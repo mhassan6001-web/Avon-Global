@@ -1,0 +1,98 @@
+.scene {
+  position: relative;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-8) var(--space-4);
+  background: radial-gradient(1000px 600px at 50% 30%, #121826, #07090f 70%);
+  overflow: hidden;
+}
+.lines {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(115deg, transparent 48%, rgba(214, 187, 131, 0.16) 49%, transparent 50%),
+    linear-gradient(65deg, transparent 62%, rgba(214, 187, 131, 0.1) 63%, transparent 64%),
+    linear-gradient(90deg, transparent 18%, rgba(214, 187, 131, 0.08) 18.1%, transparent 18.3%);
+  pointer-events: none;
+}
+.card {
+  position: relative;
+  width: min(440px, 100%);
+  padding: var(--space-8);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-default);
+  background: rgba(17, 20, 28, 0.82);
+  backdrop-filter: blur(var(--blur-glass));
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  box-shadow: var(--shadow-overlay);
+}
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0 15% auto 15%;
+  height: 1px;
+  background: var(--hairline-gold);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-8);
+}
+.title {
+  font-size: var(--text-2xl);
+  margin-bottom: var(--space-2);
+}
+.lead {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-6);
+  font-size: var(--text-sm);
+}
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-6);
+}
+.qr {
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius-md);
+  background: #f5efe2;
+}
+.qr svg {
+  width: 200px;
+  height: 200px;
+}
+.secret {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
+  overflow-wrap: anywhere;
+  color: var(--gold-300);
+  margin-bottom: var(--space-4);
+}
+.codes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--border-default);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+.footer {
+  position: relative;
+  margin-top: var(--space-6);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+}
+.link {
+  color: var(--gold-300);
+  font-weight: 600;
+}

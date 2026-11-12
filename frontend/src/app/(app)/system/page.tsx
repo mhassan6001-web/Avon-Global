@@ -6,7 +6,7 @@ import { DependencyList, RefreshButton, formatTime } from "@/components/system/P
 import { Badge, PageHeader, Panel, Skeleton } from "@/components/ui";
 import { useSystemStatus } from "@/lib/system/SystemStatusProvider";
 
-import styles from "../pages.module.css";
+import styles from "@/app/pages.module.css";
 
 function Field({ label, value }: { label: string; value: ReactNode }) {
   return (

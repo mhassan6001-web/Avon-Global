@@ -8,11 +8,15 @@
 import { motion } from "framer-motion";
 import {
   forwardRef,
+  useEffect,
   useId,
+  useRef,
   type ButtonHTMLAttributes,
   type HTMLAttributes,
+  type InputHTMLAttributes,
   type KeyboardEvent,
   type ReactNode,
+  type SelectHTMLAttributes,
 } from "react";
 
 import styles from "./ui.module.css";
@@ -303,5 +307,107 @@ export function SegmentedControl<T extends string>({
         );
       })}
     </div>
+  );
+}
+
+/* ---------- Form fields ---------- */
+
+interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
+  label: string;
+  hint?: string;
+  error?: string | null;
+}
+
+export function TextField({ label, hint, error, id, className, ...rest }: TextFieldProps) {
+  const generated = useId();
+  const inputId = id ?? generated;
+  const hintId = `${inputId}-hint`;
+  return (
+    <div className={cx(styles.field, className)}>
+      <label htmlFor={inputId} className={styles.fieldLabel}>
+        {label}
+      </label>
+      <input
+        id={inputId}
+        className={styles.input}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={hint || error ? hintId : undefined}
+        {...rest}
+      />
+      {(hint || error) && (
+        <p id={hintId} className={error ? styles.fieldError : styles.fieldHint}>
+          {error || hint}
+        </p>
+      )}
+    </div>
+  );
+}
+
+interface SelectFieldProps extends SelectHTMLAttributes<HTMLSelectElement> {
+  label: string;
+  options: ReadonlyArray<{ value: string; label: string }>;
+}
+
+export function SelectField({ label, options, id, ...rest }: SelectFieldProps) {
+  const generated = useId();
+  const selectId = id ?? generated;
+  return (
+    <div className={styles.field}>
+      <label htmlFor={selectId} className={styles.fieldLabel}>
+        {label}
+      </label>
+      <select id={selectId} className={styles.input} {...rest}>
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+export function FormError({ message }: { message: string | null | undefined }) {
+  if (!message) return null;
+  return (
+    <p role="alert" className={styles.formError}>
+      {message}
+    </p>
+  );
+}
+
+/* ---------- Dialog (modal) ---------- */
+
+export function Dialog({
+  open,
+  title,
+  onClose,
+  children,
+}: {
+  open: boolean;
+  title: string;
+  onClose: () => void;
+  children: ReactNode;
+}) {
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const dialog = ref.current;
+    if (!dialog) return;
+    if (open && !dialog.open) dialog.showModal();
+    if (!open && dialog.open) dialog.close();
+  }, [open]);
+  return (
+    <dialog
+      ref={ref}
+      className={styles.dialog}
+      aria-label={title}
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
+    >
+      <h2 className={styles.dialogTitle}>{title}</h2>
+      {children}
+    </dialog>
   );
 }

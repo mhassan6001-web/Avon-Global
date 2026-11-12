@@ -25,6 +25,6 @@ export const TOTAL_STAGES = 15;
 
 export const STAGE_STATE_LABEL: Record<StageState, string> = {
   approved: "Approved",
-  awaiting_approval: "Plan awaiting approval",
+  awaiting_approval: "Awaiting approval",
   queued: "Queued",
 };

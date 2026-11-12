@@ -7,7 +7,7 @@ import { Button, PageHeader, Panel, SegmentedControl } from "@/components/ui";
 import type { ContrastPreference, MotionPreference } from "@/lib/preferences/preferences";
 import { usePreferences } from "@/lib/preferences/PreferencesProvider";
 
-import styles from "../pages.module.css";
+import styles from "@/app/pages.module.css";
 
 const MOTION_OPTIONS = [
   { value: "system", label: "Match device" },

@@ -11,6 +11,7 @@ import {
   LuBot,
   LuBoxes,
   LuBriefcase,
+  LuBuilding2,
   LuFileText,
   LuGauge,
   LuGavel,
@@ -19,9 +20,12 @@ import {
   LuMessagesSquare,
   LuServer,
   LuSettings2,
+  LuShieldCheck,
   LuShoppingCart,
   LuTruck,
+  LuUserRound,
   LuUsers,
+  LuUsersRound,
 } from "react-icons/lu";
 
 export type ModuleStatus = "available" | "planned";
@@ -31,6 +35,8 @@ export interface NavItem {
   href: string;
   icon: IconType;
   status: ModuleStatus;
+  /** UI visibility only; the API enforces access independently. */
+  permission?: string;
 }
 
 export interface BusinessModule extends NavItem {
@@ -45,7 +51,32 @@ export const WORKSPACE_NAV: NavItem[] = [
 ];
 
 export const SETTINGS_NAV: NavItem[] = [
+  { label: "My account", href: "/account", icon: LuUserRound, status: "available" },
   { label: "Preferences", href: "/settings", icon: LuSettings2, status: "available" },
+];
+
+export const ADMIN_NAV: NavItem[] = [
+  {
+    label: "Users & access",
+    href: "/admin/users",
+    icon: LuUsersRound,
+    status: "available",
+    permission: "admin.users.manage",
+  },
+  {
+    label: "Security & audit",
+    href: "/admin/security",
+    icon: LuShieldCheck,
+    status: "available",
+    permission: "admin.audit.view",
+  },
+  {
+    label: "Organisation",
+    href: "/admin/organisation",
+    icon: LuBuilding2,
+    status: "available",
+    permission: "org.profile.edit",
+  },
 ];
 
 function planned(
@@ -174,7 +205,7 @@ export function findModule(slug: string): BusinessModule | undefined {
 
 /** Title for the header, derived from the current path. */
 export function titleForPath(pathname: string): string {
-  const all: NavItem[] = [...WORKSPACE_NAV, ...SETTINGS_NAV, ...BUSINESS_MODULES];
+  const all: NavItem[] = [...WORKSPACE_NAV, ...SETTINGS_NAV, ...ADMIN_NAV, ...BUSINESS_MODULES];
   const exact = all.find((item) => item.href === pathname);
   if (exact) return exact.label;
   const prefix = all

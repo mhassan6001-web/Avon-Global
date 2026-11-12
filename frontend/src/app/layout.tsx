@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 
-import { AppShell } from "@/components/shell/AppShell";
 import { StartupScreen } from "@/components/startup/StartupScreen";
 import { PRE_PAINT_SCRIPT } from "@/lib/preferences/preferences";
 import { PreferencesProvider } from "@/lib/preferences/PreferencesProvider";
@@ -37,7 +36,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <PreferencesProvider>
           <StartupScreen />
-          <AppShell>{children}</AppShell>
+          {children}
         </PreferencesProvider>
       </body>
     </html>
