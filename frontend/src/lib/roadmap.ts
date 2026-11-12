@@ -27,7 +27,7 @@ export const STAGES: Stage[] = [
   { number: 12, title: "Voice interface", state: "verified" },
   { number: 13, title: "Documents & integrations", state: "verified" },
   { number: 14, title: "Production readiness", state: "verified" },
-  { number: 15, title: "Mobile & installable app", state: "in_progress" },
+  { number: 15, title: "Mobile & installable app", state: "verified" },
 ];
 
 export const TOTAL_STAGES = 15;
