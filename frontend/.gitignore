@@ -2,3 +2,4 @@ e2e-results.json
 test-results/
 playwright-report/
 dev-accounts.json
+tsconfig.tsbuildinfo

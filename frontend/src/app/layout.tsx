@@ -4,11 +4,15 @@ import type { ReactNode } from "react";
 import { StartupScreen } from "@/components/startup/StartupScreen";
 import { PRE_PAINT_SCRIPT } from "@/lib/preferences/preferences";
 import { PreferencesProvider } from "@/lib/preferences/PreferencesProvider";
+import { SoundProvider } from "@/lib/sound/SoundProvider";
 
 // Fonts are self-hosted from npm (OFL licence): no request to Google at build or run time.
 import "@fontsource-variable/inter";
 import "@fontsource/sora/500.css";
 import "@fontsource/sora/600.css";
+import "@fontsource/rajdhani/500.css";
+import "@fontsource/rajdhani/600.css";
+import "@fontsource/cormorant-garamond/500.css";
 
 import "./globals.css";
 
@@ -20,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#070d1f",
+  themeColor: "#08090c",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -35,8 +39,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body>
         <PreferencesProvider>
-          <StartupScreen />
-          {children}
+          <SoundProvider>
+            <StartupScreen />
+            {children}
+          </SoundProvider>
         </PreferencesProvider>
       </body>
     </html>

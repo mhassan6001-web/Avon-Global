@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { Emblem } from "@/components/brand/Emblem";
 import { STARTUP_SEEN_KEY, type EffectiveMotion } from "@/lib/preferences/preferences";
+import { useSound } from "@/lib/sound/SoundProvider";
 import { usePreferences } from "@/lib/preferences/PreferencesProvider";
 import { EASE_OUT } from "@/lib/motion/tokens";
 
@@ -29,6 +30,7 @@ export const REPLAY_STARTUP_EVENT = "aven:replay-startup";
 
 export function StartupScreen() {
   const { effectiveMotion } = usePreferences();
+  const { play } = useSound();
   const [visible, setVisible] = useState(true);
   // The level actually used for this run. Read from the attribute the pre-paint
   // script set, because stored preferences reach React state one tick later.
@@ -65,6 +67,8 @@ export function StartupScreen() {
     delete root.dataset.startup;
     setLevel(current);
     setVisible(true);
+    // Audio is only possible after a gesture, so the chime plays on replay (or later visits once unlocked).
+    play("startup");
     const total = current === "full" ? FULL_SEQUENCE_S : REDUCED_SEQUENCE_S;
     const timer = window.setTimeout(finish, total * 1000);
     return () => window.clearTimeout(timer);

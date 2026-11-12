@@ -16,6 +16,7 @@ from app.platform.identity.models import (
     RolePermission,
     User,
     UserMfa,
+    UserPreferences,
 )
 
 __all__ = [
@@ -35,4 +36,5 @@ __all__ = [
     "StoredFile",
     "User",
     "UserMfa",
+    "UserPreferences",
 ]

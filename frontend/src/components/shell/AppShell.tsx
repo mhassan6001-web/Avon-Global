@@ -1,9 +1,11 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { useOptionalAuth } from "@/lib/auth/AuthProvider";
+import { AccountPreferencesSync } from "@/lib/preferences/AccountPreferencesSync";
+import { useSound } from "@/lib/sound/SoundProvider";
 import { SystemStatusProvider } from "@/lib/system/SystemStatusProvider";
 
 import { BottomNav } from "./BottomNav";
@@ -27,8 +29,18 @@ export function AppShell({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Close the mobile drawer on navigation.
-  useEffect(() => setDrawerOpen(false), [pathname]);
+  const { play } = useSound();
+  const firstPath = useRef(true);
+
+  // Close the mobile drawer on navigation; soft navigation cue after the first page.
+  useEffect(() => {
+    setDrawerOpen(false);
+    if (firstPath.current) {
+      firstPath.current = false;
+      return;
+    }
+    play(pathname.startsWith("/modules/") ? "module" : "navigation");
+  }, [pathname, play]);
 
   // Escape closes the drawer; lock background scroll while it is open.
   useEffect(() => {
@@ -56,6 +68,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <SystemStatusProvider>
+      {auth && <AccountPreferencesSync />}
       <a href="#main-content" className="skip-link">
         Skip to content
       </a>

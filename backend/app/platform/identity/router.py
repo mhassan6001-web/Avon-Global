@@ -7,7 +7,7 @@ from datetime import timedelta
 
 import segno
 from fastapi import APIRouter, Depends, Request, Response
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from app.core.config import get_settings
 from app.core.errors import NotFoundError
@@ -23,7 +23,13 @@ from app.platform.authz.deps import (
 )
 from app.platform.identity import schemas
 from app.platform.identity import service as identity
-from app.platform.identity.models import AuthSession, Department, LoginEvent, User
+from app.platform.identity.models import (
+    AuthSession,
+    Department,
+    LoginEvent,
+    User,
+    UserPreferences,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 Public = Depends(public)
@@ -246,3 +252,40 @@ def my_login_history(
         )
         for e in rows
     ]
+
+
+def _prefs_out(row: UserPreferences | None) -> schemas.PreferencesOut:
+    # Stored values are re-validated; anything unrecognised falls back to defaults.
+    try:
+        display = schemas.DisplayPrefs.model_validate(row.display if row else {})
+    except ValueError:
+        display = schemas.DisplayPrefs()
+    try:
+        sound = schemas.SoundPrefs.model_validate(row.sound if row else {})
+    except ValueError:
+        sound = schemas.SoundPrefs()
+    return schemas.PreferencesOut(display=display, sound=sound, stored=row is not None)
+
+
+@router.get("/preferences", response_model=schemas.PreferencesOut)
+def get_preferences(principal: CurrentPrincipal, db: DbSession) -> schemas.PreferencesOut:
+    return _prefs_out(db.get(UserPreferences, principal.user.id))
+
+
+@router.put("/preferences", response_model=schemas.PreferencesOut)
+def put_preferences(
+    body: schemas.PreferencesIn, principal: CurrentPrincipal, db: DbSession
+) -> schemas.PreferencesOut:
+    """Save display and/or sound preferences for the signed-in user only."""
+    row = db.get(UserPreferences, principal.user.id)
+    if row is None:
+        row = UserPreferences(user_id=principal.user.id, display={}, sound={})
+        db.add(row)
+    if body.display is not None:
+        row.display = body.display.model_dump()
+    if body.sound is not None:
+        row.sound = body.sound.model_dump()
+    row.updated_at = func.now()  # type: ignore[assignment]
+    db.commit()
+    db.refresh(row)
+    return _prefs_out(row)
