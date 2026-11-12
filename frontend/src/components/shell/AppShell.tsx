@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { useOptionalAuth } from "@/lib/auth/AuthProvider";
 import { AccountPreferencesSync } from "@/lib/preferences/AccountPreferencesSync";
+import { RealtimeProvider } from "@/lib/realtime/RealtimeProvider";
 import { useSound } from "@/lib/sound/SoundProvider";
 import { SystemStatusProvider } from "@/lib/system/SystemStatusProvider";
 
@@ -68,30 +69,32 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <SystemStatusProvider>
-      {auth && <AccountPreferencesSync />}
-      <a href="#main-content" className="skip-link">
-        Skip to content
-      </a>
-      <div className={styles.shell} data-collapsed={collapsed || undefined}>
-        <Sidebar
-          collapsed={collapsed}
-          onToggleCollapsed={toggleCollapsed}
-          drawerOpen={drawerOpen}
-          onCloseDrawer={() => setDrawerOpen(false)}
-        />
-        <div className={styles.workspace}>
-          {auth?.me.user.is_dev_account && (
-            <div className={styles.devBanner} role="note">
-              Development-only test account. Not a real person.
-            </div>
-          )}
-          <Header onOpenNavigation={() => setDrawerOpen(true)} />
-          <main id="main-content" className={styles.main} tabIndex={-1}>
-            <div className={styles.content}>{children}</div>
-          </main>
+      <RealtimeProvider>
+        {auth && <AccountPreferencesSync />}
+        <a href="#main-content" className="skip-link">
+          Skip to content
+        </a>
+        <div className={styles.shell} data-collapsed={collapsed || undefined}>
+          <Sidebar
+            collapsed={collapsed}
+            onToggleCollapsed={toggleCollapsed}
+            drawerOpen={drawerOpen}
+            onCloseDrawer={() => setDrawerOpen(false)}
+          />
+          <div className={styles.workspace}>
+            {auth?.me.user.is_dev_account && (
+              <div className={styles.devBanner} role="note">
+                Development-only test account. Not a real person.
+              </div>
+            )}
+            <Header onOpenNavigation={() => setDrawerOpen(true)} />
+            <main id="main-content" className={styles.main} tabIndex={-1}>
+              <div className={styles.content}>{children}</div>
+            </main>
+          </div>
+          <BottomNav onOpenNavigation={() => setDrawerOpen(true)} />
         </div>
-        <BottomNav onOpenNavigation={() => setDrawerOpen(true)} />
-      </div>
+      </RealtimeProvider>
     </SystemStatusProvider>
   );
 }

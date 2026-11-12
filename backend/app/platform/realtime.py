@@ -125,5 +125,5 @@ async def events(websocket: WebSocket) -> None:
     finally:
         with contextlib.suppress(Exception):
             await pubsub.unsubscribe()
-            await pubsub.aclose()
+            await pubsub.aclose()  # type: ignore[no-untyped-call]
             await redis.aclose()

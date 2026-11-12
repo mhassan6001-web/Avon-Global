@@ -17,8 +17,10 @@ import {
   LuGavel,
   LuIdCard,
   LuLandmark,
+  LuListChecks,
   LuLayoutDashboard,
   LuMessagesSquare,
+  LuNotebookPen,
   LuServer,
   LuSettings2,
   LuShieldCheck,
@@ -48,6 +50,9 @@ export interface BusinessModule extends NavItem {
 
 export const WORKSPACE_NAV: NavItem[] = [
   { label: "Command Centre", href: "/", icon: LuLayoutDashboard, status: "available" },
+  { label: "Messages", href: "/messages", icon: LuMessagesSquare, status: "available" },
+  { label: "Tasks", href: "/tasks", icon: LuListChecks, status: "available" },
+  { label: "Work reports", href: "/reports", icon: LuNotebookPen, status: "available" },
   { label: "Approvals", href: "/approvals", icon: LuBadgeCheck, status: "available" },
   { label: "System Status", href: "/system", icon: LuServer, status: "available" },
 ];
@@ -199,7 +204,7 @@ export const BUSINESS_MODULES: BusinessModule[] = [
     "/hr",
     "hr.records.view",
   ),
-  planned(
+  available(
     "communications",
     "Communications",
     LuMessagesSquare,
@@ -209,6 +214,8 @@ export const BUSINESS_MODULES: BusinessModule[] = [
       "Announcements with acknowledgements",
       "Tasks, deadlines, work plans and reports",
     ],
+    "/messages",
+    "comms.own.use",
   ),
   planned(
     "documents",

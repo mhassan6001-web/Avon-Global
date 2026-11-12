@@ -521,3 +521,17 @@ button.menuItem:hover {
     color: var(--gold-300);
   }
 }
+
+.headerIconButton {
+  position: relative;
+}
+.badgeDot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold-highlight);
+  box-shadow: 0 0 0 2px var(--ink-950);
+}

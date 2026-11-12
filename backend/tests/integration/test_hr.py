@@ -133,7 +133,7 @@ def test_employee_records_leave_and_self_service(app: FastAPI, db: Session) -> N
     assert (
         hr.post(
             f"{API}/employees/{hr_emp['id']}/reviews",
-            json={"period": "x" * 4, "rating": 5, "strengths": "Me", "improvements": "None"},
+            json={"period": "x" * 4, "rating": 5, "strengths": "Myself", "improvements": "Nothing"},
         ).status_code
         == 403
     )
