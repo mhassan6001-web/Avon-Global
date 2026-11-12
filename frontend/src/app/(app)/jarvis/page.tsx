@@ -6,6 +6,7 @@ import { LuPlus, LuSend } from "react-icons/lu";
 
 import { JarvisPresence } from "@/components/jarvis/JarvisPresence";
 import { TaskFlow } from "@/components/jarvis/TaskFlow";
+import { VoicePanel } from "@/components/voice/VoicePanel";
 import { Badge, Button, EmptyState, FormError, PageHeader, Panel } from "@/components/ui";
 import { send } from "@/lib/api/client";
 import { errorMessage, useResource } from "@/lib/api/useResource";
@@ -22,6 +23,7 @@ import {
 } from "@/lib/jarvis";
 import { useRealtimeEvent } from "@/lib/realtime/RealtimeProvider";
 import { useSound } from "@/lib/sound/SoundProvider";
+import type { MicState } from "@/lib/voice/state";
 import { formatDateTime } from "@/lib/tenders/types";
 
 import styles from "./jarvis.module.css";
@@ -47,6 +49,7 @@ export default function JarvisPage() {
   const [error, setError] = useState<string | null>(null);
   const [chain, setChain] = useState<Chain>({});
   const [target, setTarget] = useState<string | undefined>();
+  const [voice, setVoice] = useState<MicState>("off");
   const end = useRef<HTMLDivElement>(null);
   const configured = status.data?.ai_configured ?? false;
 
@@ -79,32 +82,49 @@ export default function JarvisPage() {
     if (messages) end.current?.scrollIntoView({ block: "nearest" });
   }, [messages]);
 
+  /** Send one question (typed or spoken). Resolves with JARVIS's reply text. */
+  const askQuestion = useCallback(
+    async (question: string): Promise<string | null> => {
+      setBusy(true);
+      setError(null);
+      play("processing");
+      try {
+        let id = current;
+        if (!id) {
+          const { data } = await send<JarvisConversation>("POST", "/jarvis/conversations", {
+            body: {},
+          });
+          id = data.id;
+          setCurrent(id);
+        }
+        const { data } = await send<JarvisMessage[]>(
+          "POST",
+          `/jarvis/conversations/${id}/messages`,
+          {
+            body: { text: question },
+          },
+        );
+        play("response");
+        await Promise.all([loadThread(id), conversations.reload()]);
+        const replies = data.filter((m) => m.role === "assistant" && m.text);
+        return replies.length ? replies[replies.length - 1]!.text : null;
+      } catch (e) {
+        setError(errorMessage(e));
+        play("warning");
+        return null;
+      } finally {
+        setBusy(false);
+      }
+    },
+    [current, play, loadThread, conversations],
+  );
+
   const ask = useCallback(async () => {
     const question = text.trim();
     if (!question || busy) return;
-    setBusy(true);
-    setError(null);
-    play("processing");
-    try {
-      let id = current;
-      if (!id) {
-        const { data } = await send<JarvisConversation>("POST", "/jarvis/conversations", {
-          body: {},
-        });
-        id = data.id;
-        setCurrent(id);
-      }
-      await send("POST", `/jarvis/conversations/${id}/messages`, { body: { text: question } });
-      setText("");
-      play("response");
-      await Promise.all([loadThread(id), conversations.reload()]);
-    } catch (e) {
-      setError(errorMessage(e));
-      play("warning");
-    } finally {
-      setBusy(false);
-    }
-  }, [text, busy, current, play, loadThread, conversations]);
+    const reply = await askQuestion(question);
+    if (reply !== null) setText("");
+  }, [text, busy, askQuestion]);
 
   async function decide(action: JarvisAction, verb: "confirm" | "cancel") {
     setError(null);
@@ -143,13 +163,24 @@ export default function JarvisPage() {
             <div className={styles.presence}>
               <JarvisPresence
                 state={
-                  !status.data ? "idle" : !configured ? "offline" : busy ? "processing" : "idle"
+                  !status.data
+                    ? "idle"
+                    : !configured
+                      ? "offline"
+                      : voice === "listening"
+                        ? "listening"
+                        : voice === "speaking"
+                          ? "speaking"
+                          : busy || voice === "processing"
+                            ? "processing"
+                            : "idle"
                 }
                 size={240}
               />
               <TaskFlow statuses={chain} target={target} />
             </div>
           </Panel>
+          {configured && <VoicePanel onQuestion={askQuestion} onState={setVoice} />}
           <Panel title="Conversations">
             {conversations.data && conversations.data.length === 0 ? (
               <EmptyState title="No conversations yet">Ask a question to start one.</EmptyState>

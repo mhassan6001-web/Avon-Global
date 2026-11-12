@@ -13,6 +13,12 @@ test("JARVIS briefs from recorded data and prepares a task that needs confirmati
   await expect(page.getByText("from recorded data only", { exact: false })).toBeVisible();
   await expect(page.getByText("Nothing is waiting for your decision.")).toBeVisible();
 
+  // Stage 12: voice is opt-in. The microphone stays off and the wake word is
+  // unavailable until it is licensed; push-to-talk waits for speech recognition.
+  await expect(page.getByRole("status").filter({ hasText: "Microphone off" })).toBeVisible();
+  await expect(page.getByText(/wake-word licence is not configured/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Enable wake word…" })).toBeDisabled();
+
   await page.getByLabel("Ask JARVIS").fill("Create task: E2E TEST call the clearing agent");
   await page.getByRole("button", { name: "Ask", exact: true }).click();
   const card = page.getByRole("group", { name: "Prepared action" });
