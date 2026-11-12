@@ -1,0 +1,56 @@
+name: CI
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env: { POSTGRES_DB: aven_test, POSTGRES_USER: aven, POSTGRES_PASSWORD: ci_password }
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U aven" --health-interval 5s --health-retries 20
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+    defaults: { run: { working-directory: backend } }
+    env:
+      TEST_DATABASE_URL: postgresql+psycopg://aven:ci_password@localhost:5432/aven_test
+      TEST_REDIS_URL: redis://localhost:6379/0
+      REDIS_URL: redis://localhost:6379/0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r requirements-dev.txt
+      - run: ruff check . && ruff format --check .
+      - run: mypy app
+      - run: bandit -q -r app
+      - run: pip-audit -r requirements.txt
+      - name: Tests (integration tests must not be skipped in CI)
+        run: pytest -rA | tee pytest.log && ! grep -q "^SKIPPED.*integration" pytest.log
+      - name: Migration round-trip
+        env: { DATABASE_URL: postgresql+psycopg://aven:ci_password@localhost:5432/aven_test }
+        run: alembic downgrade base && alembic upgrade head && alembic check
+      - name: Application startup
+        env: { DATABASE_URL: postgresql+psycopg://aven:ci_password@localhost:5432/aven_test }
+        run: |
+          uvicorn app.main:create_app --factory --port 8000 & sleep 4
+          curl -fsS http://127.0.0.1:8000/api/v1/health/live
+          curl -fsS http://127.0.0.1:8000/api/v1/health/ready
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: frontend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - run: npm install
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build

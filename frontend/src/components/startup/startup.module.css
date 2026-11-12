@@ -1,0 +1,143 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(900px 520px at 50% 45%, var(--navy-850), var(--navy-975) 70%);
+  cursor: default;
+}
+
+/* Hidden before paint when the session has already seen it (no flash). */
+:global(:root[data-startup="skip"]) .overlay {
+  display: none;
+}
+
+/* Faint architectural gold lines, echoing the boardroom references. */
+.grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(90deg, rgba(214, 187, 131, 0.05) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(214, 187, 131, 0.035) 1px, transparent 1px);
+  background-size: 120px 120px;
+  mask-image: radial-gradient(ellipse at center, black 10%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 10%, transparent 70%);
+}
+
+.glow {
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(214, 187, 131, 0.12), transparent 65%);
+  filter: blur(10px);
+}
+
+.center {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.emblem {
+  margin-bottom: var(--space-6);
+  filter: drop-shadow(0 0 18px rgba(214, 187, 131, 0.25));
+}
+
+/* Stroke-draw of the emblem (CSS so it works with SVG pathLength=1). */
+.emblem[data-animate="draw"] :global([data-draw="ring"]),
+.emblem[data-animate="draw"] :global([data-draw="letter"]),
+.emblem[data-animate="draw"] :global([data-draw="horizon"]),
+.emblem[data-animate="draw"] :global([data-draw="meridian"]) {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 0.9s var(--ease-out) forwards;
+}
+.emblem[data-animate="draw"] :global([data-draw="letter"]) {
+  animation-delay: 0.12s;
+}
+.emblem[data-animate="draw"] :global([data-draw="horizon"]) {
+  animation-delay: 0.38s;
+}
+.emblem[data-animate="draw"] :global([data-draw="meridian"]) {
+  animation-delay: 0.5s;
+}
+.emblem[data-animate="draw"] :global([data-draw="apex"]) {
+  opacity: 0;
+  animation: appear 0.4s var(--ease-out) 0.7s forwards;
+}
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes appear {
+  to {
+    opacity: 1;
+  }
+}
+
+.wordmark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: var(--font-display);
+  line-height: 1;
+}
+.primary {
+  display: flex;
+  gap: 0.32em;
+  font-size: clamp(34px, 6vw, 52px);
+  font-weight: 600;
+  color: var(--ivory-50);
+}
+.primary > span {
+  display: inline-block;
+}
+.secondary {
+  margin-top: 0.9em;
+  letter-spacing: 0.62em;
+  margin-right: -0.62em;
+  font-size: clamp(11px, 1.6vw, 14px);
+  font-weight: 500;
+  color: var(--gold-400);
+}
+
+.hairline {
+  display: block;
+  width: 220px;
+  height: 1px;
+  margin-top: var(--space-8);
+  background: var(--hairline-gold);
+  transform-origin: center;
+}
+
+.caption {
+  margin-top: var(--space-4);
+  font-size: var(--text-xs);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.skip {
+  position: absolute;
+  right: var(--space-6);
+  bottom: var(--space-6);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.skip:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}

@@ -1,0 +1,254 @@
+/* =====================================================================
+   AVEN GLOBAL — design tokens and base styles
+   Palette: midnight navy · deep blue · champagne gold · warm white · graphite
+   Signal accent (ice blue) is reserved for live/system state only.
+   ===================================================================== */
+
+:root {
+  /* --- raw palette --- */
+  --navy-975: #04081a;
+  --navy-950: #070d1f;
+  --navy-900: #0b1428;
+  --navy-850: #0f1a33;
+  --navy-800: #142241;
+  --navy-700: #1c2e55;
+  --blue-600: #24427d;
+  --blue-500: #2f5597;
+
+  --gold-200: #f2e6c8;
+  --gold-300: #e7d3a4;
+  --gold-400: #d6bb83;
+  --gold-500: #c3a268;
+  --gold-600: #a1824c;
+
+  --ivory-50: #faf6ee;
+  --ivory-100: #f3eee3;
+  --ivory-300: #d9d3c6;
+
+  --graphite-300: #a9afbd;
+  --graphite-400: #8b92a3;
+  --graphite-500: #6b7286;
+  --graphite-600: #4b5266;
+  --graphite-700: #2f3546;
+
+  --ice-400: #8ccbe8;
+  --success-400: #6cc596;
+  --warning-400: #e3b85c;
+  --danger-400: #e67a74;
+
+  /* --- semantic --- */
+  --bg: var(--navy-950);
+  --bg-elevated: var(--navy-900);
+  --surface-glass: rgba(20, 34, 65, 0.55);
+  --surface-glass-strong: rgba(20, 34, 65, 0.82);
+  --surface-sunken: rgba(4, 8, 26, 0.45);
+  --surface-hover: rgba(214, 187, 131, 0.07);
+
+  --border-subtle: rgba(214, 187, 131, 0.12);
+  --border-default: rgba(214, 187, 131, 0.22);
+  --border-strong: rgba(214, 187, 131, 0.45);
+  --hairline-gold: linear-gradient(90deg, transparent, rgba(214, 187, 131, 0.6), transparent);
+
+  --text-primary: var(--ivory-50);
+  --text-secondary: #bcc2cf;
+  --text-muted: var(--graphite-400);
+  --text-accent: var(--gold-400);
+  --text-on-accent: var(--navy-950);
+
+  --accent: var(--gold-400);
+  --accent-strong: var(--gold-300);
+  --signal: var(--ice-400);
+  --focus-ring: 0 0 0 2px var(--navy-950), 0 0 0 4px var(--gold-400);
+
+  /* --- typography --- */
+  --font-display: var(--font-sora), "Segoe UI", system-ui, sans-serif;
+  --font-body: var(--font-inter), "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Consolas, monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.0625rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+  --tracking-wide: 0.08em;
+  --tracking-brand: 0.32em;
+
+  /* --- space, radius, elevation --- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+
+  --shadow-panel: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 18px 40px -24px rgba(0, 0, 0, 0.7);
+  --shadow-overlay: 0 24px 60px -20px rgba(0, 0, 0, 0.8);
+  --glow-gold: 0 0 24px -6px rgba(214, 187, 131, 0.45);
+  --glow-signal: 0 0 14px -2px rgba(140, 203, 232, 0.6);
+  --blur-glass: 18px;
+
+  /* --- layout --- */
+  --sidebar-width: 264px;
+  --sidebar-width-collapsed: 76px;
+  --header-height: 64px;
+  --bottom-nav-height: 64px;
+  --content-max: 1360px;
+
+  /* --- motion --- */
+  --dur-instant: 80ms;
+  --dur-fast: 140ms;
+  --dur-base: 220ms;
+  --dur-slow: 420ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  color-scheme: dark;
+}
+
+/* High-contrast preference: solid surfaces, brighter text and borders. */
+:root[data-contrast="high"] {
+  --surface-glass: var(--navy-900);
+  --surface-glass-strong: var(--navy-900);
+  --text-secondary: var(--ivory-100);
+  --text-muted: var(--ivory-300);
+  --border-subtle: rgba(231, 211, 164, 0.4);
+  --border-default: rgba(231, 211, 164, 0.6);
+  --border-strong: var(--gold-300);
+  --blur-glass: 0px;
+}
+
+/* Motion preferences (set by PreferencesProvider and the pre-paint script). */
+:root[data-motion="reduced"] {
+  --dur-fast: 60ms;
+  --dur-base: 100ms;
+  --dur-slow: 160ms;
+}
+:root[data-motion="off"] *,
+:root[data-motion="off"] *::before,
+:root[data-motion="off"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* --- base --- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(1200px 600px at 85% -10%, rgba(36, 66, 125, 0.35), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(214, 187, 131, 0.07), transparent 60%);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-sm);
+}
+
+::selection {
+  background: rgba(214, 187, 131, 0.35);
+  color: var(--ivory-50);
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--space-4);
+  top: -100px;
+  z-index: 200;
+  padding: var(--space-2) var(--space-4);
+  background: var(--accent);
+  color: var(--text-on-accent);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+}
+.skip-link:focus {
+  top: var(--space-4);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Thin, quiet scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--graphite-700) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion="full"]) {
+    --dur-fast: 60ms;
+    --dur-base: 100ms;
+    --dur-slow: 160ms;
+  }
+}
