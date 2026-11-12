@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { StartupScreen } from "@/components/startup/StartupScreen";
 import { PRE_PAINT_SCRIPT } from "@/lib/preferences/preferences";
+import { RegisterServiceWorker } from "@/lib/pwa/RegisterServiceWorker";
 import { PreferencesProvider } from "@/lib/preferences/PreferencesProvider";
 import { SoundProvider } from "@/lib/sound/SoundProvider";
 
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <PreferencesProvider>
           <SoundProvider>
             <StartupScreen />
+            <RegisterServiceWorker />
             {children}
           </SoundProvider>
         </PreferencesProvider>

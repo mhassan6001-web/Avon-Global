@@ -24,10 +24,10 @@ export const STAGES: Stage[] = [
   { number: 9, title: "HR & payroll", state: "verified" },
   { number: 10, title: "Staff communications", state: "verified" },
   { number: 11, title: "JARVIS AI core", state: "verified" },
-  { number: 12, title: "Voice interface", state: "in_progress" },
-  { number: 13, title: "Documents & integrations", state: "queued" },
-  { number: 14, title: "Production readiness", state: "queued" },
-  { number: 15, title: "Mobile & installable app", state: "queued" },
+  { number: 12, title: "Voice interface", state: "verified" },
+  { number: 13, title: "Documents & integrations", state: "verified" },
+  { number: 14, title: "Production readiness", state: "verified" },
+  { number: 15, title: "Mobile & installable app", state: "in_progress" },
 ];
 
 export const TOTAL_STAGES = 15;

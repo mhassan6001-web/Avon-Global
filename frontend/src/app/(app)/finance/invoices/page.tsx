@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { LuPlus } from "react-icons/lu";
 
+import { DocLinks } from "@/components/documents/DocLinks";
 import styles from "@/components/crm/crm.module.css";
 import { FinanceNav } from "@/components/finance/FinanceNav";
 import { emptyLine, LineEditor, linesBody, type LineDraft } from "@/components/finance/LineEditor";
@@ -156,6 +157,11 @@ export default function InvoicesPage() {
                     <tr key={i.id}>
                       <td>
                         <strong>{i.number ?? "Draft"}</strong>
+                        <DocLinks
+                          kind="invoice"
+                          id={i.id}
+                          label={`Invoice ${i.number ?? "draft"}`}
+                        />
                         {i.status === "draft" && editable && (
                           <div>
                             <Button
@@ -224,6 +230,7 @@ export default function InvoicesPage() {
                   <tr key={r.id}>
                     <td>
                       <strong>{r.number}</strong>
+                      <DocLinks kind="receipt" id={r.id} label={`Receipt ${r.number}`} />
                       {r.reference && <div className={styles.ref}>{r.reference}</div>}
                     </td>
                     <td>{r.customer_name}</td>

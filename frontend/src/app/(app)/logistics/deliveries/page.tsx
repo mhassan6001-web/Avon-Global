@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { LuPlus, LuTrash2 } from "react-icons/lu";
 
+import { DocLinks } from "@/components/documents/DocLinks";
 import styles from "@/components/crm/crm.module.css";
 import { OpsNav } from "@/components/inventory/OpsNav";
 import {
@@ -108,7 +109,12 @@ export default function DeliveriesPage() {
                   {label(n.status)}
                 </Badge>
                 <div>
-                  <strong>{n.number}</strong> · {n.customer_name} · from {n.warehouse_code}
+                  <strong>{n.number}</strong>
+                  <DocLinks
+                    kind="delivery_note"
+                    id={n.id}
+                    label={`Delivery note ${n.number}`}
+                  /> · {n.customer_name} · from {n.warehouse_code}
                   <div className={page.muted}>
                     {n.lines.map((l) => `${qty(l.quantity)} ${l.unit} ${l.sku}`).join(", ")} ·{" "}
                     {n.delivery_address}

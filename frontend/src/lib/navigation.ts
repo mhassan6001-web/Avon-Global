@@ -217,16 +217,19 @@ export const BUSINESS_MODULES: BusinessModule[] = [
     "/messages",
     "comms.own.use",
   ),
-  planned(
+  available(
     "documents",
     "Documents",
     LuFileText,
     "Branded PDF, Excel and Word documents from validated records.",
     [
-      "Quotations, invoices, receipts and statements",
-      "Purchase orders, delivery notes and contracts",
-      "Tender packs and financial reports",
+      "Invoices, receipts, purchase orders and delivery notes (PDF and Word)",
+      "Company letterhead for letters (Word and PDF)",
+      "Excel workbooks: trial balance, ageing and stock",
+      "A version register with a fingerprint for every download",
     ],
+    "/documents",
+    "org.profile.view",
   ),
   available(
     "jarvis",

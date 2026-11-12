@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { DocLinks } from "@/components/documents/DocLinks";
 import styles from "@/components/crm/crm.module.css";
 import { ProcurementNav } from "@/components/procurement/ProcurementNav";
 import { Badge, EmptyState, FormError, PageHeader, Panel } from "@/components/ui";
@@ -44,6 +45,11 @@ export default function OrdersPage() {
                   <tr key={o.id}>
                     <td>
                       <strong>{o.reference}</strong>
+                      <DocLinks
+                        kind="purchase_order"
+                        id={o.id}
+                        label={`Purchase order ${o.reference}`}
+                      />
                       <div className={styles.ref}>
                         from{" "}
                         <Link
