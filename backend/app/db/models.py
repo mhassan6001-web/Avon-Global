@@ -1,6 +1,16 @@
 """Import every model so Alembic and the metadata see the full schema."""
 
 from app.db.base import Base
+from app.modules.comms.models import (
+    Acknowledgement,
+    Conversation,
+    Member,
+    Message,
+    Report,
+    ReportRequest,
+    Task,
+    TaskUpdate,
+)
 from app.modules.crm.models import Activity, Contact, Customer, Opportunity
 from app.modules.finance.models import (
     Account,
@@ -73,6 +83,7 @@ from app.platform.identity.models import (
 
 __all__ = [
     "Account",
+    "Acknowledgement",
     "Activity",
     "ApprovalRequest",
     "Attendance",
@@ -86,6 +97,7 @@ __all__ = [
     "Compensation",
     "Contact",
     "Contract",
+    "Conversation",
     "Counter",
     "CreditNote",
     "Customer",
@@ -102,6 +114,8 @@ __all__ = [
     "Kpi",
     "LeaveRequest",
     "LoginEvent",
+    "Member",
+    "Message",
     "OneTimeToken",
     "Opportunity",
     "OrganisationProfile",
@@ -119,6 +133,8 @@ __all__ = [
     "PurchaseRequestLine",
     "Receipt",
     "ReceiptAllocation",
+    "Report",
+    "ReportRequest",
     "Requirement",
     "Review",
     "Role",
@@ -135,6 +151,8 @@ __all__ = [
     "SupplierBankAccount",
     "SupplierQuote",
     "SupplierQuoteLine",
+    "Task",
+    "TaskUpdate",
     "TaxCode",
     "Tender",
     "User",

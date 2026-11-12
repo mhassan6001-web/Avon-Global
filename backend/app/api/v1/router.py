@@ -3,6 +3,7 @@
 from fastapi import APIRouter
 
 from app.api.v1.endpoints import health
+from app.modules.comms.router import router as comms_router
 from app.modules.crm.router import router as crm_router
 from app.modules.director.router import router as director_router
 from app.modules.finance.router import router as finance_router
@@ -16,6 +17,7 @@ from app.platform.admin.router import router as admin_router
 from app.platform.approvals.router import router as approvals_router
 from app.platform.files.router import router as files_router
 from app.platform.identity.router import router as auth_router
+from app.platform.realtime import router as realtime_router
 
 # Single list of module routers; the route-coverage test checks every route in it.
 ROUTERS: tuple[APIRouter, ...] = (
@@ -32,6 +34,8 @@ ROUTERS: tuple[APIRouter, ...] = (
     inventory_router,
     logistics_router,
     hr_router,
+    comms_router,
+    realtime_router,
     approvals_router,
 )
 

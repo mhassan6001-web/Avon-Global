@@ -134,6 +134,12 @@ MATRIX: list[tuple[str, str, dict | None, set[str]]] = [
     ("GET", "/hr/leave", None, HRA),
     ("GET", "/hr/payroll-runs", None, HRA),
     ("GET", "/hr/pay-components", None, HRA),
+    # Stage 10: communications (everyone) and the Director's team view
+    ("GET", "/comms/conversations", None, EVERYONE),
+    ("GET", "/comms/tasks", None, EVERYONE),
+    ("GET", "/comms/people", None, EVERYONE),
+    ("GET", "/comms/team", None, DIRECTOR),
+    ("GET", "/hr/me", None, EVERYONE),
 ]
 
 
