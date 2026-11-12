@@ -5,9 +5,9 @@ from __future__ import annotations
 
 import io
 import zipfile
-from xml.sax.saxutils import escape
 
 from ..model import Sheet
+from . import escape
 
 _CT = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">

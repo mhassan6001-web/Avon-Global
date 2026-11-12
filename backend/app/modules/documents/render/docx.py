@@ -5,9 +5,9 @@ from __future__ import annotations
 
 import io
 import zipfile
-from xml.sax.saxutils import escape
 
 from ..model import Document
+from . import escape
 from .pdf import asset, jpeg_size
 
 _DOC_RELS = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
