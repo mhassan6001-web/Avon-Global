@@ -398,7 +398,7 @@ def statement(
         sums[currency][kind] += debit or credit
         rows.append(
             schemas.StatementRow(
-                entry_date=on, kind=kind, number=number, description=description,  # type: ignore[arg-type]
+                entry_date=on, kind=kind, number=number, description=description,
                 currency=currency, debit=debit, credit=credit, balance=balance[currency],
             )
         )  # fmt: skip
