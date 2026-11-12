@@ -40,9 +40,8 @@ export default function JarvisPage() {
   const briefing = useResource<Briefing>("/jarvis/briefing");
   const conversations = useResource<JarvisConversation[]>("/jarvis/conversations");
   const [current, setCurrent] = useState<string | null>(null);
-  const thread = useResource<JarvisMessage[]>(
-    current ? `/jarvis/conversations/${current}/messages` : null,
-  );
+  const [messages, setMessages] = useState<JarvisMessage[] | null>(null);
+  const seq = useRef(0);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,7 +75,9 @@ export default function JarvisPage() {
     loadThread(current).catch((e: unknown) => setError(errorMessage(e)));
   }, [current, loadThread]);
 
-  useEffect(() => end.current?.scrollIntoView({ block: "nearest" }), [messages]);
+  useEffect(() => {
+    if (messages) end.current?.scrollIntoView({ block: "nearest" });
+  }, [messages]);
 
   const ask = useCallback(async () => {
     const question = text.trim();
