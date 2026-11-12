@@ -50,6 +50,7 @@ jobs:
           $RUN pytest sh -c 'pytest -rA > pytest.log 2>&1; s=$?; cat pytest.log; exit $s'
           echo "::notice title=pytest::$(tail -n 1 pytest.log)"
           echo "::notice title=pytest integration::$(grep -c '^PASSED tests/integration' pytest.log) integration tests passed"
+          echo "::notice title=pytest warnings::$(grep -E 'Warning:' pytest.log | sed 's/^ *//' | sort -u | head -n 5 | tr '\n' ' ' | cut -c1-900)"
           if grep -q '^SKIPPED.*integration' pytest.log; then echo "::error title=pytest::integration tests were skipped"; exit 1; fi
       - name: Migration round-trip
         if: ${{ !cancelled() }}
@@ -66,7 +67,7 @@ jobs:
           echo
           $RUN ready curl -fsS -o ready.json http://127.0.0.1:8000/api/v1/health/ready
           cat ready.json
-          echo "::notice title=startup ready::$(cat ready.json)"
+          python -c "import json; d=json.load(open('ready.json')); print('::notice title=startup ready::status=' + d['status'] + '; ' + ', '.join(c['name'] + '=' + c['status'] for c in d['checks']))"
 
   frontend:
     runs-on: ubuntu-latest
