@@ -87,7 +87,7 @@ def test_bank_details_are_encrypted_masked_and_dual_controlled(app: FastAPI, db:
     details = " ".join(str(d) for d in db.execute(select(AuditEvent.details)).scalars())
     assert "1002003004" not in details and "99998888" not in details
     assert db.execute(
-        select(AuditEvent.id).where(AuditEvent.action == "procurement.supplier_bank.viewed")
+        select(AuditEvent.seq).where(AuditEvent.action == "procurement.supplier_bank.viewed")
     ).first()
 
 

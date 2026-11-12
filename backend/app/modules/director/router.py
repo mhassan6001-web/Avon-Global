@@ -18,6 +18,8 @@ from sqlalchemy import func, select
 from app.modules.crm import service as crm
 from app.modules.crm.models import OPEN_STAGES, Customer, Opportunity
 from app.modules.crm.schemas import CrmSummary
+from app.modules.finance import reports as finance_reports
+from app.modules.finance.schemas import FinanceOverview
 from app.modules.organisation.models import OrganisationProfile
 from app.platform.approvals.models import ApprovalRequest
 from app.platform.audit.models import SecurityAlert
@@ -55,7 +57,7 @@ class DirectorDashboard(BaseModel):
     approvals_pending: list[PendingApproval]
     approvals_pending_count: int
     security_alerts_open: int
-    finance: ModuleStatus
+    finance: FinanceOverview
     tenders: ModuleStatus
     procurement: ModuleStatus
 
@@ -117,7 +119,7 @@ def dashboard(
         ],
         approvals_pending_count=pending_count,
         security_alerts_open=alerts,
-        finance=ModuleStatus(available=False, stage=7),
-        tenders=ModuleStatus(available=False, stage=5),
-        procurement=ModuleStatus(available=False, stage=6),
+        finance=finance_reports.overview(db, crm.now().date()),
+        tenders=ModuleStatus(available=True, stage=5),
+        procurement=ModuleStatus(available=True, stage=6),
     )

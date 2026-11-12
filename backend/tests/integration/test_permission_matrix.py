@@ -27,6 +27,7 @@ DIRECTOR = {"director"}
 EVERYONE = set(ALL_ROLES)
 CRM = {"director", "business_development"}
 PRC = {"director", "procurement"}
+FIN = {"director", "finance"}
 
 PDF = b"%PDF-1.4\n% AVEN test document\n%%EOF\n"
 
@@ -106,6 +107,19 @@ MATRIX: list[tuple[str, str, dict | None, set[str]]] = [
         },
         PRC,
     ),
+    # Stage 7: finance
+    ("GET", "/finance/invoices", None, FIN),
+    ("GET", "/finance/accounts", None, FIN),
+    ("GET", "/finance/reports/trial-balance", None, FIN),
+    ("GET", "/finance/overview", None, FIN),
+    ("GET", "/finance/bills", None, FIN),
+    (
+        "POST",
+        "/finance/periods",
+        {"name": "Matrix", "start_date": "2001-01-01", "end_date": "2001-01-31"},
+        FIN,
+    ),
+    ("POST", f"/finance/periods/{uuid.uuid4()}/close", None, DIRECTOR),
 ]
 
 
@@ -291,7 +305,7 @@ def test_separation_of_duties(db: Session) -> None:
     own = approvals.create_request(
         db,
         principal=d,
-        subject_type="supplier_bank_change",
+        subject_type="test_subject",
         subject_id="S-1",
         permission_required="procurement.supplier_bank.approve_change",
         summary="Change bank details",
@@ -303,7 +317,7 @@ def test_separation_of_duties(db: Session) -> None:
     req = approvals.create_request(
         db,
         principal=p,
-        subject_type="supplier_bank_change",
+        subject_type="test_subject",
         subject_id="S-2",
         permission_required="procurement.supplier_bank.approve_change",
         summary="Change bank details",

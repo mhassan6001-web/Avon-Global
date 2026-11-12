@@ -189,7 +189,7 @@ def test_director_dashboard_aggregates_real_records(app: FastAPI, db: Session) -
     director = sign_in(app, make_user(db, "director"))
     empty = director.get(f"{API}/director/dashboard").json()
     assert empty["crm"]["has_records"] is False
-    assert empty["finance"] == {"available": False, "stage": 7}
+    assert empty["finance"]["has_records"] is False
     assert empty["top_customers_open_pipeline"] == []
 
     bd = _bd(app, db)

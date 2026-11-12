@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from app.api.v1.endpoints import health
 from app.modules.crm.router import router as crm_router
 from app.modules.director.router import router as director_router
+from app.modules.finance.router import router as finance_router
 from app.modules.organisation.router import router as organisation_router
 from app.modules.procurement.router import router as procurement_router
 from app.modules.tenders.router import router as tenders_router
@@ -24,6 +25,7 @@ ROUTERS: tuple[APIRouter, ...] = (
     crm_router,
     tenders_router,
     procurement_router,
+    finance_router,
     approvals_router,
 )
 
