@@ -27,7 +27,10 @@ test("JARVIS briefs from recorded data and prepares a task that needs confirmati
   await expect(card.getByText("executed")).toBeVisible();
 
   await page.getByRole("link", { name: "Tasks" }).first().click();
-  await expect(page.getByText("E2E TEST call the clearing agent")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Tasks", level: 1 })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "E2E TEST call the clearing agent" }),
+  ).toBeVisible();
   await expect(page.getByText(/prepared by JARVIS/).first()).toBeVisible();
 });
 
