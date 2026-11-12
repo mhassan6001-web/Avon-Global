@@ -159,6 +159,8 @@ jobs:
           curl -fsS http://127.0.0.1:3000/healthz
       - name: Browser tests (Playwright, Chromium)
         working-directory: frontend
+        env:
+          E2E_REDIS_PORT: "6379"
         run: |
           npx playwright install --with-deps chromium > /dev/null
           set +e

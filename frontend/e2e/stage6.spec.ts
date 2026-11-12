@@ -32,7 +32,7 @@ test("procurement: verified supplier, quotation comparison, approval request", a
   const vd = page.getByRole("dialog", { name: "Supplier verification" });
   await vd.getByLabel("What was checked").fill("Certificate of incorporation seen");
   await vd.getByRole("button", { name: "Save" }).click();
-  await expect(page.getByText("verified", { exact: true })).toBeVisible();
+  await expect(page.locator("span").getByText("verified", { exact: true })).toBeVisible();
 
   // Purchase request with one line and one quotation.
   await page.getByRole("link", { name: "Purchase requests" }).click();

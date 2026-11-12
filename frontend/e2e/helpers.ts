@@ -1,5 +1,6 @@
 import { createHmac } from "node:crypto";
 import { readFileSync } from "node:fs";
+import { connect } from "node:net";
 
 import { expect, type BrowserContext, type Page } from "@playwright/test";
 
@@ -35,8 +36,30 @@ export function totp(secret: string, stepsAhead = 0): string {
   return code.toString().padStart(6, "0");
 }
 
+/**
+ * The e2e suite signs in more often than the production per-IP limit allows in
+ * 15 minutes. Rather than weaken the limit, clear the test Redis's rate-limit
+ * counters before each sign-in. Only runs when E2E_REDIS_PORT is set (CI).
+ */
+async function clearSignInLimits(): Promise<void> {
+  const port = Number(process.env.E2E_REDIS_PORT ?? 0);
+  if (!port) return;
+  const script = "for _,k in ipairs(redis.call('keys','rl:*')) do redis.call('del',k) end return 1";
+  const parts = ["EVAL", script, "0"];
+  const command = `*${parts.length}\r\n${parts.map((p) => `$${Buffer.byteLength(p)}\r\n${p}\r\n`).join("")}`;
+  await new Promise<void>((resolve, reject) => {
+    const socket = connect(port, "127.0.0.1", () => socket.write(command));
+    socket.once("data", () => {
+      socket.end();
+      resolve();
+    });
+    socket.once("error", reject);
+  });
+}
+
 export async function signIn(page: Page, role: string) {
   const account = accounts[role]!;
+  await clearSignInLimits();
   await page.goto("/sign-in");
   await page.getByLabel("Email").fill(account.email);
   await page.getByLabel("Password").fill(account.password);

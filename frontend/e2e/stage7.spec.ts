@@ -11,7 +11,7 @@ test("finance: set up books, issue an invoice, see a balanced trial balance", as
   await expect(page.getByText(/Setup needed before posting/)).toBeVisible();
   await expect(page.getByText("Not yet reviewed by an accountant")).toBeVisible();
 
-  await page.getByRole("link", { name: "Setup" }).click();
+  await page.getByRole("link", { name: "Setup", exact: true }).click();
   for (const [code, name, kind] of [
     ["E1000", "E2E TEST Bank", "bank"],
     ["E1100", "E2E TEST Debtors", "receivable"],
