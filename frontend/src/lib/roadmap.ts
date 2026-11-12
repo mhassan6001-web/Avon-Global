@@ -26,8 +26,9 @@ export const STAGES: Stage[] = [
   { number: 11, title: "JARVIS AI core", state: "verified" },
   { number: 12, title: "Voice interface", state: "verified" },
   { number: 13, title: "Documents & integrations", state: "verified" },
-  { number: 14, title: "Production readiness", state: "verified" },
+  { number: 14, title: "Production readiness runbooks", state: "verified" },
   { number: 15, title: "Mobile & installable app", state: "verified" },
+  { number: 16, title: "Company identity, quotations & approval rules", state: "in_progress" },
 ];
 
 export const TOTAL_STAGES = 15;

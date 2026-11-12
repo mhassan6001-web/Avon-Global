@@ -8,6 +8,7 @@ import styles from "./crm.module.css";
 const LINKS = [
   { href: "/crm", label: "Customers" },
   { href: "/crm/pipeline", label: "Pipeline" },
+  { href: "/crm/quotations", label: "Quotations" },
   { href: "/crm/follow-ups", label: "Follow-ups" },
 ];
 

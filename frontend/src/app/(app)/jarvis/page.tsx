@@ -50,6 +50,7 @@ export default function JarvisPage() {
   const [chain, setChain] = useState<Chain>({});
   const [target, setTarget] = useState<string | undefined>();
   const [voice, setVoice] = useState<MicState>("off");
+  const [deep, setDeep] = useState(false);
   const end = useRef<HTMLDivElement>(null);
   const configured = status.data?.ai_configured ?? false;
 
@@ -101,7 +102,7 @@ export default function JarvisPage() {
           "POST",
           `/jarvis/conversations/${id}/messages`,
           {
-            body: { text: question },
+            body: { text: question, depth: deep ? "advanced" : "standard" },
           },
         );
         play("response");
@@ -116,7 +117,7 @@ export default function JarvisPage() {
         setBusy(false);
       }
     },
-    [current, play, loadThread, conversations],
+    [current, play, loadThread, conversations, deep],
   );
 
   const ask = useCallback(async () => {
@@ -312,6 +313,15 @@ export default function JarvisPage() {
                 }}
               />
               <div className={styles.cardActions}>
+                <label className={styles.deep}>
+                  <input
+                    type="checkbox"
+                    checked={deep}
+                    disabled={!configured}
+                    onChange={(e) => setDeep(e.target.checked)}
+                  />
+                  Deep analysis (advanced model, higher cost)
+                </label>
                 <Button
                   type="submit"
                   variant="primary"
