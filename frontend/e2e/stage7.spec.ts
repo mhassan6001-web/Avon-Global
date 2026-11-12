@@ -41,12 +41,12 @@ test("finance: set up books, issue an invoice, see a balanced trial balance", as
   await dialog.getByRole("button", { name: "Save draft" }).click();
   await expect(page.getByRole("cell", { name: "Draft", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Issue", exact: true }).click();
-  await expect(page.getByText(`INV-${year}-00001`)).toBeVisible();
+  await expect(page.getByText(`INV-${year}-00001`).first()).toBeVisible();
   await expect(page.getByText("MWK 1,500.50").first()).toBeVisible();
 
-  await page.getByRole("link", { name: "Reports" }).click();
+  await page.getByRole("link", { name: "Reports", exact: true }).click();
   await expect(page.getByText("Balanced", { exact: true })).toBeVisible();
-  await expect(page.getByRole("cell", { name: "E1100 E2E TEST Debtors" })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "E1100 E2E TEST Debtors" }).first()).toBeVisible();
 });
 
 test("finance is invisible and refused for other departments", async ({ page }) => {

@@ -49,15 +49,15 @@ test("procurement: verified supplier, quotation comparison, approval request", a
   await qd.getByLabel("Supplier", { exact: true }).selectOption({ label: supplier });
   await qd.getByLabel("Unit price: A4 ream").fill("6500");
   await qd.getByRole("button", { name: "Save quotation" }).click();
-  await expect(page.getByText("MWK 65,000.00")).toBeVisible();
-  await expect(page.getByText("Lowest valid")).toBeVisible();
+  await expect(page.getByText("MWK 65,000.00").first()).toBeVisible();
+  await expect(page.getByText("Lowest valid").first()).toBeVisible();
 
   await page.getByRole("button", { name: "Send for Director approval" }).click();
   await page
     .getByRole("dialog", { name: "Send for Director approval" })
     .getByRole("button", { name: "Send" })
     .click();
-  await expect(page.getByText("Waiting for the Director.")).toBeVisible();
+  await expect(page.getByText("Waiting for the Director.").first()).toBeVisible();
 });
 
 test("landed-cost estimate uses only the rates entered", async ({ page }) => {
