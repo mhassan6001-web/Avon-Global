@@ -228,7 +228,7 @@ export const BUSINESS_MODULES: BusinessModule[] = [
       "Tender packs and financial reports",
     ],
   ),
-  planned(
+  available(
     "jarvis",
     "JARVIS",
     LuBot,
@@ -238,6 +238,8 @@ export const BUSINESS_MODULES: BusinessModule[] = [
       "Voice conversation (push-to-talk)",
       "Actions only through permission-checked, audited tools",
     ],
+    "/jarvis",
+    "jarvis.use",
   ),
 ];
 
