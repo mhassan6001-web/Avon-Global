@@ -71,8 +71,8 @@ export function JarvisPreview() {
           />
         </div>
         <p className={styles.previewNote}>
-          Visual states only. JARVIS is not connected yet: it does not listen, record or answer. The
-          microphone is never used on this page.
+          Visual states only. This preview is not connected to JARVIS: it does not listen, record or
+          answer. The microphone is never used on this page.
         </p>
       </Panel>
       <Panel eyebrow="Control chain" title="How JARVIS carries out a task">

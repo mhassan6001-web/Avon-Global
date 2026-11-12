@@ -215,12 +215,25 @@ export default function CommandCentrePage() {
               <JarvisPresence state="idle" size={180} label={false} />
               <div>
                 <p className="hud-label">JARVIS</p>
-                <p className={cc.jarvisText}>
-                  Your daily briefing will appear here once JARVIS is connected (Stage 11).
-                </p>
-                <Link href="/modules/jarvis" className={cc.jarvisLink}>
-                  Preview JARVIS <LuArrowRight aria-hidden="true" />
-                </Link>
+                {can("jarvis.use") ? (
+                  <>
+                    <p className={cc.jarvisText}>
+                      Your daily briefing, from recorded data, is ready in JARVIS.
+                    </p>
+                    <Link href="/jarvis" className={cc.jarvisLink}>
+                      Open briefing <LuArrowRight aria-hidden="true" />
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <p className={cc.jarvisText}>
+                      JARVIS is enabled for the Director. Ask the Director if you need access.
+                    </p>
+                    <Link href="/jarvis/preview" className={cc.jarvisLink}>
+                      Visual preview <LuArrowRight aria-hidden="true" />
+                    </Link>
+                  </>
+                )}
               </div>
             </section>
           </motion.div>

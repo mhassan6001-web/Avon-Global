@@ -62,7 +62,21 @@ export default function JarvisPage() {
     if (!current && conversations.data?.length) setCurrent(conversations.data[0]!.id);
   }, [conversations.data, current]);
 
-  useEffect(() => end.current?.scrollIntoView({ block: "end" }), [thread.data]);
+  const loadThread = useCallback(async (id: string | null) => {
+    const mine = ++seq.current;
+    if (!id) {
+      setMessages(null);
+      return;
+    }
+    const { data } = await send<JarvisMessage[]>("GET", `/jarvis/conversations/${id}/messages`);
+    if (mine === seq.current) setMessages(data);
+  }, []);
+
+  useEffect(() => {
+    loadThread(current).catch((e: unknown) => setError(errorMessage(e)));
+  }, [current, loadThread]);
+
+  useEffect(() => end.current?.scrollIntoView({ block: "nearest" }), [messages]);
 
   const ask = useCallback(async () => {
     const question = text.trim();
@@ -82,14 +96,14 @@ export default function JarvisPage() {
       await send("POST", `/jarvis/conversations/${id}/messages`, { body: { text: question } });
       setText("");
       play("response");
-      await Promise.all([thread.reload(), conversations.reload()]);
+      await Promise.all([loadThread(id), conversations.reload()]);
     } catch (e) {
       setError(errorMessage(e));
       play("warning");
     } finally {
       setBusy(false);
     }
-  }, [text, busy, current, play, thread, conversations]);
+  }, [text, busy, current, play, loadThread, conversations]);
 
   async function decide(action: JarvisAction, verb: "confirm" | "cancel") {
     setError(null);
@@ -101,7 +115,7 @@ export default function JarvisPage() {
       } else {
         play(verb === "confirm" ? "complete" : "navigation");
       }
-      await thread.reload();
+      await loadThread(current);
     } catch (e) {
       setError(errorMessage(e));
       play("warning");
@@ -195,7 +209,7 @@ export default function JarvisPage() {
                   Your question starts a new conversation.
                 </EmptyState>
               )}
-              {thread.data?.map((m) => (
+              {messages?.map((m) => (
                 <div key={m.id} className={styles.turn} data-role={m.role}>
                   {m.text && <div className={styles.bubble}>{m.text}</div>}
                   {m.tools_used.length > 0 && (

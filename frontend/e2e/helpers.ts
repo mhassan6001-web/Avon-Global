@@ -65,8 +65,20 @@ export async function signIn(page: Page, role: string) {
   await page.getByLabel("Password").fill(account.password);
   await page.getByRole("button", { name: "Sign in" }).click();
   if (account.totp_secret) {
-    await page.getByLabel("Authenticator code").fill(totp(account.totp_secret));
-    await page.getByRole("button", { name: "Verify" }).click();
+    // The server refuses a code already used (replay protection). When two
+    // tests sign in to the same account within one 30-second window, wait for
+    // the next window and use its fresh code.
+    for (let attempt = 0; attempt < 2; attempt++) {
+      await page.getByLabel("Authenticator code").fill(totp(account.totp_secret));
+      await page.getByRole("button", { name: "Verify" }).click();
+      const home = page.getByRole("heading", { name: "Command Centre", level: 1 });
+      try {
+        await home.waitFor({ timeout: 4000 });
+        break;
+      } catch {
+        await page.waitForTimeout(31_000 - (Date.now() % 30_000));
+      }
+    }
   }
   await expect(page.getByRole("heading", { name: "Command Centre", level: 1 })).toBeVisible();
 }

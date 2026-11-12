@@ -8,7 +8,7 @@ test("JARVIS briefs from recorded data and prepares a task that needs confirmati
   page,
 }) => {
   await signIn(page, "director");
-  await page.getByRole("link", { name: "JARVIS" }).first().click();
+  await page.getByRole("link", { name: "JARVIS", exact: true }).first().click();
   await expect(page.getByRole("heading", { name: "JARVIS", level: 1 })).toBeVisible();
   await expect(page.getByText("from recorded data only", { exact: false })).toBeVisible();
   await expect(page.getByText("Nothing is waiting for your decision.")).toBeVisible();
@@ -27,5 +27,6 @@ test("JARVIS briefs from recorded data and prepares a task that needs confirmati
 
 test("JARVIS is not available to departments without access", async ({ page }) => {
   await signIn(page, "finance");
-  await expect(page.getByRole("link", { name: "JARVIS" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "JARVIS", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Visual preview" })).toBeVisible();
 });

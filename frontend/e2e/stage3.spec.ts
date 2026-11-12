@@ -88,12 +88,14 @@ test("JARVIS preview shows states and the control chain, labelled as a preview",
   page,
 }) => {
   await signIn(page, "logistics");
-  await page.goto("/modules/jarvis");
+  await page.goto("/jarvis/preview");
   await expect(page.getByText("JARVIS · Standing by")).toBeVisible();
   await expect(page.getByTestId("jarvis-canvas").first()).toBeVisible();
   await page.getByRole("radio", { name: "Speaking" }).click();
   await expect(page.getByText("JARVIS · Speaking")).toBeVisible();
-  await expect(page.getByText("JARVIS is not connected yet")).toBeVisible();
+  await expect(
+    page.getByText("This preview is not connected to JARVIS", { exact: false }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Play simulated sequence" }).click();
   await expect(page.getByText("Audit: done")).toBeAttached({ timeout: 10000 });
 });
