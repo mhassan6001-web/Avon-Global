@@ -120,7 +120,7 @@ def update_settings(db: Session, body: schemas.SettingsIn, actor: uuid.UUID) -> 
             _account(db, value, *checks[field])
         setattr(s, field, value)
     s.updated_by = actor
-    _audit(db, "settings.updated", actor, "fin_settings", 1, fields=sorted(body.model_fields_set))
+    _audit(db, "settings.updated", actor, "fin_settings", "1", fields=sorted(body.model_fields_set))
 
 
 def create_account(db: Session, body: schemas.AccountIn, actor: uuid.UUID) -> Account:

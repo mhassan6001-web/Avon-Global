@@ -12,10 +12,12 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 
 from app.core.errors import NotFoundError
+from app.modules.crm.models import Customer
+from app.modules.procurement.models import Supplier
 from app.platform.audit import service as audit
 from app.platform.authz.deps import DbSession, Principal, require, require_step_up
 
-from . import reports, schemas
+from . import posting, reports, schemas
 from . import service as fin
 from .models import (
     Account,
@@ -39,7 +41,7 @@ Ledger = Depends(require("finance.ledger.view"))
 
 
 def _today() -> date:
-    return fin.posting.now().date()
+    return posting.now().date()
 
 
 # --- Configuration ---------------------------------------------------------------
@@ -84,7 +86,7 @@ def accountant_review(
         action="finance.accountant_review",
         actor_id=principal.user.id,
         target_type="fin_settings",
-        target_id=1,
+        target_id="1",
         details={"reviewed": body.reviewed, "note": body.note},
     )
     db.commit()
@@ -195,6 +197,32 @@ def create_tax_code(
     row = fin.create_tax_code(db, body, principal.user.id)
     db.commit()
     return schemas.TaxCodeOut.model_validate(row)
+
+
+class PartyOut(BaseModel):
+    id: uuid.UUID
+    name: str
+    reference: str
+
+
+@router.get("/parties", response_model=list[PartyOut])
+def list_parties(
+    db: DbSession, kind: Literal["customer", "supplier"], _: Principal = View
+) -> list[PartyOut]:
+    """Names only, so Finance can bill and pay without access to CRM or supplier records."""
+    if kind == "customer":
+        rows = db.execute(
+            select(Customer.id, Customer.name, Customer.reference)
+            .where(Customer.status != "archived")
+            .order_by(Customer.name)
+        ).all()
+    else:
+        rows = db.execute(
+            select(Supplier.id, Supplier.name, Supplier.reference)
+            .where(Supplier.status != "suspended")
+            .order_by(Supplier.name)
+        ).all()
+    return [PartyOut(id=i, name=n, reference=r) for i, n, r in rows]
 
 
 # --- Journals ----------------------------------------------------------------------

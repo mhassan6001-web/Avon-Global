@@ -143,7 +143,7 @@ export const BUSINESS_MODULES: BusinessModule[] = [
     "/procurement",
     "procurement.records.view",
   ),
-  planned(
+  available(
     "finance",
     "Finance",
     LuLandmark,
@@ -154,6 +154,8 @@ export const BUSINESS_MODULES: BusinessModule[] = [
       "Bank reconciliation, debtors and creditors",
       "Multi-currency: MWK, USD, ZAR, ZMW",
     ],
+    "/finance",
+    "finance.records.view",
   ),
   planned(
     "inventory",

@@ -186,7 +186,7 @@ def ageing(db: Session, kind: str, as_of: date) -> schemas.Ageing:
         )
         for (party, currency), b in sorted(totals.items(), key=lambda kv: names[kv[0][0]])
     ]
-    return schemas.Ageing(kind=kind, as_of=as_of, rows=rows)  # type: ignore[arg-type]
+    return schemas.Ageing(kind=kind, as_of=as_of, rows=rows)
 
 
 def cashbook(

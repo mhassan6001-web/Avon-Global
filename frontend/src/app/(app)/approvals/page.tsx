@@ -49,6 +49,10 @@ type View = (typeof VIEWS)[number]["value"];
 function subjectLink(a: Approval): string | null {
   if (a.subject_type === "tender_submission") return `/tenders/${a.subject_id}`;
   if (a.subject_type === "purchase_request") return `/procurement/requests/${a.subject_id}`;
+  if (a.subject_type === "supplier_payment") return "/finance/bills";
+  if (a.subject_type === "credit_note") return "/finance/invoices";
+  if (a.subject_type === "manual_journal" || a.subject_type === "journal_reversal")
+    return "/finance/journals";
   return null;
 }
 

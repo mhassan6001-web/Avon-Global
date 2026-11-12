@@ -25,7 +25,8 @@ describe("navigation", () => {
   it("resolves titles and active state", () => {
     assert.equal(titleForPath("/"), "Command Centre");
     assert.equal(titleForPath("/system"), "System Status");
-    assert.equal(titleForPath("/modules/finance"), "Finance");
+    assert.equal(titleForPath("/finance/invoices"), "Finance");
+    assert.equal(titleForPath("/modules/hr"), "HR & Payroll");
     assert.equal(titleForPath("/unknown"), "AVEN GLOBAL");
     assert.equal(isActive("/system", "/"), false);
     assert.equal(isActive("/", "/"), true);
