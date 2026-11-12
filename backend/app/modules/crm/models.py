@@ -150,3 +150,74 @@ class Activity(TimestampMixin, Base):
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     assigned_to: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("auth_users.id"))
     created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("auth_users.id"), nullable=False)
+
+
+QUOTATION_STATUSES = (
+    "draft",
+    "awaiting_approval",
+    "issued",
+    "accepted",
+    "declined",
+    "cancelled",
+)
+
+
+class Quotation(TimestampMixin, Base):
+    """A priced offer to a customer. It gets its number when issued, and its
+    lines and amounts cannot change after that (database trigger)."""
+
+    __tablename__ = "crm_quotations"
+    __table_args__ = (
+        CheckConstraint(_in("status", QUOTATION_STATUSES), name="status_valid"),
+        CheckConstraint(_in("currency", CURRENCIES), name="currency_valid"),
+        CheckConstraint(
+            "status IN ('draft', 'awaiting_approval', 'cancelled') OR number IS NOT NULL",
+            name="issued_has_number",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    number: Mapped[str | None] = mapped_column(String(20), unique=True)
+    customer_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("crm_customers.id"), nullable=False, index=True
+    )
+    opportunity_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("crm_opportunities.id"))
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    currency: Mapped[str] = mapped_column(String(3), nullable=False, server_default="MWK")
+    quote_date: Mapped[date] = mapped_column(Date, nullable=False)
+    valid_until: Mapped[date] = mapped_column(Date, nullable=False)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, server_default="draft")
+    subtotal: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, server_default="0")
+    tax_total: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, server_default="0")
+    total: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, server_default="0")
+    terms: Mapped[str | None] = mapped_column(Text)
+    notes: Mapped[str | None] = mapped_column(Text)
+    approval_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("sys_approval_requests.id"))
+    issued_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("auth_users.id"))
+    issued_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("auth_users.id"), nullable=False)
+
+
+class QuotationLine(Base):
+    __tablename__ = "crm_quotation_lines"
+    __table_args__ = (
+        CheckConstraint("quantity > 0 AND unit_price >= 0", name="amounts_valid"),
+        Index("uq_crm_quotation_lines_no", "quotation_id", "line_no", unique=True),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    quotation_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("crm_quotations.id", ondelete="CASCADE"), nullable=False
+    )
+    line_no: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    description: Mapped[str] = mapped_column(String(300), nullable=False)
+    quantity: Mapped[Decimal] = mapped_column(Numeric(18, 3), nullable=False)
+    unit: Mapped[str] = mapped_column(String(20), nullable=False, server_default="each")
+    unit_price: Mapped[Decimal] = mapped_column(Numeric(18, 4), nullable=False)
+    tax_code_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("fin_tax_codes.id"))
+    net: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False)
+    tax: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False)

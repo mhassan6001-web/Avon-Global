@@ -8,6 +8,7 @@ import uuid
 from fastapi import APIRouter, Depends
 from sqlalchemy import select
 
+from app.core.config import get_settings
 from app.modules.comms import service as comms
 from app.modules.comms.models import Conversation, Message, Task
 from app.platform.authz.deps import DbSession, Principal, require
@@ -82,6 +83,8 @@ def status(principal: Principal = Use) -> schemas.StatusOut:
         can_use=True,
         ai_configured=provider is not None,
         provider=provider.name if provider else None,
+        model=provider.model if provider else None,
+        advanced_model=get_settings().anthropic_advanced_model if provider else None,
         tools=[
             {"name": t.name, "category": t.category, "description": t.description}
             for t in available(principal)
@@ -138,7 +141,7 @@ def ask(
     conv = service.get_conversation(db, principal, conv_id)
     if conv.title == "New conversation":
         conv.title = body.text[:80]
-    new = service.ask(db, principal, conv, body.text)
+    new = service.ask(db, principal, conv, body.text, advanced=body.depth == "advanced")
     db.commit()
     return _messages_out(db, new)
 

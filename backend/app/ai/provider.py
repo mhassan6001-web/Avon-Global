@@ -69,6 +69,7 @@ class AIProvider(Protocol):
         messages: list[ProviderMessage],
         tools: list[ToolSpec],
         max_tokens: int,
+        model: str | None = None,
     ) -> ProviderResult: ...
 
 
@@ -91,9 +92,10 @@ class AnthropicProvider:
         messages: list[ProviderMessage],
         tools: list[ToolSpec],
         max_tokens: int,
+        model: str | None = None,
     ) -> ProviderResult:
         body = {
-            "model": self.model,
+            "model": model or self.model,
             "max_tokens": max_tokens,
             "system": system,
             "messages": [{"role": m.role, "content": m.content} for m in messages],
@@ -125,7 +127,7 @@ class AnthropicProvider:
         return ProviderResult(
             content=[b for b in data.get("content", []) if b.get("type") in ("text", "tool_use")],
             stop_reason=str(data.get("stop_reason") or "end_turn"),
-            model=str(data.get("model") or self.model),
+            model=str(data.get("model") or model or self.model),
             input_tokens=int(usage.get("input_tokens") or 0),
             output_tokens=int(usage.get("output_tokens") or 0),
             latency_ms=int((time.monotonic() - started) * 1000),
@@ -158,7 +160,9 @@ class FakeProvider:
         messages: list[ProviderMessage],
         tools: list[ToolSpec],
         max_tokens: int,
+        model: str | None = None,
     ) -> ProviderResult:
+        self._model = model or self.model
         last = messages[-1]
         names = {t.name for t in tools}
         results = [b for b in last.content if b.get("type") == "tool_result"]
@@ -178,11 +182,13 @@ class FakeProvider:
         )
 
     def _text(self, text: str) -> ProviderResult:
-        return ProviderResult([{"type": "text", "text": text}], "end_turn", self.model, 10, 10)
+        used = getattr(self, "_model", self.model)
+        return ProviderResult([{"type": "text", "text": text}], "end_turn", used, 10, 10)
 
     def _tool(self, name: str, args: dict[str, Any]) -> ProviderResult:
         block = {"type": "tool_use", "id": f"fake_{name}_{time.monotonic_ns()}", "name": name}
-        return ProviderResult([{**block, "input": args}], "tool_use", self.model, 10, 5)
+        used = getattr(self, "_model", self.model)
+        return ProviderResult([{**block, "input": args}], "tool_use", used, 10, 5)
 
 
 def get_provider() -> AIProvider | None:

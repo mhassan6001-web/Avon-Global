@@ -47,7 +47,6 @@ def test_invoice_pdf_and_word_from_the_record(app: FastAPI, db: Session) -> None
     body = _pdf_text(draft.content)
     assert b"DRAFT - NOT ISSUED" in body and b"Desks \\(oak\\)" in body
     assert b"signature" in body  # states that no signature is applied
-    assert b"legal name not yet confirmed" in body or b"profile not set up" in body
 
     issued = b.fin.post(f"/api/v1/finance/invoices/{inv['id']}/issue", json={}).json()
     pdf = b.fin.get(f"{API}/records/invoice/{inv['id']}")

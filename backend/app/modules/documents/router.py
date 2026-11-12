@@ -116,7 +116,7 @@ def _deliver(
 
 @router.get("/records/{kind}/{record_id}")
 def record_document(
-    kind: Literal["invoice", "receipt", "purchase_order", "delivery_note"],
+    kind: Literal["quotation", "invoice", "receipt", "purchase_order", "delivery_note"],
     record_id: uuid.UUID,
     principal: CurrentPrincipal,
     db: DbSession,

@@ -12,7 +12,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.errors import NotFoundError
-from app.modules.crm.models import Customer
+from app.modules.crm.models import Customer, Quotation, QuotationLine
 from app.modules.finance.models import Invoice, InvoiceLine, Receipt, TaxCode
 from app.modules.inventory.models import Product, Warehouse
 from app.modules.logistics.models import DeliveryNote, DeliveryNoteLine
@@ -51,18 +51,39 @@ def _org(db: Session) -> OrganisationProfile | None:
 
 
 def issuer_lines(db: Session) -> list[str]:
+    """Company block for documents. Address, phone, email, TPIN and VAT number
+    appear only when the Director has approved each of them for print."""
     org = _org(db)
     if org is None:
         return ["Organisation profile not set up"]
     lines = [org.legal_name or f"{org.trading_name} (legal name not yet confirmed)"]
+    if org.print_address and org.address_line1:
+        lines.append(", ".join(x for x in (org.address_line1, org.address_line2) if x))
     place = ", ".join(x for x in (org.headquarters_city, org.headquarters_country_code) if x)
     if place:
         lines.append(place)
+    contact = [
+        f"Tel {org.phone}" if org.print_phone and org.phone else None,
+        org.email if org.print_email and org.email else None,
+    ]
+    if any(contact):
+        lines.append(" · ".join(x for x in contact if x))
     if org.registration_status == "registered" and org.registration_number:
         lines.append(f"Registration no. {org.registration_number}")
     else:
         lines.append(REG_LABEL.get(org.registration_status, "Registration not confirmed"))
+    tax = [
+        f"TPIN {org.tpin}" if org.print_tpin and org.tpin else None,
+        f"VAT reg. no. {org.vat_number}" if org.print_vat and org.vat_number else None,
+    ]
+    if any(tax):
+        lines.append(" · ".join(x for x in tax if x))
     return lines
+
+
+def vat_printable(db: Session) -> bool:
+    org = _org(db)
+    return bool(org and org.print_vat and org.vat_number)
 
 
 def _name(db: Session, user_id: uuid.UUID | None) -> str | None:
@@ -130,7 +151,8 @@ def invoice(db: Session, record_id: uuid.UUID, by: str, now: datetime) -> Docume
             ]
         )
     return Document(
-        kind="Tax invoice" if inv.tax_total else "Invoice",
+        # "Tax invoice" only once a VAT number is confirmed and approved for print.
+        kind="Tax invoice" if inv.tax_total and vat_printable(db) else "Invoice",
         number=inv.number or "DRAFT",
         issuer=issuer_lines(db),
         recipient_title="Bill to",
@@ -298,7 +320,88 @@ def delivery_note(db: Session, record_id: uuid.UUID, by: str, now: datetime) -> 
     )
 
 
+def quotation(db: Session, record_id: uuid.UUID, by: str, now: datetime) -> Document:
+    q = db.get(Quotation, record_id)
+    if q is None:
+        raise NotFoundError("Quotation not found.")
+    customer = db.get(Customer, q.customer_id)
+    lines = list(
+        db.execute(
+            select(QuotationLine)
+            .where(QuotationLine.quotation_id == q.id)
+            .order_by(QuotationLine.line_no)
+        ).scalars()
+    )
+    ids = {ln.tax_code_id for ln in lines if ln.tax_code_id}
+    codes = {t.id: t for t in db.execute(select(TaxCode).where(TaxCode.id.in_(ids))).scalars()}
+    banners = _demo(bool(customer and customer.is_demo))
+    if q.status in ("draft", "awaiting_approval"):
+        banners.insert(0, "DRAFT - NOT ISSUED")
+    elif q.status in ("cancelled", "declined"):
+        banners.insert(0, q.status.upper())
+    elif q.status == "issued" and q.valid_until < now.astimezone(TZ).date():
+        banners.insert(0, "EXPIRED")
+    meta = [
+        ("Date", day(q.quote_date)),
+        ("Valid until", day(q.valid_until)),
+        ("Currency", q.currency),
+        ("Prepared by", _name(db, q.created_by) or "—"),
+    ]
+    rows = []
+    for ln in lines:
+        code = codes.get(ln.tax_code_id) if ln.tax_code_id else None
+        rows.append(
+            [
+                ln.description,
+                qty(ln.quantity),
+                ln.unit,
+                money(ln.unit_price),
+                f"{code.code} {code.rate_pct.normalize():f}%" if code else "—",
+                money(ln.net + ln.tax),
+            ]
+        )
+    notes = [f"Subject: {q.title}"]
+    if q.terms:
+        notes.append(f"Terms: {q.terms}")
+    if q.notes:
+        notes.append(q.notes)
+    return Document(
+        kind="Quotation",
+        number=q.number or "DRAFT",
+        issuer=issuer_lines(db),
+        recipient_title="Quotation for",
+        recipient=[
+            x
+            for x in (
+                customer.name if customer else "—",
+                customer and customer.city,
+                customer and customer.email,
+            )
+            if x
+        ],
+        meta=meta,
+        columns=[
+            Column("Description", 5),
+            Column("Qty", 1.1, "right"),
+            Column("Unit", 1),
+            Column("Unit price", 1.6, "right"),
+            Column("Tax code", 1.4, "right"),
+            Column("Amount", 1.8, "right"),
+        ],
+        rows=rows,
+        totals=[
+            ("Subtotal", money(q.subtotal)),
+            ("Tax", money(q.tax_total)),
+            ("Total", f"{q.currency} {money(q.total)}"),
+        ],
+        notes=notes,
+        footer=footer(by, now),
+        banners=banners,
+    )
+
+
 BUILDERS = {
+    "quotation": (quotation, "crm.records.view"),
     "invoice": (invoice, "finance.records.view"),
     "receipt": (receipt, "finance.records.view"),
     "purchase_order": (purchase_order, "procurement.records.view"),

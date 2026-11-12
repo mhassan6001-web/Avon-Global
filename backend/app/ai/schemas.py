@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -10,6 +10,8 @@ from pydantic import BaseModel, ConfigDict, Field
 class AskIn(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
     text: str = Field(min_length=1, max_length=4000)
+    # "advanced" uses the configured advanced model for complex analysis (higher cost).
+    depth: Literal["standard", "advanced"] = "standard"
 
 
 class ConversationIn(BaseModel):
@@ -49,3 +51,5 @@ class StatusOut(BaseModel):
     ai_configured: bool
     provider: str | None
     tools: list[dict[str, str]]
+    model: str | None = None
+    advanced_model: str | None = None

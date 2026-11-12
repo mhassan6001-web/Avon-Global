@@ -108,7 +108,10 @@ class Settings(BaseModel):
     # test provider and is refused in production.
     ai_provider: Literal["disabled", "anthropic", "fake"] = "disabled"
     anthropic_api_key: SecretStr = SecretStr("")
+    # Director's decision (2026-11-12): Sonnet for everyday work; Opus only when
+    # the user asks for deep analysis. Both are configuration, never code.
     anthropic_model: str = Field(default="claude-sonnet-5-5", min_length=3, max_length=80)
+    anthropic_advanced_model: str = Field(default="claude-opus-5-5", min_length=3, max_length=80)
     anthropic_base_url: str = "https://api.anthropic.com"
     ai_max_tool_rounds: Annotated[int, Field(ge=1, le=10)] = 5
     ai_max_output_tokens: Annotated[int, Field(ge=256, le=8192)] = 2048

@@ -127,9 +127,11 @@ class _Scripted(FakeProvider):
     def __init__(self, tool: str, args: dict[str, Any]) -> None:
         self.tool, self.args = tool, args
 
-    def complete(self, system: str, messages: Any, tools: Any, max_tokens: int) -> ProviderResult:
+    def complete(
+        self, system: str, messages: Any, tools: Any, max_tokens: int, model: str | None = None
+    ) -> ProviderResult:
         if any(b.get("type") == "tool_result" for b in messages[-1].content):
-            return super().complete(system, messages, tools, max_tokens)
+            return super().complete(system, messages, tools, max_tokens, model)
         return self._tool(self.tool, self.args)
 
 

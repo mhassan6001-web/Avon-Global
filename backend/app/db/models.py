@@ -19,7 +19,14 @@ from app.modules.comms.models import (
     Task,
     TaskUpdate,
 )
-from app.modules.crm.models import Activity, Contact, Customer, Opportunity
+from app.modules.crm.models import (
+    Activity,
+    Contact,
+    Customer,
+    Opportunity,
+    Quotation,
+    QuotationLine,
+)
 from app.modules.documents.models import GeneratedDocument
 from app.modules.finance.models import (
     Account,
@@ -73,7 +80,7 @@ from app.modules.procurement.models import (
     SupplierQuoteLine,
 )
 from app.modules.tenders.models import Requirement, Tender
-from app.platform.approvals.models import ApprovalRequest
+from app.platform.approvals.models import ApprovalRequest, ApprovalRule
 from app.platform.audit.models import AuditEvent, SecurityAlert
 from app.platform.files.models import StoredFile
 from app.platform.identity.models import (
@@ -101,6 +108,7 @@ __all__ = [
     "Acknowledgement",
     "Activity",
     "ApprovalRequest",
+    "ApprovalRule",
     "Attendance",
     "AuditEvent",
     "AuthSession",
@@ -147,6 +155,8 @@ __all__ = [
     "PurchaseOrderLine",
     "PurchaseRequest",
     "PurchaseRequestLine",
+    "Quotation",
+    "QuotationLine",
     "Receipt",
     "ReceiptAllocation",
     "Report",

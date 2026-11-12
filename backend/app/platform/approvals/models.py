@@ -4,9 +4,20 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, String, Text, Uuid, text
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Numeric,
+    String,
+    Text,
+    Uuid,
+    text,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -39,3 +50,25 @@ class ApprovalRequest(TimestampMixin, Base):
     decided_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("auth_users.id"))
     decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     decision_note: Mapped[str | None] = mapped_column(Text)
+
+
+class ApprovalRule(Base):
+    """Director-configured approval limit for one kind of request.
+
+    ``enabled`` off: no approval step. ``threshold`` empty: every request needs
+    approval. Otherwise approval is needed at or above the threshold, measured
+    in the functional currency.
+    """
+
+    __tablename__ = "sys_approval_rules"
+    __table_args__ = (
+        CheckConstraint("threshold IS NULL OR threshold >= 0", name="threshold_non_negative"),
+    )
+
+    key: Mapped[str] = mapped_column(String(40), primary_key=True)
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("true"))
+    threshold: Mapped[Decimal | None] = mapped_column(Numeric(18, 2))
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("auth_users.id"))
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=text("now()")
+    )

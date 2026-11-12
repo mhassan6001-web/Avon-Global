@@ -117,20 +117,24 @@ def _usage(
     )
 
 
-def ask(db: Session, p: Principal, conv: AIConversation, text: str) -> list[AIMessage]:
+def ask(
+    db: Session, p: Principal, conv: AIConversation, text: str, advanced: bool = False
+) -> list[AIMessage]:
+    """``advanced`` selects the configured advanced model (higher cost) for this question."""
     provider = get_provider()
     if provider is None:
         raise ServiceUnavailableError(
             "JARVIS's AI service is not configured yet. The daily briefing still works."
         )
     settings = get_settings()
+    model = settings.anthropic_advanced_model if advanced else None
     new = [_store(db, conv, "user", [{"type": "text", "text": text}], text)]
     tools = [ToolSpec(t.name, t.description, t.schema()) for t in available(p)]
     system = system_prompt(db, p)
     for _ in range(settings.ai_max_tool_rounds):
         try:
             result = provider.complete(
-                system, history(db, conv), tools, settings.ai_max_output_tokens
+                system, history(db, conv), tools, settings.ai_max_output_tokens, model
             )
         except AIProviderError as exc:
             _usage(db, p, conv, provider, "error")

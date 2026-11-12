@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from decimal import Decimal
 from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, Query
@@ -13,7 +14,7 @@ from sqlalchemy import select
 from app.core.errors import NotFoundError
 from app.platform.approvals import service as approvals
 from app.platform.approvals.models import ApprovalRequest
-from app.platform.authz.deps import CurrentPrincipal, DbSession, require_step_up
+from app.platform.authz.deps import CurrentPrincipal, DbSession, Principal, require, require_step_up
 from app.platform.identity.models import User
 
 router = APIRouter(prefix="/approvals", tags=["approvals"])
@@ -34,6 +35,7 @@ class ApprovalOut(BaseModel):
     decided_at: datetime | None
     decision_note: str | None
     can_decide: bool
+    blocked_reason: str | None = None
 
 
 class DecisionIn(BaseModel):
@@ -52,6 +54,17 @@ def _out(
         if ids
         else {}
     )
+    # A pending request nobody else can decide is blocked, and says so.
+    has_other: dict[tuple[str, uuid.UUID], bool] = {}
+
+    def blocked(r: ApprovalRequest) -> str | None:
+        if r.status != "pending":
+            return None
+        key = (r.permission_required, r.requested_by)
+        if key not in has_other:
+            has_other[key] = approvals.other_approver_exists(db, *key)
+        return None if has_other[key] else approvals.NO_SECOND_APPROVER
+
     return [
         ApprovalOut(
             id=r.id,
@@ -70,6 +83,7 @@ def _out(
             can_decide=r.status == "pending"
             and r.requested_by != principal.user.id
             and principal.has(r.permission_required),
+            blocked_reason=blocked(r),
         )
         for r in rows
     ]
@@ -118,3 +132,67 @@ def decide(
     approvals.decide(db, principal=principal, request=request, approve=body.approve, note=body.note)
     db.commit()
     return _out(db, [request], principal)[0]
+
+
+class RuleOut(BaseModel):
+    key: str
+    label: str
+    permission: str
+    configurable: bool
+    note: str
+    enabled: bool
+    threshold: Decimal | None
+    functional_currency: str
+    second_approver_exists: bool
+
+
+class RuleIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool
+    threshold: Decimal | None = Field(default=None, ge=0, max_digits=18, decimal_places=2)
+
+
+def _rules_out(db: DbSession, principal: Principal) -> list[RuleOut]:
+    from app.modules.finance.posting import functional_currency
+
+    currency = functional_currency(db)
+    out = []
+    for spec in approvals.RULES:
+        enabled, threshold = approvals.get_rule(db, spec.key) if spec.configurable else (True, None)
+        out.append(
+            RuleOut(
+                key=spec.key,
+                label=spec.label,
+                permission=spec.permission,
+                configurable=spec.configurable,
+                note=spec.note,
+                enabled=enabled,
+                threshold=threshold,
+                functional_currency=currency,
+                second_approver_exists=approvals.other_approver_exists(
+                    db, spec.permission, principal.user.id
+                ),
+            )
+        )
+    return out
+
+
+@router.get("/rules", response_model=list[RuleOut])
+def list_rules(
+    db: DbSession, principal: Principal = Depends(require("admin.permissions.manage"))
+) -> list[RuleOut]:
+    """Approval limits and whether a second approver exists for each control."""
+    return _rules_out(db, principal)
+
+
+@router.put("/rules/{key}", response_model=list[RuleOut], dependencies=[Depends(require_step_up)])
+def put_rule(
+    key: str,
+    body: RuleIn,
+    db: DbSession,
+    principal: Principal = Depends(require("admin.permissions.manage")),
+) -> list[RuleOut]:
+    approvals.set_rule(db, key, body.enabled, body.threshold, principal)
+    db.commit()
+    return _rules_out(db, principal)

@@ -6,6 +6,7 @@ from app.ai.router import router as jarvis_router
 from app.ai.voice_router import router as voice_router
 from app.api.v1.endpoints import health
 from app.modules.comms.router import router as comms_router
+from app.modules.crm.quotations import router as quotations_router
 from app.modules.crm.router import router as crm_router
 from app.modules.director.router import router as director_router
 from app.modules.documents.router import router as documents_router
@@ -30,6 +31,7 @@ ROUTERS: tuple[APIRouter, ...] = (
     organisation_router,
     files_router,
     director_router,
+    quotations_router,
     crm_router,
     tenders_router,
     procurement_router,
