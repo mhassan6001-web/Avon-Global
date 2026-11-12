@@ -222,3 +222,46 @@ export async function send<T>(
     body: parsed,
   });
 }
+
+export interface UploadedFile {
+  id: string;
+  original_name: string;
+  mime_type: string;
+  size_bytes: number;
+}
+
+/**
+ * Upload a document into a module's section. The server checks the file type
+ * from its content and stores who may read it (``requiredPermission``).
+ */
+export async function uploadFile(
+  file: File,
+  module: string,
+  requiredPermission: string,
+): Promise<UploadedFile> {
+  const form = new FormData();
+  form.append("file", file);
+  form.append("module", module);
+  form.append("required_permission", requiredPermission);
+  const headers: Record<string, string> = { Accept: "application/json" };
+  const csrf = readCookie(CSRF_COOKIE);
+  if (csrf) headers["X-CSRF-Token"] = csrf;
+  const response = await fetch(`${API_PREFIX}/files`, {
+    method: "POST",
+    body: form,
+    headers,
+    credentials: "same-origin",
+  });
+  const parsed: unknown = await response.json().catch(() => null);
+  if (!response.ok) {
+    const envelope = isErrorEnvelope(parsed) ? parsed.error : null;
+    throw new ApiError({
+      status: response.status,
+      code: envelope?.code ?? "upload_failed",
+      message: envelope?.message ?? "The file could not be uploaded.",
+      requestId: response.headers.get("x-request-id"),
+      body: parsed,
+    });
+  }
+  return parsed as UploadedFile;
+}

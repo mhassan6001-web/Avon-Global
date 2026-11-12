@@ -21,6 +21,14 @@ from app.modules.finance.models import (
     Settings,
     TaxCode,
 )
+from app.modules.inventory.models import GoodsReceipt, Product, StockLevel, StockMovement, Warehouse
+from app.modules.logistics.models import (
+    DeliveryNote,
+    DeliveryNoteLine,
+    Shipment,
+    ShipmentDocument,
+    ShipmentEvent,
+)
 from app.modules.organisation.models import OrganisationProfile
 from app.modules.procurement.models import (
     PurchaseOrder,
@@ -64,8 +72,11 @@ __all__ = [
     "Counter",
     "CreditNote",
     "Customer",
+    "DeliveryNote",
+    "DeliveryNoteLine",
     "Department",
     "ExchangeRate",
+    "GoodsReceipt",
     "Invoice",
     "InvoiceLine",
     "JournalEntry",
@@ -78,6 +89,7 @@ __all__ = [
     "Period",
     "Permission",
     "PermissionOverride",
+    "Product",
     "PurchaseOrder",
     "PurchaseOrderLine",
     "PurchaseRequest",
@@ -89,6 +101,11 @@ __all__ = [
     "RolePermission",
     "SecurityAlert",
     "Settings",
+    "Shipment",
+    "ShipmentDocument",
+    "ShipmentEvent",
+    "StockLevel",
+    "StockMovement",
     "StoredFile",
     "Supplier",
     "SupplierBankAccount",
@@ -99,4 +116,5 @@ __all__ = [
     "User",
     "UserMfa",
     "UserPreferences",
+    "Warehouse",
 ]

@@ -28,6 +28,7 @@ EVERYONE = set(ALL_ROLES)
 CRM = {"director", "business_development"}
 PRC = {"director", "procurement"}
 FIN = {"director", "finance"}
+LGX = {"director", "logistics"}
 
 PDF = b"%PDF-1.4\n% AVEN test document\n%%EOF\n"
 
@@ -120,6 +121,13 @@ MATRIX: list[tuple[str, str, dict | None, set[str]]] = [
         FIN,
     ),
     ("POST", f"/finance/periods/{uuid.uuid4()}/close", None, DIRECTOR),
+    # Stage 8: inventory and logistics
+    ("GET", "/inventory/products", None, LGX),
+    ("GET", "/inventory/levels", None, LGX),
+    ("GET", "/inventory/open-orders", None, LGX),
+    ("GET", "/logistics/shipments", None, LGX),
+    ("GET", "/logistics/delivery-notes", None, LGX),
+    ("GET", "/logistics/customers", None, LGX),
 ]
 
 

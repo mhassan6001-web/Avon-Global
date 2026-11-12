@@ -19,6 +19,9 @@ SEQUENCES: dict[str, str] = {
     "SUP": "prc_supplier_ref_seq",
     "PR": "prc_request_ref_seq",
     "PO": "prc_order_ref_seq",
+    "GRN": "inv_grn_ref_seq",
+    "SHP": "lgx_shipment_ref_seq",
+    "DN": "lgx_delivery_ref_seq",
 }
 
 

@@ -157,7 +157,7 @@ export const BUSINESS_MODULES: BusinessModule[] = [
     "/finance",
     "finance.records.view",
   ),
-  planned(
+  available(
     "inventory",
     "Inventory",
     LuBoxes,
@@ -167,12 +167,22 @@ export const BUSINESS_MODULES: BusinessModule[] = [
       "Goods received, dispatches and adjustments",
       "Reorder alerts and stock valuation",
     ],
+    "/inventory",
+    "inventory.records.view",
   ),
-  planned("logistics", "Logistics", LuTruck, "Shipments, freight, customs and proof of delivery.", [
-    "Shipment and freight records",
-    "Customs documentation",
-    "Delivery schedules, notes and proof of delivery",
-  ]),
+  available(
+    "logistics",
+    "Logistics",
+    LuTruck,
+    "Shipments, freight, customs and proof of delivery.",
+    [
+      "Shipment and freight records",
+      "Customs documentation",
+      "Delivery schedules, notes and proof of delivery",
+    ],
+    "/logistics",
+    "logistics.records.view",
+  ),
   planned("hr", "HR & Payroll", LuUsers, "Employees, contracts, leave, payroll and performance.", [
     "Employee records and contracts",
     "Leave and attendance",

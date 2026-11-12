@@ -370,7 +370,7 @@ def test_bill_and_payment_dual_control(app: FastAPI, db: Session) -> None:
         "bill_date": str(TODAY),
         "due_date": str(TODAY),
         "lines": [
-            {"description": "x", "quantity": "1", "unit_price": "1", "account_id": b.acc["5000"]}
+            {"description": "xx", "quantity": "1", "unit_price": "1", "account_id": b.acc["5000"]}
         ],
     }
     assert b.fin.post(f"{API}/bills", json=dup).status_code == 409
