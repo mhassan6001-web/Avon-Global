@@ -28,7 +28,7 @@ Status = Literal[
 RequirementKind = Literal["eligibility", "document", "technical", "financial"]
 RequirementStatus = Literal["pending", "met", "not_met", "not_applicable"]
 
-__all__ = ["Page"]
+__all__ = ["Page", "UserRef"]
 
 
 class _In(BaseModel):

@@ -139,7 +139,9 @@ def detail(db: Session, row: Tender) -> schemas.TenderDetail:
                 select(User.id, User.display_name).where(
                     User.id.in_({a.requested_by, a.decided_by} - {None})
                 )
-            ).tuples()
+            )
+            .tuples()
+            .all()
         )
         approval = schemas.ApprovalInfo(
             id=a.id,
