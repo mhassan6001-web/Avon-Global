@@ -66,7 +66,8 @@ test("wrong password shows a generic error", async ({ page }) => {
   await page.getByLabel("Email").fill(accounts.logistics!.email);
   await page.getByLabel("Password").fill("definitely-not-it");
   await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page.getByRole("alert")).toContainText("Email or password is incorrect");
+  // (Next.js adds its own hidden role="alert" route announcer, so match the message text.)
+  await expect(page.getByText("Email or password is incorrect.")).toBeVisible();
 });
 
 test("staff see only their section; the API refuses admin pages", async ({ page }) => {
@@ -74,7 +75,7 @@ test("staff see only their section; the API refuses admin pages", async ({ page 
   await expect(page.getByText("Development-only test account")).toBeVisible();
   await expect(page.getByRole("link", { name: "Users & access" })).toHaveCount(0);
   await page.goto("/admin/users");
-  await expect(page.getByRole("alert")).toContainText("permission");
+  await expect(page.getByText("You do not have permission to perform this action.")).toBeVisible();
 });
 
 test("Director: 2FA sign-in, step-up, invite a user who then signs in", async ({
