@@ -15,6 +15,7 @@ import {
   LuBuilding2,
   LuFileText,
   LuGavel,
+  LuIdCard,
   LuLandmark,
   LuLayoutDashboard,
   LuMessagesSquare,
@@ -52,6 +53,7 @@ export const WORKSPACE_NAV: NavItem[] = [
 ];
 
 export const SETTINGS_NAV: NavItem[] = [
+  { label: "My HR", href: "/me", icon: LuIdCard, status: "available" },
   { label: "My account", href: "/account", icon: LuUserRound, status: "available" },
   { label: "Preferences", href: "/settings", icon: LuSettings2, status: "available" },
 ];
@@ -120,6 +122,7 @@ export const BUSINESS_MODULES: BusinessModule[] = [
     "tenders",
     "Tenders",
     LuGavel,
+    LuIdCard,
     "Tender register, deadlines, eligibility and bid approvals.",
     [
       "RFQ, RFP and EOI register with deadlines",
@@ -183,12 +186,20 @@ export const BUSINESS_MODULES: BusinessModule[] = [
     "/logistics",
     "logistics.records.view",
   ),
-  planned("hr", "HR & Payroll", LuUsers, "Employees, contracts, leave, payroll and performance.", [
-    "Employee records and contracts",
-    "Leave and attendance",
-    "Payroll and commission (restricted access)",
-    "Performance reviews and agreed KPIs",
-  ]),
+  available(
+    "hr",
+    "HR & Payroll",
+    LuUsers,
+    "Employees, contracts, leave, payroll and performance.",
+    [
+      "Employee records and contracts",
+      "Leave and attendance",
+      "Payroll and commission (restricted access)",
+      "Performance reviews and agreed KPIs",
+    ],
+    "/hr",
+    "hr.records.view",
+  ),
   planned(
     "communications",
     "Communications",
