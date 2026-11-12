@@ -1,9 +1,9 @@
 /**
  * Navigation and module registry.
  *
- * Business modules are listed so the Director can see the planned structure,
- * but every one is marked `planned` and routes to an information page — no
- * module pretends to work before it is built.
+ * Business modules are listed so the Director can see the planned structure.
+ * A module is `available` only once it is built and tested; until then it is
+ * `planned` and routes to an information page, so nothing pretends to work.
  */
 
 import type { IconType } from "react-icons";
@@ -13,7 +13,6 @@ import {
   LuBriefcase,
   LuBuilding2,
   LuFileText,
-  LuGauge,
   LuGavel,
   LuLandmark,
   LuLayoutDashboard,
@@ -89,24 +88,32 @@ function planned(
   return { slug, label, icon, summary, scope, href: `/modules/${slug}`, status: "planned" };
 }
 
+function available(
+  slug: string,
+  label: string,
+  icon: IconType,
+  summary: string,
+  scope: string[],
+  href: string,
+  permission: string,
+): BusinessModule {
+  return { slug, label, icon, summary, scope, href, status: "available", permission };
+}
+
 export const BUSINESS_MODULES: BusinessModule[] = [
-  planned(
-    "director",
-    "Director",
-    LuGauge,
-    "Executive dashboard, approvals and management reporting.",
+  available(
+    "crm",
+    "CRM & Sales",
+    LuBriefcase,
+    "Customers, contacts, opportunities and follow-ups.",
     [
-      "Cash and revenue overview from posted records",
-      "Profitability by contract and division",
-      "Approval queue and business alerts",
-      "Staff overview and management reports",
+      "Customer profiles and contacts",
+      "Opportunities, meetings and follow-ups",
+      "Customer history and quotations",
     ],
+    "/crm",
+    "crm.records.view",
   ),
-  planned("crm", "CRM & Sales", LuBriefcase, "Customers, contacts, opportunities and follow-ups.", [
-    "Customer profiles and contacts",
-    "Opportunities, meetings and follow-ups",
-    "Customer history and quotations",
-  ]),
   planned(
     "tenders",
     "Tenders",
@@ -201,6 +208,11 @@ export const BUSINESS_MODULES: BusinessModule[] = [
 
 export function findModule(slug: string): BusinessModule | undefined {
   return BUSINESS_MODULES.find((entry) => entry.slug === slug);
+}
+
+/** Modules not built yet; each has an information page at /modules/<slug>. */
+export function plannedModules(): BusinessModule[] {
+  return BUSINESS_MODULES.filter((entry) => entry.status === "planned");
 }
 
 /** Title for the header, derived from the current path. */

@@ -1,6 +1,7 @@
 """Import every model so Alembic and the metadata see the full schema."""
 
 from app.db.base import Base
+from app.modules.crm.models import Activity, Contact, Customer, Opportunity
 from app.modules.organisation.models import OrganisationProfile
 from app.platform.approvals.models import ApprovalRequest
 from app.platform.audit.models import AuditEvent, SecurityAlert
@@ -20,13 +21,17 @@ from app.platform.identity.models import (
 )
 
 __all__ = [
+    "Activity",
     "ApprovalRequest",
     "AuditEvent",
     "AuthSession",
     "Base",
+    "Contact",
+    "Customer",
     "Department",
     "LoginEvent",
     "OneTimeToken",
+    "Opportunity",
     "OrganisationProfile",
     "Permission",
     "PermissionOverride",

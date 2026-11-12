@@ -16,13 +16,37 @@ import { JarvisPresence } from "@/components/jarvis/JarvisPresence";
 import { DependencyList, RefreshButton } from "@/components/system/PlatformStatus";
 import { Badge, PageHeader, Panel } from "@/components/ui";
 import { riseIn, staggerContainer } from "@/lib/motion/tokens";
+import { useResource } from "@/lib/api/useResource";
+import { useAuth } from "@/lib/auth/AuthProvider";
+import { formatDate, OPEN_STAGES, STAGE_LABEL, type CrmSummary } from "@/lib/crm/types";
 import { usePreferences } from "@/lib/preferences/PreferencesProvider";
 import { STAGES, STAGE_STATE_LABEL, type StageState } from "@/lib/roadmap";
 
 import cc from "./command-centre.module.css";
 
+interface DirectorDashboard {
+  functional_currency: string;
+  crm: CrmSummary;
+  top_customers_open_pipeline: Array<{
+    customer_id: string;
+    name: string;
+    open_value: string;
+    open_count: number;
+  }>;
+  approvals_pending: Array<{
+    id: string;
+    summary: string;
+    subject_type: string;
+    requested_by: string;
+    created_at: string;
+  }>;
+  approvals_pending_count: number;
+  security_alerts_open: number;
+}
+
 const STAGE_TONE: Record<StageState, "success" | "gold" | "signal" | "neutral"> = {
   approved: "success",
+  verified: "gold",
   in_progress: "signal",
   awaiting_approval: "gold",
   queued: "neutral",
@@ -35,14 +59,38 @@ const STAGE_TONE: Record<StageState, "success" | "gold" | "signal" | "neutral"> 
  */
 export default function CommandCentrePage() {
   const { motionScale } = usePreferences();
+  const { can } = useAuth();
   const item = riseIn(motionScale);
+  const isDirector = can("director.dashboard.view");
+  const director = useResource<DirectorDashboard>(isDirector ? "/director/dashboard" : null);
+  const crmOnly = useResource<CrmSummary>(
+    !isDirector && can("crm.records.view") ? "/crm/summary" : null,
+  );
+  const crm = director.data?.crm ?? crmOnly.data ?? null;
+
+  // null → "No data yet" (no records); a real array → counts, which may be zero.
+  const pipeline = crm?.has_records
+    ? crm.pipeline
+        .filter((s) => OPEN_STAGES.includes(s.stage))
+        .map((s) => ({ label: STAGE_LABEL[s.stage], value: s.count }))
+    : null;
+  const openTotal = pipeline?.reduce((sum, p) => sum + p.value, 0) ?? 0;
+  const currency = director.data?.functional_currency ?? "MWK";
+  const top =
+    director.data && crm?.has_records
+      ? director.data.top_customers_open_pipeline.map((t) => ({
+          label: t.name,
+          value: Number(t.open_value),
+        }))
+      : null;
+  const approvals = director.data?.approvals_pending ?? null;
 
   return (
     <>
       <PageHeader
         eyebrow="Director workspace"
         title="Command Centre"
-        description="Figures appear here only once they come from real, posted records. Nothing is estimated or sample data."
+        description="Figures appear only once they come from real records. Opportunity values are labelled as estimates; nothing is sample data."
       />
 
       <motion.div
@@ -86,18 +134,36 @@ export default function CommandCentrePage() {
                 </ChartCard>
               </motion.div>
             </div>
-            <motion.div variants={item}>
-              <ChartCard title="Revenue by division" meta="This year" empty>
-                <Donut data={null} />
-              </ChartCard>
-            </motion.div>
+            <div className={cc.stack}>
+              <motion.div variants={item}>
+                <ChartCard
+                  title="Open opportunities"
+                  meta="By stage · CRM"
+                  empty={pipeline === null || openTotal === 0}
+                  emptyLabel={pipeline === null ? "No data yet" : "None open"}
+                >
+                  <Donut
+                    data={pipeline}
+                    size={140}
+                    centre={pipeline ? <span className="tabular">{openTotal}</span> : undefined}
+                  />
+                </ChartCard>
+              </motion.div>
+              <motion.div variants={item}>
+                <ChartCard title="Revenue by division" meta="This year · Finance" empty>
+                  <Donut data={null} size={120} />
+                </ChartCard>
+              </motion.div>
+            </div>
           </div>
 
           <motion.div variants={item}>
             <section className={cc.tableCard} aria-label="Approvals waiting for you">
               <header className={cc.tableHead}>
                 <h3>Approvals waiting for you</h3>
-                <Badge tone="neutral">Approvals</Badge>
+                <Badge tone={approvals?.length ? "gold" : "neutral"}>
+                  {director.data ? `${director.data.approvals_pending_count} pending` : "Approvals"}
+                </Badge>
               </header>
               <table className={cc.table}>
                 <thead>
@@ -139,14 +205,39 @@ export default function CommandCentrePage() {
               </div>
             </section>
           </motion.div>
+          {crm?.has_records && (
+            <motion.div variants={item}>
+              <section className={cc.tableCard} aria-label="Follow-ups">
+                <header className={cc.tableHead}>
+                  <h3>Follow-ups</h3>
+                  <Link href="/crm/follow-ups" className={cc.jarvisLink}>
+                    Open <LuArrowRight aria-hidden="true" />
+                  </Link>
+                </header>
+                <p className={cc.followUps}>
+                  <span className={crm.follow_ups_overdue ? cc.alert : undefined}>
+                    <strong className="tabular">{crm.follow_ups_overdue}</strong> overdue
+                  </span>
+                  <span>
+                    <strong className="tabular">{crm.follow_ups_due_7_days}</strong> due in 7 days
+                  </span>
+                </p>
+              </section>
+            </motion.div>
+          )}
           <motion.div variants={item}>
-            <ChartCard title="Debtors" meta="Outstanding · MWK" empty>
+            <ChartCard title="Debtors" meta="Outstanding · Finance" empty>
               <AreaChart data={null} height={90} />
             </ChartCard>
           </motion.div>
           <motion.div variants={item}>
-            <ChartCard title="Top customers" meta="Invoiced this year" empty>
-              <HBarList data={null} />
+            <ChartCard
+              title="Top customers"
+              meta={`Open pipeline · ${currency} estimates`}
+              empty={top === null || top.length === 0}
+              emptyLabel={top === null ? "No data yet" : "No open values"}
+            >
+              <HBarList data={top} currency={currency} />
             </ChartCard>
           </motion.div>
           <motion.div variants={item}>

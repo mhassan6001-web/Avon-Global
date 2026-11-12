@@ -4,7 +4,7 @@
  * verified in CI, with questions collected for one final review.
  */
 
-export type StageState = "approved" | "in_progress" | "awaiting_approval" | "queued";
+export type StageState = "approved" | "verified" | "in_progress" | "awaiting_approval" | "queued";
 
 export interface Stage {
   number: number;
@@ -15,8 +15,8 @@ export interface Stage {
 export const STAGES: Stage[] = [
   { number: 1, title: "Core infrastructure & application shell", state: "approved" },
   { number: 2, title: "Identity & security", state: "approved" },
-  { number: 3, title: "Visual experience & sound engine", state: "in_progress" },
-  { number: 4, title: "Director Command Centre & CRM", state: "queued" },
+  { number: 3, title: "Visual experience & sound engine", state: "verified" },
+  { number: 4, title: "Director Command Centre & CRM", state: "in_progress" },
   { number: 5, title: "Tender management", state: "queued" },
   { number: 6, title: "Procurement & suppliers", state: "queued" },
   { number: 7, title: "Finance & accounting", state: "queued" },
@@ -34,6 +34,7 @@ export const TOTAL_STAGES = 15;
 
 export const STAGE_STATE_LABEL: Record<StageState, string> = {
   approved: "Approved",
+  verified: "Verified in CI",
   in_progress: "In progress",
   awaiting_approval: "Awaiting approval",
   queued: "Queued",

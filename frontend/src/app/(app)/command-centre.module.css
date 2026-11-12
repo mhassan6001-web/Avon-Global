@@ -184,3 +184,19 @@
 .securityStrip p {
   margin: 0;
 }
+.followUps {
+  display: flex;
+  gap: var(--space-5);
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+.followUps strong {
+  font-size: 1.4rem;
+  color: var(--text-primary);
+  margin-right: 4px;
+}
+.alert strong,
+.alert {
+  color: var(--danger-400);
+}

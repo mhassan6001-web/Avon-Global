@@ -25,6 +25,7 @@ API = "/api/v1"
 ALL_ROLES = [r.code for r in ROLES]
 DIRECTOR = {"director"}
 EVERYONE = set(ALL_ROLES)
+CRM = {"director", "business_development"}
 
 PDF = b"%PDF-1.4\n% AVEN test document\n%%EOF\n"
 
@@ -58,6 +59,20 @@ MATRIX: list[tuple[str, str, dict | None, set[str]]] = [
     ("GET", "/admin/login-history", None, DIRECTOR),
     ("GET", "/admin/security-alerts", None, DIRECTOR),
     ("GET", f"/admin/users/{uuid.uuid4()}/overrides", None, DIRECTOR),
+    # Stage 4: Director dashboard and CRM (Business Development's section)
+    ("GET", "/director/dashboard", None, DIRECTOR),
+    ("GET", "/crm/summary", None, CRM),
+    ("GET", "/crm/customers", None, CRM),
+    ("POST", "/crm/customers", {"name": "Matrix Customer TEST"}, CRM),
+    ("GET", f"/crm/customers/{uuid.uuid4()}", None, CRM),
+    ("GET", "/crm/opportunities", None, CRM),
+    ("GET", "/crm/activities", None, CRM),
+    (
+        "POST",
+        "/crm/opportunities",
+        {"customer_id": str(uuid.uuid4()), "title": "x1", "division": "technologies"},
+        CRM,
+    ),
 ]
 
 
