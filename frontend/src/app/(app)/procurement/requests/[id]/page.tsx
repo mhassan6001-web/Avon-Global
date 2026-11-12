@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import { LuPlus } from "react-icons/lu";
 
+import { DocLinks } from "@/components/documents/DocLinks";
 import styles from "@/components/crm/crm.module.css";
 import { ProcurementNav } from "@/components/procurement/ProcurementNav";
 import {
@@ -85,7 +86,12 @@ export default function PurchaseRequestPage() {
   return (
     <>
       <PageHeader
-        eyebrow={r.reference}
+        eyebrow={
+          <>
+            {r.reference}
+            <DocLinks kind="rfq" id={r.id} label={`Request for quotation ${r.reference}`} />
+          </>
+        }
         title={r.title}
         description={r.justification ?? undefined}
         actions={

@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { LuFileDown, LuFileSpreadsheet, LuFileText } from "react-icons/lu";
 
-import { EmptyState, PageHeader, Panel } from "@/components/ui";
+import crm from "@/components/crm/crm.module.css";
+import { EmptyState, PageHeader, Panel, SelectField, TextField } from "@/components/ui";
 import { API_PREFIX } from "@/lib/api/client";
 import { useResource } from "@/lib/api/useResource";
 import { useAuth } from "@/lib/auth/AuthProvider";
@@ -29,6 +31,64 @@ const WORKBOOKS = [
   { name: "payables", label: "Payables ageing", permission: "finance.records.view" },
   { name: "stock", label: "Stock levels", permission: "inventory.records.view" },
 ];
+
+interface Party {
+  id: string;
+  name: string;
+}
+
+/** Finance only: customer account statements from posted records. */
+function Statements() {
+  const parties = useResource<Party[]>("/finance/parties?kind=customer");
+  const [customer, setCustomer] = useState("");
+  const [from, setFrom] = useState(`${new Date().getFullYear()}-01-01`);
+  const [to, setTo] = useState(new Date().toISOString().slice(0, 10));
+  const base = `${API_PREFIX}/documents/statements/${customer}?date_from=${from}&date_to=${to}`;
+  return (
+    <Panel title="Customer statements">
+      <div className={crm.formGrid}>
+        <SelectField
+          label="Customer"
+          value={customer}
+          onChange={(e) => setCustomer(e.target.value)}
+          options={[
+            { value: "", label: "Choose" },
+            ...(parties.data ?? []).map((p) => ({ value: p.id, label: p.name })),
+          ]}
+        />
+        <TextField
+          label="From"
+          type="date"
+          value={from}
+          onChange={(e) => setFrom(e.target.value)}
+        />
+        <TextField label="To" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+      </div>
+      {customer ? (
+        <p>
+          {(["pdf", "docx", "xlsx"] as const).map((f) => (
+            <a
+              key={f}
+              className={page.inlineLink}
+              href={`${base}&format=${f}`}
+              download
+              style={{ marginRight: 16 }}
+            >
+              <LuFileDown aria-hidden="true" /> Statement (
+              {f === "pdf" ? "PDF" : f === "docx" ? "Word" : "Excel"})
+            </a>
+          ))}
+        </p>
+      ) : (
+        <p className={page.muted}>Choose a customer to download their statement of account.</p>
+      )}
+      <p className={page.note}>
+        Statements list issued invoices, receipts and posted credit notes only. Balances are shown
+        per currency and are not converted.
+      </p>
+    </Panel>
+  );
+}
 
 export default function DocumentsPage() {
   const { can } = useAuth();
@@ -94,6 +154,11 @@ export default function DocumentsPage() {
             )}
           </Panel>
         </div>
+        {can("finance.records.view") && (
+          <div>
+            <Statements />
+          </div>
+        )}
         <div>
           <Panel title="Generated documents">
             {register.data && register.data.length === 0 ? (

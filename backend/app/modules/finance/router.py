@@ -494,6 +494,22 @@ def ageing(
     return reports.ageing(db, kind, as_of or _today())
 
 
+@router.get("/reports/statement", response_model=schemas.Statement)
+def customer_statement(
+    db: DbSession,
+    customer_id: uuid.UUID,
+    _: Principal = View,
+    date_from: date | None = None,
+    date_to: date | None = None,
+) -> schemas.Statement:
+    """Customer account statement. Defaults to the current calendar year to date."""
+    end = date_to or _today()
+    start = date_from or date(end.year, 1, 1)
+    if start > end:
+        raise posting.FinanceRuleError("The start date is after the end date.")
+    return reports.statement(db, customer_id, start, end)
+
+
 @router.get("/reports/cashbook", response_model=schemas.Cashbook)
 def cashbook(
     db: DbSession, account_id: uuid.UUID, date_from: date, date_to: date, _: Principal = Ledger

@@ -18,7 +18,7 @@ from fastapi.responses import Response
 from pydantic import BaseModel
 from sqlalchemy import func, select
 
-from app.core.errors import PermissionDeniedError
+from app.core.errors import AppError, PermissionDeniedError
 from app.platform.audit import service as audit
 from app.platform.authz.deps import CurrentPrincipal, DbSession, Principal
 
@@ -40,6 +40,7 @@ REPORTS = {
 }
 KIND_PERMISSION = {k: perm for k, (_, perm) in builders.BUILDERS.items()} | REPORTS
 KIND_PERMISSION["letterhead"] = "org.profile.view"
+KIND_PERMISSION["statement"] = "finance.records.view"
 
 
 class RegisterRow(BaseModel):
@@ -116,7 +117,7 @@ def _deliver(
 
 @router.get("/records/{kind}/{record_id}")
 def record_document(
-    kind: Literal["quotation", "invoice", "receipt", "purchase_order", "delivery_note"],
+    kind: Literal["quotation", "invoice", "receipt", "purchase_order", "delivery_note", "rfq"],
     record_id: uuid.UUID,
     principal: CurrentPrincipal,
     db: DbSession,
@@ -128,6 +129,35 @@ def record_document(
     doc = build(db, record_id, principal.user.display_name, now)
     data = pdf.render(doc) if fmt == "pdf" else docx.render(doc, now.strftime("%Y-%m-%dT%H:%M:%SZ"))
     return _deliver(db, principal, kind, str(record_id), doc.number, fmt, data)
+
+
+@router.get("/statements/{customer_id}")
+def customer_statement(
+    customer_id: uuid.UUID,
+    principal: CurrentPrincipal,
+    db: DbSession,
+    date_from: date | None = Query(default=None),
+    date_to: date | None = Query(default=None),
+    fmt: Literal["pdf", "docx", "xlsx"] = Query(default="pdf", alias="format"),
+) -> Response:
+    """Customer account statement (PDF, Word or Excel) from posted finance records."""
+    _need(principal, "finance.records.view")
+    now = datetime.now(UTC)
+    end = date_to or now.astimezone(builders.TZ).date()
+    start = date_from or date(end.year, 1, 1)
+    if start > end:
+        raise AppError(
+            "The start date is after the end date.", status_code=422, code="validation_error"
+        )
+    doc, sheet = builders.statement(db, customer_id, start, end, principal.user.display_name, now)
+    if fmt == "pdf":
+        data = pdf.render(doc)
+    elif fmt == "docx":
+        data = docx.render(doc, now.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    else:
+        data = xlsx.render(sheet)
+    subject = f"{customer_id}:{start.isoformat()}:{end.isoformat()}"[:80]
+    return _deliver(db, principal, "statement", subject, doc.number, fmt, data)
 
 
 @router.get("/reports/{name}")
