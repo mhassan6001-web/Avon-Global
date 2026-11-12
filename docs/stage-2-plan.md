@@ -1,7 +1,7 @@
 # Stage 2 plan: identity and security
 
-- Status: **Plan awaiting Director approval.** No Stage 2 code has been
-  written.
+- Status: **Plan approved by the Director on 2026-11-12, with the decisions
+  in §7.** Test route: GitHub CI on `mhassan6001-web/Avon-Global`.
 - Builds on: Stage 1 (approved 2026-11-12), `docs/security/SECURITY_MODEL.md`.
 
 ## 1. Scope
@@ -44,7 +44,8 @@ email delivery (Stage 13) and SSO.
 - **Step-up:** a fresh 2FA check within the last 5 minutes for user, role and
   permission administration, and for every action marked `sensitive`.
 - **Activation:**
-  - The Director (or HR/Admin, for non-Director staff) creates an account.
+  - Only the Director creates accounts and assigns each person their
+    department and role.
   - The system produces a single-use invitation link, valid for 72 hours.
   - The user sets a password and enrols 2FA where it is mandatory.
 - **Password reset:**
@@ -84,26 +85,40 @@ email delivery (Stage 13) and SSO.
   permission. It is tested in Stage 2 and applied to real data as modules
   arrive.
 
-### Proposed initial role matrix (Decision 1)
+### Role matrix: department-scoped (Director decision, 2026-11-12)
+
+> "Only me as the Director (Muhammad) can access all records. Other staff will
+> be given their logins and their department so they can access only their
+> section of work."
 
 | Area | Director | Business Dev. | Procurement | Finance | Logistics | HR/Admin |
 |------|:-:|:-:|:-:|:-:|:-:|:-:|
 | Director dashboard | ✓ | — | — | — | — | — |
-| CRM, quotations | ✓ | ✓ edit | view | view | — | — |
-| Tenders | ✓ approve | ✓ edit | ✓ edit | view | — | — |
-| Suppliers (no bank details) | ✓ | view | ✓ edit | view | view | — |
-| **Supplier bank details** | ✓ view, approve change | — | **request change only** | ✓ view | — | — |
-| Purchase requests and orders | ✓ approve | — | ✓ create | view | view | — |
-| **Finance ledger, invoices, payments** | ✓ | own invoices view | — | ✓ | — | — |
-| Inventory and logistics | ✓ | view | view | view | ✓ edit | — |
-| Employees (non-salary) | ✓ | — | — | — | — | ✓ |
-| **Payroll and salaries** | ✓ | — | — | totals only | — | ✓ prepare |
-| Communications and tasks | ✓ | ✓ own | ✓ own | ✓ own | ✓ own | ✓ own |
-| User and role admin | ✓ | — | — | — | — | create/suspend staff, not roles |
-| Audit log | ✓ | — | — | — | — | — |
+| CRM, quotations | ✓ | ✓ | — | — | — | — |
+| Tenders | ✓ approve | ✓ | — | — | — | — |
+| Suppliers, purchase requests and orders | ✓ approve | — | ✓ | — | — | — |
+| **Supplier bank details** | ✓ (only the Director can view or approve changes) | — | request change only, cannot view | — | — | — |
+| Finance: ledger, invoices, receipts, payments, expenses | ✓ approve | — | — | ✓ | — | — |
+| Inventory and logistics | ✓ | — | — | — | ✓ | — |
+| HR records, leave, attendance | ✓ | — | — | — | — | ✓ |
+| **Payroll and salaries** | ✓ approve | — | — | — | — | ✓ prepare |
+| Own messages, tasks, profile and login history | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| User and role administration | ✓ **only** | — | — | — | — | — |
+| Audit log, everyone's login history | ✓ **only** | — | — | — | — | — |
 
-A supplier bank change always needs the requester plus a **different**
-approver (the Director), with step-up authentication.
+- **Default deny.** Each staff member sees only their department's section.
+- **Exceptions are individual.** If a staff member genuinely needs something
+  outside their section (for example Finance needing a supplier's bank
+  details to make a payment), the Director grants that person an individual,
+  audited permission override, which can be revoked at any time.
+- **Separation of duties:** department staff create restricted requests, and
+  the Director approves them. The Director cannot approve their own
+  restricted request. If the Director initiates one, a second approver
+  nominated by the Director must approve it. That nomination is decided when
+  Finance and Procurement are built (Stages 6–7).
+- The first Director account (Muhammad) is created at deployment with the
+  one-time `create-director` command. Development test accounts are never
+  real people.
 
 ### Audit and history
 
@@ -233,29 +248,21 @@ no users.** No existing data is changed or deleted.
 16. **Tooling:** ruff, mypy (full), bandit, pip-audit, eslint, tsc,
     `next build`, and API and web startup.
 
-## 6. Blocking constraint: test execution
+## 6. Test execution (resolved)
 
-Stage 2 is security-critical and **must not be approved on unexecuted
-tests**. This build workspace currently **cannot download packages**, so it
-can run neither FastAPI, SQLAlchemy and Alembic nor the new security
-libraries.
+The Director chose GitHub: `mhassan6001-web/Avon-Global`. Every change is
+pushed as a pull request, and GitHub Actions runs the full suite: integration
+tests on real PostgreSQL and Redis, the migration round-trip, API startup,
+bandit, pip-audit, ESLint, tsc and `next build`. Results are read back from
+the GitHub checks and reported exactly. **Merging into `main` is done by the
+Director.**
 
-One of these is needed before implementation (Decision 3):
+## 7. Director decisions (2026-11-12)
 
-- **A. Recommended:** turn on package installs in the network settings of
-  your Claude workspace, then start a new chat in this Project. The new
-  setting only applies to new chats. I can then run every test above myself.
-- **B.** Create a private GitHub repository and connect it. CI runs the full
-  suite on every change, and I report the CI results.
-- **C.** You run `make check` on your computer with Docker Desktop and paste
-  the output back.
-
-## 7. Decisions for the Director
-
-1. **Role matrix:** approve §2 as proposed, or amend it.
-2. **Password reset before email exists (Stage 13):** administrator-issued
-   one-time links (recommended), or bring email delivery forward into
-   Stage 2.
-3. **Test execution route:** A, B or C (§6).
-4. **2FA:** mandatory for Director, Finance and HR/Admin (recommended), or
-   for all staff.
+1. **Role matrix:** department-scoped. Only the Director sees everything
+   (§2).
+2. **Password reset:** one-time reset links issued by the Director, until
+   email arrives in Stage 13.
+3. **Testing:** GitHub CI on the Director's repository.
+4. **2FA:** mandatory for Director, Finance and HR/Admin. Optional for other
+   roles.

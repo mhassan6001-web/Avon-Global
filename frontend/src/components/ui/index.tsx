@@ -88,7 +88,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
 
 /* ---------- Panel ---------- */
 
-interface PanelProps extends HTMLAttributes<HTMLElement> {
+interface PanelProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
   title?: ReactNode;
   eyebrow?: ReactNode;
   actions?: ReactNode;

@@ -5,8 +5,10 @@
 
 import type { Variants } from "framer-motion";
 
-export const EASE_OUT = [0.16, 1, 0.3, 1] as const;
-export const EASE_IN_OUT = [0.65, 0, 0.35, 1] as const;
+type CubicBezier = [number, number, number, number];
+
+export const EASE_OUT: CubicBezier = [0.16, 1, 0.3, 1];
+export const EASE_IN_OUT: CubicBezier = [0.65, 0, 0.35, 1];
 
 export const DURATION = {
   fast: 0.14,
