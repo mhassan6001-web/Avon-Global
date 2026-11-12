@@ -14,10 +14,18 @@ import os
 from collections.abc import Mapping
 from enum import StrEnum
 from functools import lru_cache
-from typing import Annotated
+from typing import Annotated, Literal
 from urllib.parse import urlsplit
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    SecretStr,
+    ValidationError,
+    field_validator,
+    model_validator,
+)
 
 # Hosts that must never appear in production URLs. Matched only, never bound.
 LOCAL_HOSTS = frozenset({"localhost", "127.0.0.1", "0.0.0.0", "::1"})  # noqa: S104  # nosec B104
@@ -95,6 +103,17 @@ class Settings(BaseModel):
     argon2_time_cost: Annotated[int, Field(ge=1, le=10)] = 3
     argon2_memory_kib: Annotated[int, Field(ge=8 * 1024, le=1024 * 1024)] = 64 * 1024
 
+    # --- JARVIS AI (Stage 11) ---------------------------------------------
+    # "disabled" until the Director supplies a key; "fake" is a deterministic
+    # test provider and is refused in production.
+    ai_provider: Literal["disabled", "anthropic", "fake"] = "disabled"
+    anthropic_api_key: SecretStr = SecretStr("")
+    anthropic_model: str = Field(default="claude-sonnet-5-5", min_length=3, max_length=80)
+    anthropic_base_url: str = "https://api.anthropic.com"
+    ai_max_tool_rounds: Annotated[int, Field(ge=1, le=10)] = 5
+    ai_max_output_tokens: Annotated[int, Field(ge=256, le=8192)] = 2048
+    ai_timeout_seconds: Annotated[float, Field(gt=0, le=300)] = 60.0
+
     # --- validators -------------------------------------------------------
 
     @field_validator("cors_origins", "field_encryption_keys", mode="before")
@@ -158,6 +177,10 @@ class Settings(BaseModel):
             problems.append("COOKIE_SECURE cannot be false in production")
         if not self.public_base_url.startswith("https://"):
             problems.append("PUBLIC_BASE_URL must be https in production")
+        if self.ai_provider == "fake":
+            problems.append("AI_PROVIDER=fake is for tests only")
+        if self.ai_provider == "anthropic" and not self.anthropic_base_url.startswith("https://"):
+            problems.append("ANTHROPIC_BASE_URL must be https in production")
         if problems:
             raise ValueError("unsafe production configuration: " + "; ".join(problems))
         return self

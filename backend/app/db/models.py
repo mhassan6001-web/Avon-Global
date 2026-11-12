@@ -1,5 +1,6 @@
 """Import every model so Alembic and the metadata see the full schema."""
 
+from app.ai.models import AIAction, AIConversation, AIMessage, AIUsage
 from app.db.base import Base
 from app.modules.comms.models import (
     Acknowledgement,
@@ -82,6 +83,10 @@ from app.platform.identity.models import (
 )
 
 __all__ = [
+    "AIAction",
+    "AIConversation",
+    "AIMessage",
+    "AIUsage",
     "Account",
     "Acknowledgement",
     "Activity",

@@ -272,11 +272,22 @@ def messages(
     ]
 
 
-def send(db: Session, conv: Conversation, body: schemas.MessageIn, principal: Principal) -> Message:
+def send(
+    db: Session,
+    conv: Conversation,
+    body: schemas.MessageIn,
+    principal: Principal,
+    ai_generated: bool = False,
+) -> Message:
     if conv.kind == "announcements" and not principal.has(ANNOUNCE):
         raise PermissionDeniedError("Only the Director posts company announcements.")
     _file_ok(db, body.file_id, principal)
-    msg = Message(conversation_id=conv.id, sender_id=principal.user.id, **body.model_dump())
+    msg = Message(
+        conversation_id=conv.id,
+        sender_id=principal.user.id,
+        ai_generated=ai_generated,
+        **body.model_dump(),
+    )
     db.add(msg)
     db.flush()
     return msg

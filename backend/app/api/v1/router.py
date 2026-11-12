@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter
 
+from app.ai.router import router as jarvis_router
 from app.api.v1.endpoints import health
 from app.modules.comms.router import router as comms_router
 from app.modules.crm.router import router as crm_router
@@ -35,6 +36,7 @@ ROUTERS: tuple[APIRouter, ...] = (
     logistics_router,
     hr_router,
     comms_router,
+    jarvis_router,
     realtime_router,
     approvals_router,
 )
