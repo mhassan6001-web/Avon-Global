@@ -226,6 +226,7 @@ only.
 IDs are referenced in `USER_ACCEPTANCE_TESTS.md` (Stage 14).
 
 **Wake word**
+
 - **WW-01:** A fresh user has the wake word off. No microphone permission is
   requested until the user enables it or presses push-to-talk.
 - **WW-02:** Enabling the wake word shows the consent screen. Declining leaves
@@ -246,12 +247,14 @@ IDs are referenced in `USER_ACCEPTANCE_TESTS.md` (Stage 14).
   falls back to push-to-talk with an explanation.
 
 **Microphone permissions**
+
 - **MP-01:** Denied permission shows recovery instructions per browser and
   never loops prompts.
 - **MP-02:** Revoking permission mid-session moves to Off with a message, with
   no crash.
 
 **Voice**
+
 - **VO-01:** The Director can preview every candidate voice and the choice
   persists across sessions and devices.
 - **VO-02:** Speed and voice volume changes apply to the next utterance, within
@@ -262,6 +265,7 @@ IDs are referenced in `USER_ACCEPTANCE_TESTS.md` (Stage 14).
   with an error notice.
 
 **Sound controls and accessibility**
+
 - **SC-01:** No sound plays before the first user gesture. This is verified in
   Chrome, Safari and Firefox with autoplay policies at default.
 - **SC-02:** Master, interface, notification and voice volumes and each
@@ -277,6 +281,7 @@ IDs are referenced in `USER_ACCEPTANCE_TESTS.md` (Stage 14).
   check against `AUDIO_LICENCES.md`).
 
 **Security**
+
 - **SV-01:** A voice command for a restricted action (payment, approval,
   supplier bank change, payroll) never executes without on-screen confirmation
   by the signed-in user plus step-up authentication where the policy requires
@@ -287,6 +292,7 @@ IDs are referenced in `USER_ACCEPTANCE_TESTS.md` (Stage 14).
   (storage inspection). Transcripts follow the retention policy.
 
 **Platform compatibility** (run on real devices)
+
 - **PC-01:** Windows 11 with Chrome and Edge, macOS with Safari and Chrome,
   iOS Safari and installed PWA, and Android Chrome and installed PWA. Each must
   pass WW-01–08 and SC-01–05 within the documented limits in §3.3.

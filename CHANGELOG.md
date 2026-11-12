@@ -3,6 +3,7 @@
 ## [0.1.0] — 2026-11-12 — Stage 1: Core infrastructure (approved 2026-11-12)
 
 ### Added
+
 - FastAPI backend (`app.main:create_app` factory) with an API versioned under `/api/v1`.
 - Environment configuration validated at startup, with production-safety guards.
 - Structured logging: JSON in production, console in development. Includes
@@ -40,6 +41,7 @@
 ## [0.1.0-docs] — 2026-11-12 — JARVIS design specification (documentation only, approved 2026-11-12)
 
 ### Added
+
 - `docs/jarvis-design-specification.md`: the Director's confirmed decisions
   (voice CINEMATIC, activation WAKE_WORD, sound IMMERSIVE), verbatim.
 - `docs/architecture/VOICE_AND_SOUND.md`: covers:
@@ -54,6 +56,7 @@
   voice threat model.
 
 ### Changed
+
 - `CLAUDE.md`, `ROADMAP.md`, `PROJECT_STATUS.md`, `SECURITY.md` and
   `docs/architecture/DESIGN_SYSTEM.md` now reference the confirmed decisions.
 - Docs reorganised: `docs/design-system.md` became
@@ -65,6 +68,7 @@ No existing requirement was removed.
 ## [0.1.0-docs.2] — 2026-11-12 — Stage 0 blueprint and reference-image register (approved 2026-11-12)
 
 ### Added
+
 - `docs/stage-0-specification.md`: the Director's Stage 0 text, verbatim.
   **The received text ends at "I. STAFF COMMUNICATIONS".**
 - `docs/architecture/MASTER_ARCHITECTURE.md`: the Stage 0 blueprint covering:
@@ -85,11 +89,13 @@ No existing requirement was removed.
   of Stage 1 against ref 08.
 
 ### Changed
+
 - Wake-word engine decided: Picovoice Porcupine, paid licence, with the
   AccessKey supplied later (`VOICE_AND_SOUND.md`, `ROADMAP.md`).
 - `CLAUDE.md`: added the visual design rule and the new required reading.
 
 ### Director decisions recorded (2026-11-12)
+
 - Stage 0 approved.
 - Reference-design decisions C1–C9 approved:
   - grey-black and gold base, with navy as a secondary depth tone
@@ -99,3 +105,40 @@ No existing requirement was removed.
   - HUD and serif typefaces
 - Recorded in `REFERENCE_IMAGE_SPECIFICATION.md` §6.1, `AI_ARCHITECTURE.md`
   §5–6 and `DESIGN_SYSTEM.md`.
+
+## [0.1.1] — 2026-11-12 — Repository on GitHub, CI verified, Stage 0 completed from full text
+
+### Added
+
+- Repository published to `mhassan6001-web/Avon-Global` (PR #1).
+- `docs/stage-0-specification.md` replaced with the **complete** 419-line
+  Stage 0 text.
+- New Stage 0 documents:
+  - `docs/architecture/SYSTEM_ARCHITECTURE.md` (replaces
+    `MASTER_ARCHITECTURE.md`; adds modules J and K, module dependencies, API
+    strategy, auth sequence, event and job architecture, AI workflow,
+    testing strategy, risks and unresolved decisions)
+  - `docs/architecture/DATABASE_DESIGN.md` (conventions and entity-relationship
+    diagrams for every module, plus invariants)
+  - `docs/architecture/DEPLOYMENT_ARCHITECTURE.md`
+  - `docs/architecture/INTEGRATION_STRATEGY.md`
+  - `docs/stage-1-readiness-checklist.md`
+- CI now publishes result summaries as annotations, and every check step runs
+  even after a failure.
+
+### Fixed
+
+- Found by CI:
+  - TypeScript `PanelProps.title` type conflict
+  - Framer Motion easing tuple types
+  - bandit findings (an `assert`, the bind-all literal)
+- Fonts are self-hosted via Fontsource (`next/font/google` failed
+  intermittently during CI builds).
+
+### Changed
+
+- `DESIGN_SYSTEM.md`: added design principles.
+- `SECURITY_MODEL.md`: department-scoped access, plus module K (security
+  alerts, backup management, system configuration).
+- `ROADMAP.md`: Stage 0 §10 naming, with dependencies and key scope.
+- `CLAUDE.md` and `README.md`: document index and the CI verification rule.

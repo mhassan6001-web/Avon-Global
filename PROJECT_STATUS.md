@@ -2,74 +2,61 @@
 
 _Last updated: 2026-11-12_
 
-## Current stage
+## Where we are
 
-**Stage 1: approved by the Director on 2026-11-12.** Report:
-`docs/stage-1-report.md`.
+| Stage | Status |
+|-------|--------|
+| 0: Architecture and blueprint | Approved 2026-11-12. All **14 required documents** now completed from the full Stage 0 text. **Awaiting Director review.** |
+| 1: Repository foundation | **Approved, and verified green in GitHub CI** (PR #1 on `mhassan6001-web/Avon-Global`): 62 backend tests including 9 integration tests on real PostgreSQL and Redis, migration round-trip, mypy clean, 15 frontend tests, `next build`. See `docs/stage-1-readiness-checklist.md`. |
+| 2: Authentication and security | **Plan approved with Director decisions** (`docs/stage-2-plan.md`). Waiting for Stage 0 review, per the Stage 0 rule "STOP after Stage 0". |
 
-The **JARVIS specification documents were also approved on 2026-11-12.**
+## Director decisions on record (2026-11-12)
 
-**Stage 0 (master architecture) was approved on 2026-11-12**, together with
-reference-design decisions C1–C9 (grey-black and gold, rich motion graphics,
-the JARVIS head with task-execution visuals, and JARVIS briefings).
-
-The supplied Stage 0 text is incomplete (it ends at "I. STAFF
-COMMUNICATIONS"). Any remaining sections will be reconciled when received.
-
-The **Stage 2 plan** (`docs/stage-2-plan.md`) is also awaiting decisions. No
-Stage 2 code has been written.
+- **JARVIS:** voice CINEMATIC, activation WAKE_WORD, sound IMMERSIVE.
+- **Wake-word engine:** Porcupine, paid licence. The AccessKey will be
+  supplied at the end.
+- **Visual design:**
+  - Reference images are the primary specification.
+  - Grey-black and gold, with navy as depth.
+  - Rich motion graphics.
+  - JARVIS particle head with task-execution visuals.
+  - JARVIS daily briefings.
+  - Serif and HUD typefaces.
+  - Dark only.
+- **Access:** department-scoped. Only the Director (Muhammad) sees
+  everything. User administration is Director only.
+- **Security:** Director-issued one-time reset links until email exists. 2FA
+  mandatory for Director, Finance and HR/Admin.
+- **Testing:** GitHub CI on the Director's repository. The Director merges
+  into `main`.
 
 ## What exists
 
-- **Backend:**
-  - FastAPI app versioned at `/api/v1`
-  - validated configuration, structured logging and the error envelope
-  - request IDs and security headers
-  - SQLAlchemy and Alembic, with baseline migration `0001` (`organisation_profile`)
-  - health and readiness endpoints (database, migration state, Redis)
-- **Frontend:**
-  - Next.js shell: sidebar, header, status, notifications, profile, mobile navigation
-  - AVEN GLOBAL design system and emblem
-  - startup sequence, route transitions, motion and contrast preferences
-  - Command Centre, System Status, Preferences and planned-module pages
-- **Tooling:** Docker Compose for development, Makefile, CI workflow.
-- **Stored for later:** the JARVIS personality prompt (Stage 11), the
-  Director's stage plan, and the JARVIS design specification.
+- **Backend:** FastAPI, config, logging, errors, health, SQLAlchemy and
+  Alembic (`0001`).
+- **Frontend:** Next.js shell and design foundation.
+- **Tooling:** Docker Compose, Makefile, CI.
+- **Documentation:** Stage 0 architecture set (SYSTEM, DATABASE, AI, VOICE &
+  SOUND, DESIGN, SECURITY MODEL, DEPLOYMENT, INTEGRATION, REFERENCE IMAGE),
+  roadmap, readiness checklist.
+- No business module is built.
 
-## What does not exist yet
+## Open decisions (none block Stage 2)
 
-Authentication and every business module: Director dashboard data, CRM,
-tenders, procurement, finance, inventory, logistics, HR, communications,
-documents and JARVIS. They appear in the navigation as **Planned** only.
+See `docs/architecture/SYSTEM_ARCHITECTURE.md` §13:
 
-## Verification status
+- hosting provider and region
+- error tracker
+- email provider
+- STT/TTS providers
+- wake phrase
+- second approver for Director-initiated requests
+- FX source
+- payroll and tax rules, and the accountant who signs them off
+- SMS or WhatsApp
+- message retention
 
-- **Executed:**
-  - 53 backend unit tests, using a real Redis
-  - 15 frontend unit tests
-  - ruff, scoped mypy, Prettier and esbuild syntax checks
-  - migration DDL on real PostgreSQL 16
-  - headless-browser render of the shell
-- **Not executed (no package downloads in the build workspace):**
-  - backend integration tests and the Alembic run
-  - API startup
-  - `next build`, `tsc` and ESLint
+## Next
 
-  These run in CI and with `make check`.
-
-## Decisions needed from the Director
-
-1. **Stage 2 plan** (`docs/stage-2-plan.md` §7):
-   - the role matrix
-   - password reset before email
-   - the test-execution route (**blocking**)
-   - the 2FA policy
-2. Optional: the rest of the Stage 0 text, if it exists.
-3. Before Stage 12: the wake phrase, the TTS provider shortlist and the audio
-   source. *(Wake-word engine decided: Porcupine paid licence, with the
-   AccessKey to come later.)*
-
-## Next stage (after approval)
-
-**Stage 2: Identity and security.** Implementation starts after the plan is
-approved and the test-execution route is in place.
+On Director approval of the Stage 0 documents, **Stage 2 implementation
+begins**, delivered as a pull request with CI evidence.

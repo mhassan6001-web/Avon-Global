@@ -8,8 +8,11 @@
 ## 1. Principles
 
 1. Enforcement happens in the backend. The UI only reflects permissions.
-2. Least privilege: six initial roles plus individual grants and denies
-   (Stage 2).
+2. **Least privilege, department-scoped** (Director decision, 2026-11-12):
+   - Only the Director can access all records.
+   - Each staff member is limited to their own department's section.
+   - Exceptions are individual, audited overrides that only the Director can
+     grant.
 3. Separation of duties: no one approves their own restricted transaction.
 4. Every state change is attributable to a signed-in person or to JARVIS
    acting for one, and is audit-logged.
@@ -51,7 +54,24 @@
 | JARVIS impersonating staff | Messages are labelled as JARVIS on behalf of a user. Sending as an employee is not possible. |
 | Runaway cost or abuse | Per-user AI rate limits and spending caps, and a usage ledger. |
 
-## 5. Data protection
+## 5. Administration and security (Stage 0 module K)
+
+- **User management, roles and individual permissions:** Director only.
+- **Audit logs:** an append-only, hash-chained table with nightly chain
+  verification.
+- **Security alerts** go to the Director for:
+  - repeated failed logins and lockouts
+  - a login from a new device or country
+  - spikes in permission denials
+  - audit-chain verification failure
+  - backup or restore-test failure
+  - changes to roles, overrides or supplier bank details
+- **Backup management:** backup and restore-test status is visible to the
+  Director (`sys_backup_runs`). Restores need Director approval.
+- **System configuration:** organisation profile, divisions, currencies,
+  security policies (session timeouts, 2FA policy). Director only, audited.
+
+## 6. Data protection
 
 - TLS everywhere in production. Encrypted backups (Stage 14).
 - Files go to private object storage with short-lived signed URLs, behind
@@ -59,7 +79,7 @@
 - No hidden employee surveillance. Communications retention is documented and
   visible to staff.
 
-## 6. Security acceptance criteria (cross-stage)
+## 7. Security acceptance criteria (cross-stage)
 
 `SV-01` to `SV-03` in `docs/architecture/VOICE_AND_SOUND.md`, plus the Stage 2
 role-by-module access matrix tests. Every protected endpoint is tested for

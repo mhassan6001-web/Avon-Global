@@ -16,6 +16,32 @@
 Tokens live in `frontend/src/app/globals.css`. Components use tokens only and
 never raw colour values.
 
+## Design principles (Stage 0 §7, plus Director decisions)
+
+1. **The reference images lead.** Every screen traces to a reference
+   (`REFERENCE_IMAGE_SPECIFICATION.md` §4) and passes the side-by-side check.
+2. **Grey-black and gold, premium and calm.**
+   - Charcoal/graphite surfaces, with gold as the signature.
+   - Navy and deep blue for depth.
+   - Ice-blue glow only for JARVIS and live data.
+   - **No neon overload, no excessive glowing borders, no clutter, no
+     generic template look.**
+3. **Rich, purposeful motion.**
+   - Motion graphics are a feature (Director request).
+   - Every animation communicates something: data arriving, a state
+     changing, JARVIS working.
+   - All of it scales through the motion setting (Full, Reduced, Off) and
+     respects reduced motion.
+4. **Data honesty.** Charts show only real records. Empty states are
+   designed, not faked. Estimates are labelled.
+5. **JARVIS is part of the interface, not a chat widget in a corner.** It
+   has a presence (the particle head), states (listening, thinking,
+   speaking) and visible task execution.
+6. **Accessible by default.** WCAG 2.2 AA, keyboard paths, high contrast,
+   and sound never the only signal.
+7. **Desktop composition is preserved.** Phone and tablet layouts are
+   re-composed (reference 06), not shrunk.
+
 ## Direction
 
 Taken from the Director's reference images (2026-11-12):

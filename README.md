@@ -4,8 +4,12 @@ The AVEN GLOBAL business operating system is a single cloud-hosted platform for 
 procurement, sales, tenders, finance, inventory, logistics, HR, communications
 and executive AI (JARVIS). It will be used on Windows, Mac, iPhone and Android.
 
-**Current state: Stage 1 (core infrastructure and application shell), awaiting
-Director approval.** No business module is built yet. See `PROJECT_STATUS.md`.
+**Current state:**
+
+- Stage 0 (architecture) documents are complete and awaiting review.
+- Stage 1 (core infrastructure and shell) is approved and **verified green
+  in GitHub CI**.
+- No business module is built yet. See `PROJECT_STATUS.md`.
 
 ## Architecture
 
@@ -30,10 +34,10 @@ make up          # copies .env.example → .env, builds and starts everything
 
 | Service   | URL                                        |
 |-----------|--------------------------------------------|
-| Web app   | http://localhost:3000                      |
-| API docs  | http://localhost:8000/api/v1/docs          |
-| Liveness  | http://localhost:8000/api/v1/health/live   |
-| Readiness | http://localhost:8000/api/v1/health/ready  |
+| Web app   | <http://localhost:3000>                      |
+| API docs  | <http://localhost:8000/api/v1/docs>          |
+| Liveness  | <http://localhost:8000/api/v1/health/live>   |
+| Readiness | <http://localhost:8000/api/v1/health/ready>  |
 
 The development backend applies migrations on start (`scripts/start-dev.sh`).
 In production, migrations run as a separate release step, never on every start.
@@ -75,5 +79,8 @@ validated at startup. With `APP_ENV=production` the API refuses to start if:
 ## Documents
 
 `PROJECT_STATUS.md`, `ROADMAP.md`, `CHANGELOG.md`, `SECURITY.md`,
+`docs/architecture/SYSTEM_ARCHITECTURE.md`, `DATABASE_DESIGN.md`,
+`DEPLOYMENT_ARCHITECTURE.md`, `INTEGRATION_STRATEGY.md`, `AI_ARCHITECTURE.md`,
+`VOICE_AND_SOUND.md`, `REFERENCE_IMAGE_SPECIFICATION.md`,
 `docs/architecture/DESIGN_SYSTEM.md`, `docs/architecture/`, `docs/security/`, `docs/stage-1-report.md`,
 `docs/director-stage-plan.md`.

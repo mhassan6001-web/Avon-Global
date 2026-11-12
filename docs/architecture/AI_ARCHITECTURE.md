@@ -2,12 +2,12 @@
 
 - Status: **Specification approved 2026-11-12. Not implemented** (JARVIS AI core is Stage 11; voice
   is Stage 12).
-- Sources: master instructions §10–§11, `docs/jarvis-design-specification.md`
+- Sources: Stage 0 §4B and §6, master instructions §10–§11, `docs/jarvis-design-specification.md`
   and `docs/director-stage-plan.md`.
 
 ## 1. Components
 
-```
+```text
 Browser (text / push-to-talk / wake word)
    │  HTTPS + WebSocket, authenticated session
    ▼

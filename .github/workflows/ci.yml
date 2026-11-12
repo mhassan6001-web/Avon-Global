@@ -67,7 +67,8 @@ jobs:
           echo
           $RUN ready curl -fsS -o ready.json http://127.0.0.1:8000/api/v1/health/ready
           cat ready.json
-          python -c "import json; d=json.load(open('ready.json')); print('::notice title=startup ready::status=' + d['status'] + '; ' + ', '.join(c['name'] + '=' + c['status'] for c in d['checks']))"
+          STATUS=$(python -c "import json; d=json.load(open('ready.json')); print(d['status'], *(c['name'] + '=' + c['status'] for c in d['checks']))")
+          echo "::notice title=startup::live=200 ready=200 ${STATUS}"
 
   frontend:
     runs-on: ubuntu-latest

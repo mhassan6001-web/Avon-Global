@@ -1,5 +1,4 @@
-<!-- Director-supplied Stage 0 specification, received 2026-11-12. Verbatim.
-     NOTE: the supplied file ends at line 208 ('I. STAFF COMMUNICATIONS -'); the rest was not received. -->
+<!-- Director-supplied Stage 0 specification, complete text re-sent 2026-11-12 (419 lines). Verbatim. -->
 
 # AVEN GLOBAL | STAGE 0: MASTER ARCHITECTURE AND PROJECT BLUEPRINT
 
@@ -209,6 +208,215 @@ H. HUMAN RESOURCES
 - Department management.
 
 I. STAFF COMMUNICATIONS
--
+- One-to-one messaging.
+- Department group conversations.
+- Director announcements.
+- Task assignments.
+- Daily reports.
+- Acknowledgements.
+- Follow-up questions.
+- Attachments and document sharing.
 
-<!-- [END OF RECEIVED TEXT — remainder missing; requested from the Director] -->
+Clearly identify AI-generated messages and distinguish them from messages personally sent by the Director.
+
+J. DOCUMENT CENTRE
+- PDF generation.
+- Excel reports.
+- Word documents.
+- Quotations.
+- Invoices.
+- Purchase orders.
+- Tender documents.
+- Contracts.
+- Business correspondence.
+
+K. ADMINISTRATION AND SECURITY
+- User management.
+- Role-based access.
+- Individual permissions.
+- Audit logs.
+- Security alerts.
+- Backup management.
+- System configuration.
+
+# 5. STAFF ROLES AND PERMISSIONS
+
+Plan the following roles:
+- Director.
+- Business Development.
+- Procurement.
+- Finance.
+- Logistics.
+- HR/Admin.
+
+All permissions must be enforced on the backend, not merely by hiding buttons in the interface.
+
+Financial records, payroll, confidential supplier information and sensitive company documents must have restricted access.
+
+A user must not approve their own restricted transactions.
+
+# 6. JARVIS SECURITY ARCHITECTURE
+
+Every JARVIS action must follow:
+
+Authentication → Permission verification → Command interpretation → Validation → Approval where required → Execution → Audit logging.
+
+JARVIS must never:
+- Execute arbitrary SQL.
+- Bypass permissions.
+- Make unauthorised payments.
+- Change supplier bank information without approval.
+- Submit tenders without human approval.
+- Impersonate employees.
+- Bypass financial controls.
+- Perform sensitive actions using voice recognition alone as authentication.
+
+Separate read-only, prepare and execute permissions.
+
+The Director must explicitly authorise sensitive operations.
+
+# 7. DESIGN SYSTEM
+
+Create a premium futuristic AVEN GLOBAL visual identity.
+
+Proposed palette:
+- Midnight navy.
+- Deep blue.
+- Champagne gold.
+- Warm white.
+- Graphite.
+
+The interface should feature:
+- Cinematic login and startup.
+- Animated AVEN GLOBAL branding.
+- Premium dashboard cards.
+- Elegant glass and layered surfaces.
+- Subtle holographic accents.
+- Smooth transitions.
+- Intelligent data visualisations.
+- A distinctive JARVIS interface.
+- Responsive desktop and mobile layouts.
+
+Avoid cheap-looking neon overload, excessive glowing borders, cluttered dashboards and generic template aesthetics.
+
+Use the Director's reference images as the primary visual design authority once supplied and inspected.
+
+# 8. CLOUD, DATA AND RELIABILITY
+
+Design for a central cloud-hosted database accessible by all authorised devices.
+
+Include:
+- Secure authentication.
+- Session management.
+- Encryption in transit and at rest.
+- Automated backups.
+- Disaster recovery.
+- Backup restoration tests.
+- Database migration strategy.
+- Application monitoring.
+- Error tracking.
+- Audit logging.
+- Secure secret management.
+- Deployment rollback procedures.
+
+Do not invent company transactions, customers, suppliers, staff, tenders, licences or financial records.
+
+Use clearly labelled demonstration data only where necessary.
+
+# 9. REQUIRED STAGE 0 DOCUMENTS
+
+Inspect the existing repository first.
+
+Create or update these files:
+
+1. CLAUDE.md
+2. README.md
+3. ROADMAP.md
+4. PROJECT_STATUS.md
+5. CHANGELOG.md
+6. docs/architecture/SYSTEM_ARCHITECTURE.md
+7. docs/architecture/DATABASE_DESIGN.md
+8. docs/architecture/AI_ARCHITECTURE.md
+9. docs/architecture/VOICE_AND_SOUND.md
+10. docs/architecture/DESIGN_SYSTEM.md
+11. docs/security/SECURITY_MODEL.md
+12. docs/architecture/DEPLOYMENT_ARCHITECTURE.md
+13. docs/architecture/INTEGRATION_STRATEGY.md
+14. docs/architecture/REFERENCE_IMAGE_SPECIFICATION.md
+
+The documents must explain the system in enough detail that another developer can understand and implement it without guessing.
+
+Include:
+- System architecture diagrams.
+- Database entity relationships.
+- Module dependencies.
+- API strategy.
+- Authentication and permission architecture.
+- AI execution workflow.
+- Voice architecture.
+- Audio architecture.
+- Design principles.
+- Cloud deployment strategy.
+- Testing strategy.
+- Risks and technical limitations.
+
+# 10. FUTURE DEVELOPMENT STAGES
+
+Create a realistic, dependency-aware roadmap covering:
+
+Stage 0: Architecture and project blueprint.
+Stage 1: Repository foundation and development environment.
+Stage 2: Authentication and security.
+Stage 3: Core design system and interface.
+Stage 4: Director dashboard and CRM.
+Stage 5: Tender management.
+Stage 6: Procurement and suppliers.
+Stage 7: Finance and accounting.
+Stage 8: Inventory and logistics.
+Stage 9: Human resources.
+Stage 10: Staff communications.
+Stage 11: JARVIS AI integration.
+Stage 12: Voice activation and immersive audio.
+Stage 13: Documents and external integrations.
+Stage 14: Cloud deployment and production readiness.
+Stage 15: Mobile experience and native application planning.
+
+You may identify additional necessary stages, but do not skip these requirements.
+
+# 11. STAGE 0 RULES
+
+- Inspect the current repository before changing anything.
+- Preserve existing work.
+- Do not delete or overwrite approved project files without a clear reason.
+- Do not write application features yet.
+- Do not deploy.
+- Do not introduce production infrastructure.
+- Do not expose secrets.
+- Do not fabricate business information.
+- Document unresolved decisions instead of guessing.
+- Identify technical risks and dependencies.
+- Create a clear Stage 1 readiness checklist.
+
+# 12. FINAL REPORT
+
+When Stage 0 is complete, report:
+
+1. What you inspected.
+2. Every file created.
+3. Every file updated.
+4. The proposed system architecture.
+5. The proposed database design.
+6. The security architecture.
+7. The JARVIS and voice architecture.
+8. The visual design architecture.
+9. Any unresolved technical decisions.
+10. Any risks or platform limitations.
+11. The Stage 1 implementation plan.
+
+Run documentation checks where possible.
+
+Do not claim tests or implementation have passed when they have not been run.
+
+STOP after Stage 0.
+
+Wait for the Director to review and explicitly approve Stage 1 before writing application code.

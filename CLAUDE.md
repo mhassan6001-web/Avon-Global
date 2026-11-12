@@ -28,8 +28,9 @@ Docker · Anthropic Claude via a provider-independent AI layer.
 
 Before: read this file, `PROJECT_STATUS.md`, `ROADMAP.md` and
 `docs/director-stage-plan.md`, `docs/jarvis-design-specification.md`,
-`docs/architecture/MASTER_ARCHITECTURE.md` and
-`docs/architecture/REFERENCE_IMAGE_SPECIFICATION.md`, then inspect the code. Present a plan
+`docs/stage-0-specification.md`, `docs/architecture/SYSTEM_ARCHITECTURE.md`,
+`DATABASE_DESIGN.md` and `REFERENCE_IMAGE_SPECIFICATION.md`, then inspect
+the code. Present a plan
 (files, database changes, acceptance tests) for approval.
 
 After approval: implement only the approved scope, then run formatting,
@@ -91,7 +92,7 @@ photos or fake statistics that appear in the references.
 
 ## Repository map
 
-```
+```text
 design-references/  Director's visual reference images (primary design spec)
 backend/   FastAPI app (app/), Alembic migrations, tests (unit/, integration/)
 frontend/  Next.js app (src/app, src/components, src/lib)
@@ -99,4 +100,19 @@ docs/      architecture/ (ADRs, design system, AI, voice & sound), security/,
            stage reports, Director's stage plan, JARVIS design specification
 ```
 
-Run everything with `make up`, `make check` (see README).
+## Document index (Stage 0)
+
+| Topic | Document |
+|-------|----------|
+| System | `docs/architecture/SYSTEM_ARCHITECTURE.md` |
+| Data | `DATABASE_DESIGN.md` |
+| AI | `AI_ARCHITECTURE.md` |
+| Voice and audio | `VOICE_AND_SOUND.md` |
+| Design | `DESIGN_SYSTEM.md` and `REFERENCE_IMAGE_SPECIFICATION.md` |
+| Deployment | `DEPLOYMENT_ARCHITECTURE.md` |
+| Integrations | `INTEGRATION_STRATEGY.md` |
+| Security | `docs/security/SECURITY_MODEL.md` |
+
+Run everything with `make up` and `make check` (see README). **GitHub CI on
+`mhassan6001-web/Avon-Global` is the verification environment.** Results are
+read from the commit's check annotations. The Director merges into `main`.

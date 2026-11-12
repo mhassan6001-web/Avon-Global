@@ -5,24 +5,30 @@ of each stage is in `docs/director-stage-plan.md`. **Every stage ends with a
 test report and stops for Director approval.** The next stage starts only
 after that approval.
 
-| # | Stage | Status |
-|---|-------|--------|
-| 0 | Master architecture and blueprint (`docs/stage-0-specification.md`, received 2026-11-12, **text incomplete**) | **Approved 2026-11-12**, with reference-design decisions C1–C9 |
-| 1 | Core infrastructure & application shell | **Approved 2026-11-12** |
-| 2 | **Next: plan awaiting approval** (`docs/stage-2-plan.md`). Identity & security: login, hashing, reset, sessions, 2FA, roles and individual permissions, activation/suspension, login history, audit logs, rate limiting, secure file access; six initial roles; development-only test accounts |  |
-| 3 | Visual experience (**apply reference decisions C1–C9**: grey-black and gold, rich motion graphics, JARVIS head with task-execution visuals): production design system, startup identity, transitions, glass/holographic panels, animated charts, JARVIS visual placeholder; original sound engine with categories, mute, quiet mode and previews | Queued |
-| 4 | Director Command Centre & CRM, built from real records and calculations | Queued |
-| 5 | Tender management: register, deadlines, readiness checks, awards; permitted external sources only | Queued |
-| 6 | Procurement: suppliers, verification, quotations, landed cost, approvals, POs, protected bank details | Queued |
-| 7 | Finance & accounting: double entry, ledger, invoices, receipts, reconciliation, multi-currency, reports, PDFs | Queued |
-| 8 | Inventory & logistics: catalogue, stock movements, valuation, shipments, delivery notes, proof of delivery | Queued |
-| 9 | Staff & HR: profiles, contracts, leave, payroll preparation, KPIs, reviews; salary data restricted | Queued |
-| 10 | Staff communications: messaging, channels, announcements, tasks, reports, live updates | Queued |
-| 11 | JARVIS AI core: Claude via provider abstraction, permission-filtered tools, logs, cost tracking | Queued |
-| 12 | JARVIS voice: push-to-talk, STT/TTS, streaming, interruptions, original voice | Queued |
-| 13 | Documents & integrations: PDF/Word/Excel, email, calendar, storage, reminders | Queued |
-| 14 | Production readiness: full testing, deployment, backups, restore tests, monitoring, launch report | Queued |
-| 15 | Mobile: installable PWA first, then an assessment of native iOS/Android | Queued |
+| # | Stage (Stage 0 §10 naming) | Depends on | Key scope | Status |
+|---|------|-----------|-----------|--------|
+| 0 | Architecture and project blueprint | — | `docs/architecture/*`, `docs/security/*` (14 required documents) | Approved 2026-11-12. **Full-text documents completed, awaiting review.** |
+| 1 | Repository foundation and development environment | 0 | FastAPI/Next.js foundation, config, logging, errors, health, Alembic, Docker, CI | **Approved 2026-11-12. CI green on GitHub** (`docs/stage-1-readiness-checklist.md`) |
+| 2 | Authentication and security | 1 | Login, Argon2id, sessions, Director-issued reset links, 2FA, department-scoped roles, overrides, suspension, login history, audit log, rate limiting, secure files, module K admin basics | **Plan approved with Director decisions.** Starts after Stage 0 review. |
+| 3 | Core design system and interface | 1, 2 (sign-in screens) | Reference-faithful grey-black and gold system (C1–C9), rich motion graphics, charts, JARVIS placeholder head, sound engine and settings | Queued |
+| 4 | Director dashboard and CRM | 2, 3 | Command Centre from real records, CRM, quotations, contracts, search, outbox and events | Queued |
+| 5 | Tender management | 2, 3, 4 (CRM organisations) | Register, government, NGO and UN sources (permitted only), bid costing, checklists, deadline alerts, Celery | Queued |
+| 6 | Procurement and suppliers | 2, 3 | Suppliers, verification, quotations, landed cost, PRs and POs, encrypted bank details with dual control, supplier performance | Queued |
+| 7 | Finance and accounting | 4, 6 | Double-entry, periods, invoices, receipts, bills, payments, reconciliation, FX, tax configuration, reports, finance PDFs. **Accountant sign-off gate.** | Queued |
+| 8 | Inventory and logistics | 6, 7 | Stock movements, valuation, shipments, customs, deliveries, proof of delivery | Queued |
+| 9 | Human resources | 2, 7 | Employees, contracts, leave, attendance, payroll preparation (configurable statutory rules, professional sign-off), KPIs | Queued |
+| 10 | Staff communications | 2, 9 | Messaging, channels, announcements, tasks, reports, WebSockets, AI-message labelling | Queued |
+| 11 | JARVIS AI integration | 4–10 (tools gated per module) | Provider abstraction, ActionGateway, tools, briefings, usage ledger, task-execution visuals | Queued |
+| 12 | Voice activation and immersive audio | 3, 11 | CINEMATIC voice, Porcupine wake word (Director's key), push-to-talk, STT/TTS streaming | Queued |
+| 13 | Documents and external integrations | 4–10 | Document Centre (J), email, calendar, reminders, notifications | Queued |
+| 14 | Cloud deployment and production readiness | all | Hosting, HTTPS, secrets, backups and restore tests, monitoring, UAT, launch report. **Director approval to deploy.** | Queued |
+| 15 | Mobile experience and native application planning | 14 | PWA (icons, splash, push), mobile layouts (ref 06), then a native assessment | Queued |
+
+**Additional work identified (folded into stages, not new stages):**
+
+- **Stage 2:** an accountant and statutory-review process is set up early
+  (who signs off tax and payroll configuration).
+- **Stage 14:** a legal check of the "JARVIS" name.
 
 ## Notes recorded for later stages
 
