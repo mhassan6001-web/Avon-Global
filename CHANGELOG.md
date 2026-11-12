@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.5.0] — 2026-11-12 — Stage 17: statements and supplier documents
+
+### Added
+
+- **Customer statement of account** (PDF, Word, Excel), built from posted
+  records only: issued invoices, receipts and posted credit notes, with an
+  opening balance and a running balance per currency. Draft invoices never
+  appear.
+- **Request for quotation** document generated from a purchase request, with
+  the items and no prices, to send to suppliers.
+- Statements panel on the Documents page (Finance and Director); RFQ links on
+  purchase requests.
+
+### Changed
+
+- Pull requests #1, #2 and #3 were merged into `main` on 2026-11-12 at the
+  Director's request. Phase 2 work continues on branch `phase-2`.
+
 ## [0.4.0] — 2026-11-12 — Stage 16 and Stage R (approved by the Director; built and verified in CI)
 
 ### Added
