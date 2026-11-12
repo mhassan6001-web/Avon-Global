@@ -77,11 +77,28 @@ def _clean_rate_limits(settings: Settings) -> Iterator[None]:
     yield
 
 
+# Business-module tables are emptied before each test so counts and "No data yet"
+# states are deterministic. Identity and the append-only audit log are kept.
+BUSINESS_PREFIXES = ("crm_", "tnd_", "prc_", "fin_", "inv_", "lgx_", "hr_", "com_", "ai_", "doc_")
+
+
+def _truncate_business_tables(session: Session) -> None:
+    from sqlalchemy import text
+
+    from app.db.models import Base
+
+    names = [t.name for t in Base.metadata.sorted_tables if t.name.startswith(BUSINESS_PREFIXES)]
+    names.append("sys_approval_requests")
+    session.execute(text(f"TRUNCATE {', '.join(names)} RESTART IDENTITY CASCADE"))  # nosec B608
+    session.commit()
+
+
 @pytest.fixture
 def db(settings: Settings, migrated: None) -> Iterator[Session]:
     from app.platform.authz.sync import sync_catalogue
 
     session = db_session.get_session_factory()()
+    _truncate_business_tables(session)
     sync_catalogue(session)
     try:
         yield session

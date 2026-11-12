@@ -178,12 +178,31 @@ export default function CommandCentrePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td colSpan={5} className={cc.emptyRow}>
-                      No approval requests yet. They appear here as Procurement and Finance are
-                      built.
-                    </td>
-                  </tr>
+                  {approvals && approvals.length > 0 ? (
+                    approvals.map((a) => (
+                      <tr key={a.id}>
+                        <td>
+                          <Link href="/approvals" className={cc.jarvisLink}>
+                            {a.summary}
+                          </Link>
+                        </td>
+                        <td>{a.subject_type.replace(/_/g, " ")}</td>
+                        <td>{a.requested_by}</td>
+                        <td className={cc.num}>—</td>
+                        <td>
+                          <Badge tone="gold">{`Pending since ${formatDate(a.created_at)}`}</Badge>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={5} className={cc.emptyRow}>
+                        {approvals
+                          ? "Nothing is waiting for your approval."
+                          : "No approval requests yet. Bids, purchases and payments will need approval here."}
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </section>

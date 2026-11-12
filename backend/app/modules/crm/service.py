@@ -108,7 +108,7 @@ def list_customers(
             .limit(size)
         ).scalars()
     )
-    counts = (
+    counts: dict[uuid.UUID, int] = (
         dict(
             db.execute(
                 select(Opportunity.customer_id, func.count())
@@ -117,7 +117,9 @@ def list_customers(
                     Opportunity.stage.in_(OPEN_STAGES),
                 )
                 .group_by(Opportunity.customer_id)
-            ).all()
+            )
+            .tuples()
+            .all()
         )
         if rows
         else {}
@@ -263,13 +265,15 @@ def delete_contact(db: Session, row: Contact, actor: uuid.UUID) -> None:
 
 
 def opportunities_out(db: Session, rows: list[Opportunity]) -> list[schemas.OpportunityOut]:
-    names = (
+    names: dict[uuid.UUID, str] = (
         dict(
             db.execute(
                 select(Customer.id, Customer.name).where(
                     Customer.id.in_({r.customer_id for r in rows})
                 )
-            ).all()
+            )
+            .tuples()
+            .all()
         )
         if rows
         else {}
@@ -411,13 +415,15 @@ def update_opportunity(
 
 
 def activities_out(db: Session, rows: list[Activity]) -> list[schemas.ActivityOut]:
-    names = (
+    names: dict[uuid.UUID, str] = (
         dict(
             db.execute(
                 select(Customer.id, Customer.name).where(
                     Customer.id.in_({r.customer_id for r in rows})
                 )
-            ).all()
+            )
+            .tuples()
+            .all()
         )
         if rows
         else {}
