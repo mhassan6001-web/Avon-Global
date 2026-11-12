@@ -12,7 +12,7 @@ from collections.abc import Iterator
 
 import pytest
 
-for module in ("fastapi", "sqlalchemy", "alembic", "psycopg", "httpx"):
+for module in ("fastapi", "sqlalchemy", "alembic", "psycopg"):
     pytest.importorskip(module, reason=f"integration tests need '{module}'")
 
 TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL")

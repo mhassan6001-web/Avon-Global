@@ -1,6 +1,6 @@
 -r requirements.txt
 pytest>=8.3
-httpx>=0.27
+httpx2>=2.0  # Starlette TestClient transport (httpx is deprecated for it)
 ruff>=0.8
 mypy>=1.13
 bandit>=1.8
