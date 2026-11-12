@@ -49,5 +49,8 @@ The test-only providers (`fake`) are refused in production.
 
 1. Create the Director account: `python -m app.cli create-director` (see the
    README). Check the audit chain: `python -m app.cli verify-audit-chain`.
-2. Fill in the organisation profile: legal name, registration and currency.
+2. Fill in the organisation profile (Admin → Organisation): legal name,
+   registration number, address and currency, as recorded in
+   `docs/DIRECTOR_DECISIONS.md`. Tick "Approved to print" only for confirmed
+   details. Leave TPIN and VAT unticked until confirmed.
 3. Finance completes setup with the accountant: accounts, periods, tax codes.

@@ -50,15 +50,26 @@ See `docs/OUTSTANDING_INFORMATION.md`.
 Until these are signed off, the system's tax, payroll and accounting settings
 are **not legally approved**, and the app says so on the finance screens.
 
-## Points noted while recording
+## Confirmed by the Director on 2026-11-12 (second message)
 
-1. **Registration.** The Director states the company is registered. The
-   system requires a registration number before the status can show
-   "registered", so documents will keep showing "registration pending" until
-   the number is entered. No number has been invented.
-2. **Legal name.** Recorded as "AVEN GLOBAL". If the registered name carries a
-   suffix (for example "Limited"), the Director will enter the exact name.
-3. **Sole approver.** With the Director as the only approver:
-   - the Director can approve staff requests
-   - restricted requests **raised by the Director** stay blocked until a
-     second approver is appointed
+1. **Registration number:** `BRN-M7S4Y5AW`. Status: registered. The Director
+   enters it in Admin → Organisation at first run; it then prints on documents.
+2. **Legal name:** AVEN GLOBAL (no suffix).
+3. **Approver:** the Director is the only approver. No second approver will be
+   appointed for now.
+
+### What "sole approver" means in the system
+
+- The Director approves every restricted request that staff raise.
+- The rule that nobody approves their own restricted financial request stays
+  in force (master instructions §8). So a payment, supplier bank change,
+  credit note, manual journal, payroll run, purchase order or tender
+  submission that the **Director raises personally** cannot be approved by the
+  Director. The Approvals screen marks it "Blocked: no second authorised
+  approver".
+- The working pattern is therefore: **staff prepare, the Director approves.**
+- Quotations are offers, not money movements. A user who holds the quotation
+  approval permission (the Director) issues their own quotations directly.
+  Staff quotations go to the Director above the configured limit.
+- If the Director later wants to approve their own restricted requests, that
+  is a change to the master rule and needs an explicit written decision.

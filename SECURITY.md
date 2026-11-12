@@ -58,6 +58,9 @@ All business modules, JARVIS, voice and documents are built and tested in CI.
 | Voice | The microphone opens only on push-to-talk and closes on send, stop or tab hide. Audio is transcribed in memory and never stored. A transcript runs through the same gateway as typed text. The wake word is off by default and requires recorded consent (append-only, audited). The Porcupine key is released only to consenting users. Voice never authorises anything. |
 | Documents | Built from stored records only, with a permission check per record type. The legal name and registration appear only as configured. Drafts and demo data are labelled. The system never applies a signature or stamp. Every download is audited and registered with a SHA-256. Spreadsheet text can never become a formula. |
 | Installable app | The service worker caches only static assets. `/api` data is never cached on the device. |
+| Company identity (Stage 16) | Only the Director edits it, with step-up, and every change is audited. TPIN, VAT number, address, phone and email print only when approved; the database refuses an approval without a value. |
+| Quotations (Stage 16) | Permission-checked; numbers assigned only at issue; issued quotations and their lines are frozen by database triggers; staff quotations above the configured limit need the Director's approval. |
+| Sole approver (Stage 16) | Self-approval stays forbidden in the service and the database. Requests that only their requester could decide are reported as blocked. Fixed controls cannot be switched off through the rules API. |
 
 ## Design reference
 

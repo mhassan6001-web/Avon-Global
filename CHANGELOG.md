@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.4.0] — 2026-11-12 — Stage 16 and Stage R (approved by the Director; built and verified in CI)
+
+### Added
+
+- **Company identity:** address, telephone, email, TPIN and VAT number on the
+  organisation profile. Each prints on documents only after the Director
+  ticks "Approved to print". Invoices are titled "Tax invoice" only once a VAT
+  number is approved.
+- **Quotations:**
+  - draft, issue and outcome, with gap-free `QUO-YYYY-NNNNN` numbers
+  - tax only from Finance's configured codes
+  - frozen after issue by database triggers
+  - PDF and Word on the letterhead
+  - CRM → Quotations screen
+- **Approval rules:**
+  - configurable limit for staff quotations
+  - the fixed controls listed in one place
+  - pending requests that no second approver can decide are shown as blocked
+- **JARVIS model routing:** Sonnet by default; the configured advanced model
+  (Opus) only when the user ticks "Deep analysis". Both are settings.
+- **Stage R research:** `docs/research/STAGE_R_FINDINGS.md` (wake word,
+  voices, trademarks, hosting, monitoring, domains, exchange rates). Nothing
+  purchased.
+- Director's decisions and outstanding-information registers
+  (`docs/DIRECTOR_DECISIONS.md`, `docs/OUTSTANDING_INFORMATION.md`).
+- Migration `0014` (additive).
+
 ## [0.3.0] — 2026-11-12 — Stages 3–15 (built and verified in CI; awaiting Director review)
 
 ### Added

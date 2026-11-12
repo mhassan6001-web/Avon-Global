@@ -33,6 +33,8 @@ deployed.
 | 13 Documents | Built, CI green. Email outbox and reminders are **not built** (no email provider yet). |
 | 14 Production readiness | Documents written (`docs/operations/*`). Infrastructure not provisioned. |
 | 15 Installable app (PWA) | Manifest, icons and a shell-only service worker built. A native app is not started. |
+| R Research | Done. Findings and six decisions requested. |
+| 16 Company identity, quotations, approval rules | Built, CI green. |
 
 ## Director decisions on record (2026-11-12)
 
@@ -52,10 +54,12 @@ deployed.
 
 ## Next
 
-The Director answered the open questions on 2026-11-12. They are recorded in
-`docs/DIRECTOR_DECISIONS.md` (confirmed, proposed, pending and
-professional-review items) and `docs/OUTSTANDING_INFORMATION.md`.
-
-Phase 2 is planned in `ROADMAP.md`. **Stage R (research, no purchases) and
-Stage 16 (company identity, quotations and approval rules) await the
-Director's approval to start.** PRs #1–#3 await review and merge.
+- **Stage R (research) is done:** `docs/research/STAGE_R_FINDINGS.md`. Six
+  decisions are requested from the Director. Nothing was purchased.
+- **Stage 16 is built and green in CI** (210 backend tests, 64 frontend tests,
+  28 browser tests; migration head `0014`): company identity with print
+  approval, quotations, approval rules, and Sonnet/Opus model routing.
+- The Director confirmed on 2026-11-12: registration number `BRN-M7S4Y5AW`,
+  legal name AVEN GLOBAL, and that the Director is the only approver.
+- **Stage 17 (customer statements and supplier documents) awaits approval.**
+- PRs #1–#3 await review and merge.
