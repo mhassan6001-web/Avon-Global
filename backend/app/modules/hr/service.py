@@ -239,7 +239,15 @@ def request_leave(
     row = LeaveRequest(employee_id=employee.id, requested_by=actor, **body.model_dump())
     db.add(row)
     db.flush()
-    _audit(db, "leave.requested", actor, "hr_employee", employee.id, days=body.days, kind=body.kind)
+    _audit(
+        db,
+        "leave.requested",
+        actor,
+        "hr_employee",
+        employee.id,
+        days=body.days,
+        leave_kind=body.kind,
+    )
     return row
 
 

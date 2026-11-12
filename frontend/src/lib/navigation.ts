@@ -122,7 +122,6 @@ export const BUSINESS_MODULES: BusinessModule[] = [
     "tenders",
     "Tenders",
     LuGavel,
-    LuIdCard,
     "Tender register, deadlines, eligibility and bid approvals.",
     [
       "RFQ, RFP and EOI register with deadlines",
