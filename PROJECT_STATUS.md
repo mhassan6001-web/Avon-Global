@@ -4,74 +4,53 @@ _Last updated: 2026-11-12_
 
 ## Where we are
 
+All fifteen stages are **built and verified in GitHub CI** on branch
+`stage-3-onwards` (pull request #3, stacked on PR #2). The Director instructed
+on 2026-11-12: _"approve and complete full next stages, ask questions and
+needs at the end"_. Stages 3–15 therefore ran in sequence, without a stop
+between stages, and questions are collected at the end of the final report
+(`docs/stages-3-15-report.md`).
+
+**Built is not production-ready.** Production needs the Director's inputs
+and the checks in `docs/operations/PRODUCTION_CHECKLIST.md`. Nothing is
+deployed.
+
 | Stage | Status |
 |-------|--------|
-| 0: Architecture and blueprint | **Approved 2026-11-12** (14 required documents). |
-| 1: Repository foundation | **Approved, and verified green in GitHub CI** (PR #1 on `mhassan6001-web/Avon-Global`): 62 backend tests including 9 integration tests on real PostgreSQL and Redis, migration round-trip, mypy clean, 15 frontend tests, `next build`. See `docs/stage-1-readiness-checklist.md`. |
-| 2: Authentication and security | **Built and verified in CI. Awaiting Director approval.** PR #2. Backend: 123 tests, 46 of them integration tests. Migration `0002` with no drift. mypy, bandit and pip-audit clean. Frontend: tsc, ESLint, 21 tests and the build pass. **E2E: 6/6 browser tests** against the real stack. See `docs/stage-2-report.md`. |
+| 0 Architecture | Approved |
+| 1 Foundation | Approved; CI green |
+| 2 Authentication and security | Built, CI green; awaiting approval (PR #2) |
+| 3 Design system, sound engine, charts, JARVIS visuals | Built, CI green |
+| 4 Director dashboard and CRM | Built, CI green |
+| 5 Tenders | Built, CI green |
+| 6 Procurement and suppliers | Built, CI green |
+| 7 Finance and accounting | Built, CI green. **Accountant sign-off required before live use.** |
+| 8 Inventory and logistics | Built, CI green. GL posting of stock valuation is not automated yet. |
+| 9 HR and payroll | Built, CI green. **Statutory rules must be entered and reviewed by a professional.** |
+| 10 Staff communications | Built, CI green |
+| 11 JARVIS AI core | Built, CI green. Uses a deterministic test provider until the Anthropic key is supplied. |
+| 12 Voice | Built, CI green. STT/TTS providers and the Porcupine key are pending. |
+| 13 Documents | Built, CI green. Email outbox and reminders are **not built** (no email provider yet). |
+| 14 Production readiness | Documents written (`docs/operations/*`). Infrastructure not provisioned. |
+| 15 Installable app (PWA) | Manifest, icons and a shell-only service worker built. A native app is not started. |
 
 ## Director decisions on record (2026-11-12)
 
 - **JARVIS:** voice CINEMATIC, activation WAKE_WORD, sound IMMERSIVE.
-- **Wake-word engine:** Porcupine, paid licence. The AccessKey will be
-  supplied at the end.
+  Wake-word engine: Porcupine with a paid licence. The AccessKey will come at
+  the end.
 - **Visual design:**
-  - Reference images are the primary specification.
-  - Grey-black and gold, with navy as depth.
-  - Rich motion graphics.
-  - JARVIS particle head with task-execution visuals.
-  - JARVIS daily briefings.
-  - Serif and HUD typefaces.
-  - Dark only.
-- **Access:** department-scoped. Only the Director (Muhammad) sees
-  everything. User administration is Director only.
-- **Security:** Director-issued one-time reset links until email exists. 2FA
-  mandatory for Director, Finance and HR/Admin.
-- **Testing:** GitHub CI on the Director's repository. The Director merges
-  into `main`.
-
-## What exists
-
-- **Identity and security (Stage 2):**
-  - sign-in with Argon2id passwords
-  - server-side sessions, CSRF protection
-  - TOTP 2FA, mandatory for Director, Finance and HR/Admin; step-up for
-    sensitive changes
-  - Director-issued invitation and reset links
-  - department-scoped roles with individual grant/deny overrides
-  - append-only, hash-chained audit log; login history; security alerts
-  - rate limiting and lockout
-  - permission-checked file storage
-  - approval requests with separation of duties
-  - organisation profile editing
-  - admin, account, sign-in and 2FA screens
-
-- **Backend:** FastAPI, config, logging, errors, health, SQLAlchemy and
-  Alembic (`0001`).
-- **Frontend:** Next.js shell and design foundation.
-- **Tooling:** Docker Compose, Makefile, CI.
-- **Documentation:** Stage 0 architecture set (SYSTEM, DATABASE, AI, VOICE &
-  SOUND, DESIGN, SECURITY MODEL, DEPLOYMENT, INTEGRATION, REFERENCE IMAGE),
-  roadmap, readiness checklist.
-- No business module is built.
-
-## Open decisions (none block Stage 2)
-
-See `docs/architecture/SYSTEM_ARCHITECTURE.md` §13:
-
-- hosting provider and region
-- error tracker
-- email provider
-- STT/TTS providers
-- wake phrase
-- second approver for Director-initiated requests
-- FX source
-- payroll and tax rules, and the accountant who signs them off
-- SMS or WhatsApp
-- message retention
+  - Grey-black and gold, with cyan only for JARVIS and live data.
+  - Rich motion.
+  - Charts show "No data yet" instead of fake numbers.
+- **Logo:** the Director's AVEN GLOBAL artwork (`docs/brand/LOGO.md`). It
+  appears in the app and on every document and letterhead.
+- **Access:** department-scoped. Only the Director sees everything.
+- **Security:** Director-issued reset links. 2FA for Director, Finance and
+  HR/Admin.
+- **Testing:** GitHub CI. The Director merges into `main`.
 
 ## Next
 
-On Director approval of Stage 2, **Stage 3 (core design system and
-interface)** begins. It applies reference decisions C1–C9 and the sound
-engine.
+The Director reviews PR #2 and PR #3, then answers the open questions in the
+final report. After that, Stage 14 provisioning can start.

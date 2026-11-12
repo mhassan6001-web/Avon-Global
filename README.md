@@ -108,3 +108,8 @@ validated at startup. With `APP_ENV=production` the API refuses to start if:
 `VOICE_AND_SOUND.md`, `REFERENCE_IMAGE_SPECIFICATION.md`,
 `docs/architecture/DESIGN_SYSTEM.md`, `docs/architecture/`, `docs/security/`, `docs/stage-1-report.md`,
 `docs/director-stage-plan.md`.
+
+Stages 3–15: `docs/stages-3-15-report.md` (results and open questions).
+Operations: `docs/operations/` (production checklist, UAT, disaster recovery,
+deployment guide, administrator guide). Brand: `docs/brand/LOGO.md`.
+Policies: `docs/policies/COMMUNICATIONS_POLICY.md`.
