@@ -314,7 +314,7 @@ def transfer(db: Session, body: schemas.TransferIn, actor: uuid.UUID) -> None:
         "inv_product",
         product.id,
         source=source.code,
-        target=target.code,
+        destination=target.code,
         quantity=body.quantity,
     )
 
