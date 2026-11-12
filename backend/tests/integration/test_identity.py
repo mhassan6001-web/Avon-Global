@@ -185,6 +185,11 @@ def test_recovery_codes_single_use(app: FastAPI, db: Session) -> None:
 def test_step_up_required_for_admin_changes(app: FastAPI, db: Session) -> None:
     director = make_user(db, "director")
     c = sign_in(app, director)
+    # Completing 2FA counts as a fresh verification; age it past the 5-minute window.
+    sessions = db.execute(select(AuthSession).where(AuthSession.user_id == director.user.id))
+    for session in sessions.scalars():
+        session.step_up_at = identity.now() - timedelta(minutes=6)
+    db.commit()
     payload = {
         "email": "newstaff@test.aven.invalid",
         "display_name": "New Staff",
@@ -219,16 +224,16 @@ def test_invitation_flow_and_hash_only_storage(app: FastAPI, db: Session) -> Non
     assert weak.status_code == 422 and weak.json()["error"]["code"] == "weak_password"
     ok = anon.post(
         f"{API}/auth/invitations/accept",
-        json={"token": raw, "new_password": "Invitee-Strong-Pass-1"},
+        json={"token": raw, "new_password": "Harbour-Lantern-Seven-31"},
     )
     assert ok.status_code == 200
     again = anon.post(
         f"{API}/auth/invitations/accept",
-        json={"token": raw, "new_password": "Invitee-Strong-Pass-2"},
+        json={"token": raw, "new_password": "Harbour-Lantern-Seven-32"},
     )
     assert again.status_code == 400 and again.json()["error"]["code"] == "invalid_link"
     login = anon.post(
-        f"{API}/auth/login", json={"email": email, "password": "Invitee-Strong-Pass-1"}
+        f"{API}/auth/login", json={"email": email, "password": "Harbour-Lantern-Seven-31"}
     )
     assert login.json()["state"] == "active"
 

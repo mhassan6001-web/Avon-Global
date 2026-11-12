@@ -25,7 +25,9 @@ def test_ready_against_real_dependencies(client: TestClient) -> None:
     checks = {c["name"]: c for c in body["checks"]}
     assert checks["database"]["status"] == "ok"
     assert checks["migrations"]["status"] == "ok"
-    assert checks["migrations"]["detail"] == "revision 0001"
+    from app.db.migration_state import code_heads
+
+    assert checks["migrations"]["detail"] == f"revision {code_heads()[0]}"
     # Redis is required by default; its result depends on TEST_REDIS_URL being reachable.
     expected = 200 if checks["redis"]["status"] == "ok" else 503
     assert response.status_code == expected

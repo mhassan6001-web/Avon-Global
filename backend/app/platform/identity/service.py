@@ -243,7 +243,7 @@ def login(
 
     assert user is not None and user.password_hash is not None  # nosec B101
     if user.status != "active":
-        _login_event(db, email, f"rejected_{user.status}", user, ip, user_agent)
+        _login_event(db, email, f"rejected_{user.status}"[:32], user, ip, user_agent)
         db.commit()
         raise InvalidCredentialsError()
 
@@ -259,9 +259,12 @@ def login(
         state = "active"
     new_session = _create_session(db, user, state, ip, user_agent)
     ratelimit.clear_account(str(user.id), email)
-    _login_event(
-        db, email, "success" if state == "active" else "password_ok_" + state, user, ip, user_agent
-    )
+    outcome = {
+        "active": "success",
+        "mfa_pending": "password_ok_mfa_due",
+        "mfa_enrolment_required": "password_ok_enrol_due",
+    }[state]
+    _login_event(db, email, outcome, user, ip, user_agent)
     audit.record(
         db,
         action="auth.login",
