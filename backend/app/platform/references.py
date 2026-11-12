@@ -16,6 +16,9 @@ SEQUENCES: dict[str, str] = {
     "CUS": "crm_customer_ref_seq",
     "OPP": "crm_opportunity_ref_seq",
     "TND": "tnd_tender_ref_seq",
+    "SUP": "prc_supplier_ref_seq",
+    "PR": "prc_request_ref_seq",
+    "PO": "prc_order_ref_seq",
 }
 
 

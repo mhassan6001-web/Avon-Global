@@ -26,6 +26,7 @@ ALL_ROLES = [r.code for r in ROLES]
 DIRECTOR = {"director"}
 EVERYONE = set(ALL_ROLES)
 CRM = {"director", "business_development"}
+PRC = {"director", "procurement"}
 
 PDF = b"%PDF-1.4\n% AVEN test document\n%%EOF\n"
 
@@ -89,6 +90,22 @@ MATRIX: list[tuple[str, str, dict | None, set[str]]] = [
         CRM,
     ),
     ("GET", "/approvals", None, EVERYONE),
+    # Stage 6: procurement
+    ("GET", "/procurement/suppliers", None, PRC),
+    ("POST", "/procurement/suppliers", {"name": "Matrix Supplier TEST"}, PRC),
+    ("GET", "/procurement/requests", None, PRC),
+    ("GET", "/procurement/orders", None, PRC),
+    (
+        "POST",
+        f"/procurement/suppliers/{uuid.uuid4()}/bank-change",
+        {
+            "bank_name": "TEST",
+            "account_name": "TEST",
+            "account_number": "12345678",
+            "reason": "matrix check",
+        },
+        PRC,
+    ),
 ]
 
 

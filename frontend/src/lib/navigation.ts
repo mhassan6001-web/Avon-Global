@@ -129,7 +129,7 @@ export const BUSINESS_MODULES: BusinessModule[] = [
     "/tenders",
     "tenders.records.view",
   ),
-  planned(
+  available(
     "procurement",
     "Procurement",
     LuShoppingCart,
@@ -140,6 +140,8 @@ export const BUSINESS_MODULES: BusinessModule[] = [
       "Purchase requests, approvals and orders",
       "Landed-cost calculations",
     ],
+    "/procurement",
+    "procurement.records.view",
   ),
   planned(
     "finance",

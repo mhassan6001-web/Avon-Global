@@ -48,6 +48,7 @@ type View = (typeof VIEWS)[number]["value"];
 /** Where the subject of an approval lives in the app. */
 function subjectLink(a: Approval): string | null {
   if (a.subject_type === "tender_submission") return `/tenders/${a.subject_id}`;
+  if (a.subject_type === "purchase_request") return `/procurement/requests/${a.subject_id}`;
   return null;
 }
 
