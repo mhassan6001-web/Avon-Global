@@ -247,9 +247,8 @@ BY_NAME: dict[str, Tool] = {t.name: t for t in TOOLS}
 
 # Defence in depth: these capabilities must never become tools.
 FORBIDDEN_WORDS = ("payment", "bank", "submit", "approve", "decide", "sql")
-assert not any(w in t.name for t in TOOLS for w in FORBIDDEN_WORDS), (
-    "a forbidden capability was registered as a JARVIS tool"
-)
+if any(w in t.name for t in TOOLS for w in FORBIDDEN_WORDS):
+    raise RuntimeError("a forbidden capability was registered as a JARVIS tool")
 
 
 def available(principal: Principal) -> list[Tool]:

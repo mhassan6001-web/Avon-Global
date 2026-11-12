@@ -76,7 +76,12 @@ def upgrade() -> None:
         sa.Column("role", sa.String(10), nullable=False),
         sa.Column("content", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
         sa.Column("text", sa.Text(), server_default="", nullable=False),
-        _now(),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("clock_timestamp()"),
+            nullable=False,
+        ),
         _ck(t, "role_valid", "role IN ('user', 'assistant', 'tool')"),
         _fk(t, "conversation_id", "ai_conversations.id", "CASCADE"),
         _pk(t),

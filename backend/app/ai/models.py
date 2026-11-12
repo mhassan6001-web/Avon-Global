@@ -32,6 +32,12 @@ def _now() -> Any:
     return mapped_column(DateTime(timezone=True), nullable=False, server_default=text("now()"))
 
 
+def _clock() -> Any:
+    return mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=text("clock_timestamp()")
+    )
+
+
 class AIConversation(TimestampMixin, Base):
     __tablename__ = "ai_conversations"
 
@@ -59,7 +65,8 @@ class AIMessage(Base):
     role: Mapped[str] = mapped_column(String(10), nullable=False)
     content: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, nullable=False)
     text: Mapped[str] = mapped_column(Text, nullable=False, server_default="")
-    created_at: Mapped[datetime] = _now()
+    # clock_timestamp(), not now(): turns written in one transaction keep their order.
+    created_at: Mapped[datetime] = _clock()
 
 
 class AIUsage(Base):
