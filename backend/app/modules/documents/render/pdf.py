@@ -145,8 +145,8 @@ class Canvas:
                 + name
                 + b" /Encoding /WinAnsiEncoding >>"
             )
-        for name in names:
-            data = self.images[name]
+        for image_name in names:
+            data = self.images[image_name]
             width, height = jpeg_size(data)
             objects.append(
                 b"<< /Type /XObject /Subtype /Image /Width %d /Height %d " % (width, height)
