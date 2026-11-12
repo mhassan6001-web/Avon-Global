@@ -1,0 +1,60 @@
+# AVEN GLOBAL — DEVELOPMENT environment only.
+# Production runs on managed cloud services (see docs/architecture/ADR-0001 and ROADMAP Stage 14).
+name: aven-global
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: aven_global
+      POSTGRES_USER: aven
+      POSTGRES_PASSWORD: aven_dev_password # development only
+    ports: ["127.0.0.1:5432:5432"]
+    volumes: [postgres-data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aven -d aven_global"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports: ["127.0.0.1:6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build: { context: ./backend, target: dev }
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgresql+psycopg://aven:aven_dev_password@postgres:5432/aven_global
+      REDIS_URL: redis://redis:6379/0
+    ports: ["127.0.0.1:8000:8000"]
+    volumes: ["./backend:/app"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health/live', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+
+  frontend:
+    build: { context: ./frontend, target: dev }
+    environment:
+      BACKEND_INTERNAL_URL: http://backend:8000
+      WATCHPACK_POLLING: "true"
+    ports: ["127.0.0.1:3000:3000"]
+    volumes: ["./frontend:/app", "/app/node_modules", "/app/.next"]
+    depends_on:
+      backend: { condition: service_healthy }
+
+volumes:
+  postgres-data:

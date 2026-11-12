@@ -1,0 +1,172 @@
+"use client";
+
+import { AnimatePresence, motion } from "framer-motion";
+import { useCallback, useEffect, useState } from "react";
+
+import { Emblem } from "@/components/brand/Emblem";
+import { STARTUP_SEEN_KEY, type EffectiveMotion } from "@/lib/preferences/preferences";
+import { usePreferences } from "@/lib/preferences/PreferencesProvider";
+import { EASE_OUT } from "@/lib/motion/tokens";
+
+import styles from "./startup.module.css";
+
+/** Total on-screen time at full motion, in seconds. Kept short by design. */
+const FULL_SEQUENCE_S = 2.3;
+const REDUCED_SEQUENCE_S = 0.9;
+
+const LETTERS = ["A", "V", "E", "N"];
+
+/**
+ * Restrained startup sequence, shown once per browser session.
+ *
+ * - Renders server-side so there is no flash of the app before it appears;
+ *   the pre-paint script sets `data-startup="skip"` when it should not show.
+ * - Skippable with the button, Escape, Enter, Space or a click.
+ * - Reduced motion: a short fade. Motion off: never shown.
+ * - It overlays the app; the app loads underneath and is never blocked.
+ */
+export const REPLAY_STARTUP_EVENT = "aven:replay-startup";
+
+export function StartupScreen() {
+  const { effectiveMotion } = usePreferences();
+  const [visible, setVisible] = useState(true);
+  // The level actually used for this run. Read from the attribute the pre-paint
+  // script set, because stored preferences reach React state one tick later.
+  const [level, setLevel] = useState<EffectiveMotion>("full");
+  const [replayToken, setReplayToken] = useState(0);
+
+  const finish = useCallback(() => {
+    try {
+      window.sessionStorage.setItem(STARTUP_SEEN_KEY, "1");
+    } catch {
+      // ignore unavailable storage
+    }
+    document.documentElement.dataset.startup = "skip";
+    setVisible(false);
+  }, []);
+
+  useEffect(() => {
+    const onReplay = () => setReplayToken((token) => token + 1);
+    window.addEventListener(REPLAY_STARTUP_EVENT, onReplay);
+    return () => window.removeEventListener(REPLAY_STARTUP_EVENT, onReplay);
+  }, []);
+
+  // Decide whether to play: on first mount, and whenever a replay is requested.
+  useEffect(() => {
+    const root = document.documentElement;
+    const attr = root.dataset.motion;
+    const current: EffectiveMotion =
+      replayToken > 0 || !attr ? effectiveMotion : (attr as EffectiveMotion);
+    const alreadySeen = root.dataset.startup === "skip" && replayToken === 0;
+    if (alreadySeen || current === "off") {
+      setVisible(false);
+      return;
+    }
+    delete root.dataset.startup;
+    setLevel(current);
+    setVisible(true);
+    const total = current === "full" ? FULL_SEQUENCE_S : REDUCED_SEQUENCE_S;
+    const timer = window.setTimeout(finish, total * 1000);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once per (re)play request
+  }, [replayToken]);
+
+  useEffect(() => {
+    if (!visible) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape" || event.key === "Enter" || event.key === " ") finish();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [visible, finish]);
+
+  const full = level === "full";
+  const s = full ? 1 : 0.4;
+
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          key="startup"
+          className={styles.overlay}
+          data-startup-overlay
+          role="presentation"
+          onClick={finish}
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0, transition: { duration: 0.45 * s, ease: EASE_OUT } }}
+        >
+          <div className={styles.grid} aria-hidden="true" />
+          <div className={styles.glow} aria-hidden="true" />
+
+          <div className={styles.center}>
+            <p className="visually-hidden" role="status">
+              Starting AVEN GLOBAL
+            </p>
+
+            <motion.div
+              className={styles.emblem}
+              data-animate={full ? "draw" : "fade"}
+              initial={{ opacity: 0, scale: full ? 0.94 : 1 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6 * s, ease: EASE_OUT }}
+            >
+              <Emblem size={88} decorative />
+            </motion.div>
+
+            <div className={styles.wordmark} aria-hidden="true">
+              <span className={styles.primary}>
+                {LETTERS.map((letter, i) => (
+                  <motion.span
+                    key={letter}
+                    initial={{ opacity: 0, y: full ? 14 : 0 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 * s, delay: (0.55 + i * 0.07) * s, ease: EASE_OUT }}
+                  >
+                    {letter}
+                  </motion.span>
+                ))}
+              </span>
+              <motion.span
+                className={styles.secondary}
+                initial={{ opacity: 0, letterSpacing: full ? "0.25em" : "0.62em" }}
+                animate={{ opacity: 1, letterSpacing: "0.62em" }}
+                transition={{ duration: 0.7 * s, delay: 0.95 * s, ease: EASE_OUT }}
+              >
+                GLOBAL
+              </motion.span>
+            </div>
+
+            <motion.span
+              className={styles.hairline}
+              aria-hidden="true"
+              initial={{ scaleX: 0, opacity: 0 }}
+              animate={{ scaleX: 1, opacity: 1 }}
+              transition={{ duration: 0.8 * s, delay: 1.15 * s, ease: EASE_OUT }}
+            />
+
+            <motion.p
+              className={styles.caption}
+              aria-hidden="true"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 * s, delay: 1.35 * s }}
+            >
+              Business Operating System
+            </motion.p>
+          </div>
+
+          <button
+            type="button"
+            className={styles.skip}
+            onClick={(event) => {
+              event.stopPropagation();
+              finish();
+            }}
+          >
+            Skip
+          </button>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}

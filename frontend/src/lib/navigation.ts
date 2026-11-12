@@ -1,0 +1,189 @@
+/**
+ * Navigation and module registry.
+ *
+ * Business modules are listed so the Director can see the planned structure,
+ * but every one is marked `planned` and routes to an information page — no
+ * module pretends to work before it is built.
+ */
+
+import type { IconType } from "react-icons";
+import {
+  LuBot,
+  LuBoxes,
+  LuBriefcase,
+  LuFileText,
+  LuGauge,
+  LuGavel,
+  LuLandmark,
+  LuLayoutDashboard,
+  LuMessagesSquare,
+  LuServer,
+  LuSettings2,
+  LuShoppingCart,
+  LuTruck,
+  LuUsers,
+} from "react-icons/lu";
+
+export type ModuleStatus = "available" | "planned";
+
+export interface NavItem {
+  label: string;
+  href: string;
+  icon: IconType;
+  status: ModuleStatus;
+}
+
+export interface BusinessModule extends NavItem {
+  slug: string;
+  summary: string;
+  scope: string[];
+}
+
+export const WORKSPACE_NAV: NavItem[] = [
+  { label: "Command Centre", href: "/", icon: LuLayoutDashboard, status: "available" },
+  { label: "System Status", href: "/system", icon: LuServer, status: "available" },
+];
+
+export const SETTINGS_NAV: NavItem[] = [
+  { label: "Preferences", href: "/settings", icon: LuSettings2, status: "available" },
+];
+
+function planned(
+  slug: string,
+  label: string,
+  icon: IconType,
+  summary: string,
+  scope: string[],
+): BusinessModule {
+  return { slug, label, icon, summary, scope, href: `/modules/${slug}`, status: "planned" };
+}
+
+export const BUSINESS_MODULES: BusinessModule[] = [
+  planned(
+    "director",
+    "Director",
+    LuGauge,
+    "Executive dashboard, approvals and management reporting.",
+    [
+      "Cash and revenue overview from posted records",
+      "Profitability by contract and division",
+      "Approval queue and business alerts",
+      "Staff overview and management reports",
+    ],
+  ),
+  planned("crm", "CRM & Sales", LuBriefcase, "Customers, contacts, opportunities and follow-ups.", [
+    "Customer profiles and contacts",
+    "Opportunities, meetings and follow-ups",
+    "Customer history and quotations",
+  ]),
+  planned(
+    "tenders",
+    "Tenders",
+    LuGavel,
+    "Tender register, deadlines, eligibility and bid approvals.",
+    [
+      "RFQ, RFP and EOI register with deadlines",
+      "Eligibility and submission-document checklists",
+      "Bid approvals and award tracking",
+    ],
+  ),
+  planned(
+    "procurement",
+    "Procurement",
+    LuShoppingCart,
+    "Suppliers, quotations, purchase requests and orders.",
+    [
+      "Supplier register and verification",
+      "Supplier quotation comparison",
+      "Purchase requests, approvals and orders",
+      "Landed-cost calculations",
+    ],
+  ),
+  planned(
+    "finance",
+    "Finance",
+    LuLandmark,
+    "Double-entry accounting, invoicing, payments and reporting.",
+    [
+      "Chart of accounts and balanced journals",
+      "Invoices, bills, receipts, payments and expenses",
+      "Bank reconciliation, debtors and creditors",
+      "Multi-currency: MWK, USD, ZAR, ZMW",
+    ],
+  ),
+  planned(
+    "inventory",
+    "Inventory",
+    LuBoxes,
+    "Catalogue, warehouses, stock movements and valuation.",
+    [
+      "Products, SKUs and warehouses",
+      "Goods received, dispatches and adjustments",
+      "Reorder alerts and stock valuation",
+    ],
+  ),
+  planned("logistics", "Logistics", LuTruck, "Shipments, freight, customs and proof of delivery.", [
+    "Shipment and freight records",
+    "Customs documentation",
+    "Delivery schedules, notes and proof of delivery",
+  ]),
+  planned("hr", "HR & Payroll", LuUsers, "Employees, contracts, leave, payroll and performance.", [
+    "Employee records and contracts",
+    "Leave and attendance",
+    "Payroll and commission (restricted access)",
+    "Performance reviews and agreed KPIs",
+  ]),
+  planned(
+    "communications",
+    "Communications",
+    LuMessagesSquare,
+    "Staff messaging, announcements and tasks.",
+    [
+      "One-to-one and department messaging",
+      "Announcements with acknowledgements",
+      "Tasks, deadlines, work plans and reports",
+    ],
+  ),
+  planned(
+    "documents",
+    "Documents",
+    LuFileText,
+    "Branded PDF, Excel and Word documents from validated records.",
+    [
+      "Quotations, invoices, receipts and statements",
+      "Purchase orders, delivery notes and contracts",
+      "Tender packs and financial reports",
+    ],
+  ),
+  planned(
+    "jarvis",
+    "JARVIS",
+    LuBot,
+    "Executive AI assistant with voice, under permission controls.",
+    [
+      "Briefings, analysis and document preparation",
+      "Voice conversation (push-to-talk)",
+      "Actions only through permission-checked, audited tools",
+    ],
+  ),
+];
+
+export function findModule(slug: string): BusinessModule | undefined {
+  return BUSINESS_MODULES.find((entry) => entry.slug === slug);
+}
+
+/** Title for the header, derived from the current path. */
+export function titleForPath(pathname: string): string {
+  const all: NavItem[] = [...WORKSPACE_NAV, ...SETTINGS_NAV, ...BUSINESS_MODULES];
+  const exact = all.find((item) => item.href === pathname);
+  if (exact) return exact.label;
+  const prefix = all
+    .filter((item) => item.href !== "/" && pathname.startsWith(`${item.href}/`))
+    .sort((a, b) => b.href.length - a.href.length)[0];
+  return prefix?.label ?? "AVEN GLOBAL";
+}
+
+export function isActive(pathname: string, href: string): boolean {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}

@@ -1,0 +1,103 @@
+name: CI
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env: { POSTGRES_DB: aven_test, POSTGRES_USER: aven, POSTGRES_PASSWORD: ci_password }
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U aven" --health-interval 5s --health-retries 20
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+    defaults: { run: { working-directory: backend } }
+    env:
+      APP_ENV: test
+      TEST_DATABASE_URL: postgresql+psycopg://aven:ci_password@localhost:5432/aven_test
+      DATABASE_URL: postgresql+psycopg://aven:ci_password@localhost:5432/aven_test
+      TEST_REDIS_URL: redis://localhost:6379/0
+      REDIS_URL: redis://localhost:6379/0
+      RUN: ../.github/scripts/run.sh
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.12" }
+      - name: Install
+        run: $RUN install pip install -r requirements-dev.txt
+      # Checks run independently (if: !cancelled()) so one run reports every failure.
+      - name: Lint
+        if: ${{ !cancelled() }}
+        run: $RUN ruff sh -c "ruff check . && ruff format --check ."
+      - name: Type check
+        if: ${{ !cancelled() }}
+        run: |
+          $RUN mypy mypy app
+          echo "::notice title=mypy::$(mypy app | tail -n 1)"
+      - name: Security lint
+        if: ${{ !cancelled() }}
+        run: $RUN bandit bandit -q -r app
+      - name: Dependency audit
+        if: ${{ !cancelled() }}
+        run: $RUN pip-audit pip-audit -r requirements.txt
+      - name: Tests (integration tests must not be skipped)
+        if: ${{ !cancelled() }}
+        run: |
+          $RUN pytest sh -c 'pytest -rA > pytest.log 2>&1; s=$?; cat pytest.log; exit $s'
+          echo "::notice title=pytest::$(tail -n 1 pytest.log)"
+          echo "::notice title=pytest integration::$(grep -c '^PASSED tests/integration' pytest.log) integration tests passed"
+          echo "::notice title=pytest warnings::$(grep -E 'Warning:' pytest.log | sed 's/^ *//' | sort -u | head -n 5 | tr '\n' ' ' | cut -c1-900)"
+          if grep -q '^SKIPPED.*integration' pytest.log; then echo "::error title=pytest::integration tests were skipped"; exit 1; fi
+      - name: Migration round-trip
+        if: ${{ !cancelled() }}
+        run: |
+          $RUN alembic sh -c "alembic downgrade base && alembic upgrade head && alembic check"
+          echo "::notice title=alembic::downgrade base, upgrade head, check passed. Head: $(alembic heads | head -n 1)"
+      - name: Application startup
+        if: ${{ !cancelled() }}
+        run: |
+          uvicorn app.main:create_app --factory --port 8000 > uvicorn.log 2>&1 &
+          sleep 5
+          cat uvicorn.log
+          $RUN live curl -fsS http://127.0.0.1:8000/api/v1/health/live
+          echo
+          $RUN ready curl -fsS -o ready.json http://127.0.0.1:8000/api/v1/health/ready
+          cat ready.json
+          echo
+          STATUS=$(python -c "import json; d=json.load(open('ready.json')); print(d['status'], *(c['name'] + '=' + c['status'] for c in d['checks']))")
+          echo "::notice title=startup::live=200 ready=200 ${STATUS}"
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: frontend } }
+    env:
+      RUN: ../.github/scripts/run.sh
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: "22" }
+      - name: Install
+        run: $RUN install npm install --no-audit --no-fund
+      - name: Format
+        if: ${{ !cancelled() }}
+        run: $RUN prettier npm run format:check
+      - name: Lint
+        if: ${{ !cancelled() }}
+        run: $RUN eslint npm run lint
+      - name: Type check
+        if: ${{ !cancelled() }}
+        run: $RUN tsc npm run typecheck
+      - name: Unit tests
+        if: ${{ !cancelled() }}
+        run: |
+          $RUN tests sh -c 'npm test > t.log 2>&1; s=$?; cat t.log; exit $s'
+          echo "::notice title=frontend tests::$(grep -E '^# (tests|pass|fail)' t.log | tr '\n' ' ')"
+      - name: Build
+        if: ${{ !cancelled() }}
+        run: |
+          $RUN build sh -c 'npm run build > b.log 2>&1; s=$?; cat b.log; exit $s'
+          echo "::notice title=next build::$(grep -E '(Compiled|Generating static pages)' b.log | tr '\n' ' ')"
