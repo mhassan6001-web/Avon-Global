@@ -35,7 +35,9 @@ jobs:
         run: $RUN ruff sh -c "ruff check . && ruff format --check ."
       - name: Type check
         if: ${{ !cancelled() }}
-        run: $RUN mypy mypy app
+        run: |
+          $RUN mypy mypy app
+          echo "::notice title=mypy::$(mypy app | tail -n 1)"
       - name: Security lint
         if: ${{ !cancelled() }}
         run: $RUN bandit bandit -q -r app
@@ -44,14 +46,27 @@ jobs:
         run: $RUN pip-audit pip-audit -r requirements.txt
       - name: Tests (integration tests must not be skipped)
         if: ${{ !cancelled() }}
-        run: $RUN pytest sh -c 'pytest -rA > pytest.log 2>&1; s=$?; cat pytest.log; if grep -q "^SKIPPED.*integration" pytest.log; then echo "Integration tests were skipped"; exit 1; fi; exit $s'
+        run: |
+          $RUN pytest sh -c 'pytest -rA > pytest.log 2>&1; s=$?; cat pytest.log; exit $s'
+          echo "::notice title=pytest::$(tail -n 1 pytest.log)"
+          echo "::notice title=pytest integration::$(grep -c '^PASSED tests/integration' pytest.log) integration tests passed"
+          if grep -q '^SKIPPED.*integration' pytest.log; then echo "::error title=pytest::integration tests were skipped"; exit 1; fi
       - name: Migration round-trip
         if: ${{ !cancelled() }}
-        run: $RUN alembic sh -c "alembic downgrade base && alembic upgrade head && alembic check"
+        run: |
+          $RUN alembic sh -c "alembic downgrade base && alembic upgrade head && alembic check"
+          echo "::notice title=alembic::downgrade base, upgrade head, check passed. Head: $(alembic heads | head -n 1)"
       - name: Application startup
         if: ${{ !cancelled() }}
         run: |
-          $RUN startup sh -c '(uvicorn app.main:create_app --factory --port 8000 > uvicorn.log 2>&1 &) ; sleep 5; cat uvicorn.log; curl -fsS http://127.0.0.1:8000/api/v1/health/live && echo && curl -fsS http://127.0.0.1:8000/api/v1/health/ready'
+          uvicorn app.main:create_app --factory --port 8000 > uvicorn.log 2>&1 &
+          sleep 5
+          cat uvicorn.log
+          $RUN live curl -fsS http://127.0.0.1:8000/api/v1/health/live
+          echo
+          $RUN ready curl -fsS -o ready.json http://127.0.0.1:8000/api/v1/health/ready
+          cat ready.json
+          echo "::notice title=startup ready::$(cat ready.json)"
 
   frontend:
     runs-on: ubuntu-latest
@@ -75,7 +90,11 @@ jobs:
         run: $RUN tsc npm run typecheck
       - name: Unit tests
         if: ${{ !cancelled() }}
-        run: $RUN tests npm test
+        run: |
+          $RUN tests sh -c 'npm test > t.log 2>&1; s=$?; cat t.log; exit $s'
+          echo "::notice title=frontend tests::$(grep -E '^# (tests|pass|fail)' t.log | tr '\n' ' ')"
       - name: Build
         if: ${{ !cancelled() }}
-        run: $RUN build npm run build
+        run: |
+          $RUN build sh -c 'npm run build > b.log 2>&1; s=$?; cat b.log; exit $s'
+          echo "::notice title=next build::$(grep -E '(Compiled|Generating static pages)' b.log | tr '\n' ' ')"
