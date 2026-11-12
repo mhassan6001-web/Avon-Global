@@ -87,7 +87,8 @@ export const ADMIN_NAV: NavItem[] = [
   },
 ];
 
-function planned(
+/** Helper for a future module that is listed before it is built. */
+export function planned(
   slug: string,
   label: string,
   icon: IconType,
