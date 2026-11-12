@@ -67,13 +67,14 @@ def cmd_create_director(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_seed_dev_users(_: argparse.Namespace) -> int:
+def cmd_seed_dev_users(args: argparse.Namespace) -> int:
     if get_settings().app_env is not Environment.DEVELOPMENT:
         print("Refusing: seed-dev-users only runs with APP_ENV=development.", file=sys.stderr)
         return 2
     with _db() as db:
         sync_catalogue(db)
         print("DEVELOPMENT-ONLY TEST ACCOUNTS (not real people). Shown once.\n")
+        created: dict[str, dict[str, str]] = {}
         for role in ROLES:
             email = f"{role.code.replace('_', '-')}@{DEV_DOMAIN}"
             if db.execute(select(User.id).where(User.email == email)).first():
@@ -91,6 +92,7 @@ def cmd_seed_dev_users(_: argparse.Namespace) -> int:
             )
             identity.set_password(db, user, password)
             line = f"  {email:45} password: {password}"
+            created[role.code] = {"email": email, "password": password}
             if role.mfa_required:
                 secret = totp.new_secret()
                 db.add(
@@ -101,8 +103,14 @@ def cmd_seed_dev_users(_: argparse.Namespace) -> int:
                     )
                 )
                 line += f"  TOTP secret: {secret}"
+                created[role.code]["totp_secret"] = secret
             print(line)
         db.commit()
+    if args.output:
+        import json
+        from pathlib import Path
+
+        Path(args.output).write_text(json.dumps(created, indent=2))
     return 0
 
 
@@ -124,7 +132,9 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--name", required=True)
     p.add_argument("--password-stdin", action="store_true")
     p.set_defaults(func=cmd_create_director)
-    sub.add_parser("seed-dev-users").set_defaults(func=cmd_seed_dev_users)
+    seed = sub.add_parser("seed-dev-users")
+    seed.add_argument("--output", help="also write the created accounts as JSON (dev/CI only)")
+    seed.set_defaults(func=cmd_seed_dev_users)
     sub.add_parser("verify-audit-chain").set_defaults(func=cmd_verify_audit_chain)
     args = parser.parse_args(argv)
     result: int = args.func(args)

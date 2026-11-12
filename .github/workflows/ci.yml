@@ -109,3 +109,66 @@ jobs:
         run: |
           $RUN build sh -c 'npm run build > b.log 2>&1; s=$?; cat b.log; exit $s'
           echo "::notice title=next build::$(grep -E '(Compiled|Generating static pages)' b.log | tr '\n' ' ')"
+
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env: { POSTGRES_DB: aven_e2e, POSTGRES_USER: aven, POSTGRES_PASSWORD: ci_password }
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U aven" --health-interval 5s --health-retries 20
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+    env:
+      APP_ENV: development
+      DATABASE_URL: postgresql+psycopg://aven:ci_password@localhost:5432/aven_e2e
+      REDIS_URL: redis://localhost:6379/0
+      PUBLIC_BASE_URL: http://127.0.0.1:3000
+      CORS_ORIGINS: http://127.0.0.1:3000
+      RUN: ${{ github.workspace }}/.github/scripts/run.sh
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v5
+        with: { node-version: "22" }
+      - name: Start API with development-only accounts
+        working-directory: backend
+        run: |
+          pip install -q -r requirements.txt
+          $RUN migrate alembic upgrade head
+          $RUN seed python -m app.cli seed-dev-users --output ../frontend/dev-accounts.json > /dev/null
+          nohup uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000 > ../api.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8000/api/v1/health/ready > /dev/null && break; sleep 1; done
+          curl -fsS http://127.0.0.1:8000/api/v1/health/ready
+      - name: Build and start web app
+        working-directory: frontend
+        env:
+          BACKEND_INTERNAL_URL: http://127.0.0.1:8000
+        run: |
+          $RUN install npm install --no-audit --no-fund
+          $RUN build npm run build
+          cp -r .next/static .next/standalone/.next/static
+          cp -r public .next/standalone/public
+          PORT=3000 HOSTNAME=127.0.0.1 nohup node .next/standalone/server.js > ../web.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:3000/healthz > /dev/null && break; sleep 1; done
+          curl -fsS http://127.0.0.1:3000/healthz
+      - name: Browser tests (Playwright, Chromium)
+        working-directory: frontend
+        run: |
+          npx playwright install --with-deps chromium > /dev/null
+          set +e
+          npx playwright test > e2e.log 2>&1
+          status=$?
+          set -e
+          cat e2e.log
+          node -e "const r=require('./e2e-results.json');const s=r.stats;console.log('::notice title=e2e::passed='+s.expected+' failed='+s.unexpected+' flaky='+s.flaky+' skipped='+s.skipped)"
+          if [ $status -ne 0 ]; then
+            echo "::error title=e2e failures::$(grep -E '✘|Error:|expect\(' e2e.log | head -40 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')"
+            echo "::error title=api log tail::$(tail -40 ../api.log | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')"
+          fi
+          exit $status

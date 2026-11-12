@@ -1,3 +1,6 @@
 .next
 node_modules
 next-env.d.ts
+e2e-results.json
+test-results
+playwright-report
