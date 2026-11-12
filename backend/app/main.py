@@ -20,6 +20,20 @@ from app.db.session import dispose_engine
 logger = logging.getLogger("aven.app")
 
 
+def _sync_catalogue() -> None:
+    """Bring roles, permissions and departments in line with the code catalogue."""
+    from app.db.session import get_session_factory
+    from app.platform.authz.sync import sync_catalogue
+
+    try:
+        with get_session_factory()() as db:
+            sync_catalogue(db)
+    except Exception:  # database not migrated yet: readiness will report it
+        logger.warning(
+            "catalogue sync skipped (database unavailable or not migrated)", exc_info=True
+        )
+
+
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
     configure_logging(settings.log_level, settings.log_format.value)
@@ -30,6 +44,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "starting",
             extra={"version": settings.app_version, "environment": settings.app_env.value},
         )
+        _sync_catalogue()
         yield
         dispose_engine()
         logger.info("stopped")
@@ -49,7 +64,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_origins=settings.cors_origins,
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-        allow_headers=["Authorization", "Content-Type", REQUEST_ID_HEADER],
+        allow_headers=["Content-Type", "X-CSRF-Token", REQUEST_ID_HEADER],
         expose_headers=[REQUEST_ID_HEADER],
     )
     # Added last so it is the outermost middleware and every response carries a request id.

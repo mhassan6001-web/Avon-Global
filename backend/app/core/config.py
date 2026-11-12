@@ -23,6 +23,11 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_valida
 LOCAL_HOSTS = frozenset({"localhost", "127.0.0.1", "0.0.0.0", "::1"})  # noqa: S104  # nosec B104
 
 
+# Development-only secrets. Production configuration is rejected if it uses them.
+DEV_FIELD_KEY = "ZGV2LW9ubHktZmllbGQta2V5LWF2ZW4tZ2xvYmFsLTA="  # nosec B105
+DEV_SIGNING_SECRET = "dev-only-signing-secret-aven-global-do-not-use"  # noqa: S105  # nosec B105
+
+
 class Environment(StrEnum):
     DEVELOPMENT = "development"
     TEST = "test"
@@ -74,11 +79,27 @@ class Settings(BaseModel):
 
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
 
+    # --- identity and security (Stage 2) ---------------------------------
+    public_base_url: str = "http://localhost:3000"
+    session_idle_minutes: Annotated[int, Field(ge=5, le=24 * 60)] = 30
+    session_absolute_hours: Annotated[int, Field(ge=1, le=72)] = 12
+    step_up_minutes: Annotated[int, Field(ge=1, le=30)] = 5
+    cookie_secure: bool | None = None  # default: True outside development/test
+    invitation_valid_hours: Annotated[int, Field(ge=1, le=24 * 14)] = 72
+    reset_link_valid_minutes: Annotated[int, Field(ge=5, le=24 * 60)] = 60
+    # Comma-separated Fernet keys; the first encrypts, all decrypt (rotation).
+    field_encryption_keys: list[str] = Field(default_factory=lambda: [DEV_FIELD_KEY])
+    signing_secret: str = DEV_SIGNING_SECRET
+    storage_dir: str = "/tmp/aven-files"  # noqa: S108  # nosec B108 - dev default only
+    max_upload_mb: Annotated[int, Field(ge=1, le=200)] = 25
+    argon2_time_cost: Annotated[int, Field(ge=1, le=10)] = 3
+    argon2_memory_kib: Annotated[int, Field(ge=8 * 1024, le=1024 * 1024)] = 64 * 1024
+
     # --- validators -------------------------------------------------------
 
-    @field_validator("cors_origins", mode="before")
+    @field_validator("cors_origins", "field_encryption_keys", mode="before")
     @classmethod
-    def _parse_cors(cls, value: object) -> object:
+    def _parse_csv_lists(cls, value: object) -> object:
         return _split_csv(value)
 
     @field_validator("log_level")
@@ -129,6 +150,14 @@ class Settings(BaseModel):
             problems.append("LOG_FORMAT must be 'json' in production")
         if self.log_level == "DEBUG":
             problems.append("LOG_LEVEL must not be DEBUG in production")
+        if DEV_FIELD_KEY in self.field_encryption_keys:
+            problems.append("FIELD_ENCRYPTION_KEYS uses the development key")
+        if self.signing_secret == DEV_SIGNING_SECRET or len(self.signing_secret) < 32:
+            problems.append("SIGNING_SECRET must be set (32+ characters, not the dev value)")
+        if self.cookie_secure is False:
+            problems.append("COOKIE_SECURE cannot be false in production")
+        if not self.public_base_url.startswith("https://"):
+            problems.append("PUBLIC_BASE_URL must be https in production")
         if problems:
             raise ValueError("unsafe production configuration: " + "; ".join(problems))
         return self
@@ -138,6 +167,12 @@ class Settings(BaseModel):
     @property
     def is_production(self) -> bool:
         return self.app_env is Environment.PRODUCTION
+
+    @property
+    def secure_cookies(self) -> bool:
+        if self.cookie_secure is not None:
+            return self.cookie_secure
+        return self.app_env not in {Environment.DEVELOPMENT, Environment.TEST}
 
     @property
     def expose_error_details(self) -> bool:

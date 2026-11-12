@@ -18,11 +18,12 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Response, status
 
 from app.core.config import Settings, get_settings
+from app.platform.authz.deps import public
 from app.schemas.health import CheckStatus, LivenessResponse, ReadinessResponse
 from app.services.dependency_checks import build_checks
 from app.services.readiness import ReadinessCheck, evaluate
 
-router = APIRouter(prefix="/health", tags=["health"])
+router = APIRouter(prefix="/health", tags=["health"], dependencies=[Depends(public)])
 
 SettingsDep = Annotated[Settings, Depends(get_settings)]
 
