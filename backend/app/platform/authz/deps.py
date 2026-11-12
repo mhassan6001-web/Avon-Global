@@ -6,6 +6,7 @@ as public); ``tests/integration/test_route_coverage.py`` enforces it.
 
 from __future__ import annotations
 
+import ipaddress
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from typing import Annotated, Any
@@ -59,7 +60,14 @@ class Principal:
 
 
 def client_ip(request: Request) -> str | None:
-    return request.client.host if request.client else None
+    """The peer address if it is a valid IP (proxies may supply other values)."""
+    host = request.client.host if request.client else None
+    if not host:
+        return None
+    try:
+        return str(ipaddress.ip_address(host))
+    except ValueError:
+        return None
 
 
 def _load(request: Request, db: Session) -> Principal:

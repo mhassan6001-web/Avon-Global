@@ -47,11 +47,19 @@ jobs:
       - name: Tests (integration tests must not be skipped)
         if: ${{ !cancelled() }}
         run: |
-          $RUN pytest sh -c 'pytest -rA > pytest.log 2>&1; s=$?; cat pytest.log; exit $s'
+          set +e
+          pytest -rA --tb=short > pytest.log 2>&1
+          status=$?
+          set -e
+          cat pytest.log
           echo "::notice title=pytest::$(tail -n 1 pytest.log)"
           echo "::notice title=pytest integration::$(grep -c '^PASSED tests/integration' pytest.log) integration tests passed"
-          echo "::notice title=pytest warnings::$(grep -E 'Warning:' pytest.log | sed 's/^ *//' | sort -u | head -n 5 | tr '\n' ' ' | cut -c1-900)"
+          grep -E '^(FAILED|ERROR) ' pytest.log | cut -c1-400 > failed.log || true
+          if [ -s failed.log ]; then
+            echo "::error title=failing tests ($(wc -l < failed.log))::$(sed 's/%/%25/g' failed.log | awk '{printf "%s%%0A", $0}')"
+          fi
           if grep -q '^SKIPPED.*integration' pytest.log; then echo "::error title=pytest::integration tests were skipped"; exit 1; fi
+          exit $status
       - name: Migration round-trip
         if: ${{ !cancelled() }}
         run: |
