@@ -2,6 +2,7 @@
 
 import { LuPlay } from "react-icons/lu";
 
+import { SoundSettingsPanel } from "@/components/sound/SoundSettingsPanel";
 import { REPLAY_STARTUP_EVENT } from "@/components/startup/StartupScreen";
 import { Button, PageHeader, Panel, SegmentedControl } from "@/components/ui";
 import type { ContrastPreference, MotionPreference } from "@/lib/preferences/preferences";
@@ -34,8 +35,8 @@ export default function SettingsPage() {
     <>
       <PageHeader
         eyebrow="Preferences"
-        title="Display & accessibility"
-        description="Saved on this device. They will move to your account once sign-in is available."
+        title="Display, sound & accessibility"
+        description="Saved to your account, so they follow you to every device you sign in on."
       />
       <div className={styles.grid}>
         <div className={styles.span6}>
@@ -77,12 +78,7 @@ export default function SettingsPage() {
           </Panel>
         </div>
         <div className={styles.span12}>
-          <Panel eyebrow="Coming later" title="Sound">
-            <p className={styles.note} style={{ marginTop: 0 }}>
-              Sound settings (volume, mute, quiet mode) arrive with the sound system in a later
-              stage. Audio will always be optional.
-            </p>
-          </Panel>
+          <SoundSettingsPanel />
         </div>
       </div>
     </>

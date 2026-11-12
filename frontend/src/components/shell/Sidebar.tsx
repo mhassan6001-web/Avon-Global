@@ -5,8 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LuPanelLeftClose, LuPanelLeftOpen, LuX } from "react-icons/lu";
 
-import { Emblem } from "@/components/brand/Emblem";
-import { Wordmark } from "@/components/brand/Wordmark";
+import { Logo } from "@/components/brand/Logo";
 import { IconButton } from "@/components/ui";
 import { usePreferences } from "@/lib/preferences/PreferencesProvider";
 import { useOptionalAuth } from "@/lib/auth/AuthProvider";
@@ -18,6 +17,7 @@ import {
   isActive,
   type NavItem,
 } from "@/lib/navigation";
+import { STAGES } from "@/lib/roadmap";
 
 import styles from "./shell.module.css";
 
@@ -82,14 +82,20 @@ function SidebarContents({
   onClose?: () => void;
 }) {
   const auth = useOptionalAuth();
-  const admin = ADMIN_NAV.filter((item) => !item.permission || auth?.can(item.permission));
+  const allowed = (item: { permission?: string }) =>
+    !item.permission || !!auth?.can(item.permission);
+  const admin = ADMIN_NAV.filter(allowed);
+  const modules = BUSINESS_MODULES.filter(allowed);
+  const current = STAGES.find((stage) => stage.state === "in_progress");
   return (
     <>
       <div className={styles.brand}>
         <Link href="/" className={styles.brandLink} aria-label="AVEN GLOBAL — Command Centre">
-          <Emblem size={34} decorative />
+          <span className={styles.brandMark}>
+            <Logo variant="emblem" height={30} decorative priority />
+          </span>
           <span className={styles.brandWordmark}>
-            <Wordmark size="sm" />
+            <Logo variant="wordmark" height={26} decorative priority />
           </span>
         </Link>
         {onClose && (
@@ -101,7 +107,7 @@ function SidebarContents({
 
       <nav className={styles.nav} aria-label="Main">
         <NavSection title="Workspace" items={WORKSPACE_NAV} collapsed={collapsed} />
-        <NavSection title="Business modules" items={BUSINESS_MODULES} collapsed={collapsed} />
+        <NavSection title="Business modules" items={modules} collapsed={collapsed} />
         {admin.length > 0 && (
           <NavSection title="Administration" items={admin} collapsed={collapsed} />
         )}
@@ -111,7 +117,9 @@ function SidebarContents({
       <div className={styles.sidebarFooter}>
         <p className={styles.buildTag}>
           <span className={styles.buildDot} aria-hidden="true" />
-          <span className={styles.navLabel}>Stage 2 · Identity & security</span>
+          <span className={styles.navLabel}>
+            {current ? `Stage ${current.number} · ${current.title}` : "AVEN GLOBAL"}
+          </span>
         </p>
         {onToggleCollapsed && (
           <IconButton

@@ -129,6 +129,7 @@ jobs:
       REDIS_URL: redis://localhost:6379/0
       PUBLIC_BASE_URL: http://127.0.0.1:3000
       CORS_ORIGINS: http://127.0.0.1:3000
+      AI_PROVIDER: fake  # deterministic test provider; never a real model in CI
       RUN: ${{ github.workspace }}/.github/scripts/run.sh
     steps:
       - uses: actions/checkout@v5
@@ -159,6 +160,8 @@ jobs:
           curl -fsS http://127.0.0.1:3000/healthz
       - name: Browser tests (Playwright, Chromium)
         working-directory: frontend
+        env:
+          E2E_REDIS_PORT: "6379"
         run: |
           npx playwright install --with-deps chromium > /dev/null
           set +e

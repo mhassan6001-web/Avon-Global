@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 
-import { Emblem } from "@/components/brand/Emblem";
-import { Wordmark } from "@/components/brand/Wordmark";
+import { Logo } from "@/components/brand/Logo";
 
 import styles from "./auth.module.css";
 
@@ -12,8 +11,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
       <div className={styles.lines} aria-hidden="true" />
       <div className={styles.card}>
         <div className={styles.brand}>
-          <Emblem size={52} decorative />
-          <Wordmark size="md" />
+          <Logo variant="lockup" height={150} priority />
         </div>
         {children}
       </div>

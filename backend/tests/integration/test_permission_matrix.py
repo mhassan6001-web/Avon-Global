@@ -25,6 +25,11 @@ API = "/api/v1"
 ALL_ROLES = [r.code for r in ROLES]
 DIRECTOR = {"director"}
 EVERYONE = set(ALL_ROLES)
+CRM = {"director", "business_development"}
+PRC = {"director", "procurement"}
+FIN = {"director", "finance"}
+LGX = {"director", "logistics"}
+HRA = {"director", "hr_admin"}
 
 PDF = b"%PDF-1.4\n% AVEN test document\n%%EOF\n"
 
@@ -58,6 +63,90 @@ MATRIX: list[tuple[str, str, dict | None, set[str]]] = [
     ("GET", "/admin/login-history", None, DIRECTOR),
     ("GET", "/admin/security-alerts", None, DIRECTOR),
     ("GET", f"/admin/users/{uuid.uuid4()}/overrides", None, DIRECTOR),
+    # Stage 4: Director dashboard and CRM (Business Development's section)
+    ("GET", "/director/dashboard", None, DIRECTOR),
+    ("GET", "/crm/summary", None, CRM),
+    ("GET", "/crm/customers", None, CRM),
+    ("POST", "/crm/customers", {"name": "Matrix Customer TEST"}, CRM),
+    ("GET", f"/crm/customers/{uuid.uuid4()}", None, CRM),
+    ("GET", "/crm/opportunities", None, CRM),
+    ("GET", "/crm/activities", None, CRM),
+    (
+        "POST",
+        "/crm/opportunities",
+        {"customer_id": str(uuid.uuid4()), "title": "x1", "division": "technologies"},
+        CRM,
+    ),
+    # Stage 5: tenders (Business Development) and the approval queue (everyone signed in)
+    ("GET", "/tenders", None, CRM),
+    ("GET", "/tenders/summary", None, CRM),
+    ("GET", f"/tenders/{uuid.uuid4()}", None, CRM),
+    (
+        "POST",
+        "/tenders",
+        {
+            "title": "Matrix",
+            "issuer_name": "TEST",
+            "kind": "rfq",
+            "submission_deadline": "2031-01-01T10:00:00+02:00",
+        },
+        CRM,
+    ),
+    ("GET", "/approvals", None, EVERYONE),
+    # Stage 6: procurement
+    ("GET", "/procurement/suppliers", None, PRC),
+    ("POST", "/procurement/suppliers", {"name": "Matrix Supplier TEST"}, PRC),
+    ("GET", "/procurement/requests", None, PRC),
+    ("GET", "/procurement/orders", None, PRC),
+    (
+        "POST",
+        f"/procurement/suppliers/{uuid.uuid4()}/bank-change",
+        {
+            "bank_name": "TEST",
+            "account_name": "TEST",
+            "account_number": "12345678",
+            "reason": "matrix check",
+        },
+        PRC,
+    ),
+    # Stage 7: finance
+    ("GET", "/finance/invoices", None, FIN),
+    ("GET", "/finance/accounts", None, FIN),
+    ("GET", "/finance/reports/trial-balance", None, FIN),
+    ("GET", "/finance/overview", None, FIN),
+    ("GET", "/finance/bills", None, FIN),
+    (
+        "POST",
+        "/finance/periods",
+        {"name": "Matrix", "start_date": "2001-01-01", "end_date": "2001-01-31"},
+        FIN,
+    ),
+    ("POST", f"/finance/periods/{uuid.uuid4()}/close", None, DIRECTOR),
+    # Stage 8: inventory and logistics
+    ("GET", "/inventory/products", None, LGX),
+    ("GET", "/inventory/levels", None, LGX),
+    ("GET", "/inventory/open-orders", None, LGX),
+    ("GET", "/logistics/shipments", None, LGX),
+    ("GET", "/logistics/delivery-notes", None, LGX),
+    ("GET", "/logistics/customers", None, LGX),
+    # Stage 9: HR and payroll
+    ("GET", "/hr/employees", None, HRA),
+    ("GET", "/hr/leave", None, HRA),
+    ("GET", "/hr/payroll-runs", None, HRA),
+    ("GET", "/hr/pay-components", None, HRA),
+    # Stage 10: communications (everyone) and the Director's team view
+    ("GET", "/comms/conversations", None, EVERYONE),
+    ("GET", "/comms/tasks", None, EVERYONE),
+    ("GET", "/comms/people", None, EVERYONE),
+    ("GET", "/comms/team", None, DIRECTOR),
+    ("GET", "/crm/quotations", None, CRM),
+    ("GET", "/approvals/rules", None, DIRECTOR),
+    ("GET", "/jarvis/status", None, DIRECTOR),
+    ("GET", "/jarvis/briefing", None, DIRECTOR),
+    ("GET", "/jarvis/conversations", None, DIRECTOR),
+    ("GET", "/jarvis/voice/status", None, DIRECTOR),
+    ("GET", "/documents/reports/trial_balance", None, FIN),
+    ("GET", "/hr/me", None, EVERYONE),
 ]
 
 
@@ -243,7 +332,7 @@ def test_separation_of_duties(db: Session) -> None:
     own = approvals.create_request(
         db,
         principal=d,
-        subject_type="supplier_bank_change",
+        subject_type="test_subject",
         subject_id="S-1",
         permission_required="procurement.supplier_bank.approve_change",
         summary="Change bank details",
@@ -255,7 +344,7 @@ def test_separation_of_duties(db: Session) -> None:
     req = approvals.create_request(
         db,
         principal=p,
-        subject_type="supplier_bank_change",
+        subject_type="test_subject",
         subject_id="S-2",
         permission_required="procurement.supplier_bank.approve_change",
         summary="Change bank details",

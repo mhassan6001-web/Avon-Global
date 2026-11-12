@@ -1,18 +1,17 @@
 "use client";
 
+import Link from "next/link";
 import { LuBell } from "react-icons/lu";
 
-import { EmptyState } from "@/components/ui";
+import { Button, EmptyState } from "@/components/ui";
+import { useRealtime } from "@/lib/realtime/RealtimeProvider";
 
 import { Popover } from "./Popover";
 import styles from "./shell.module.css";
 
-/**
- * Notification area. The notification service (events, approvals, alerts)
- * depends on authentication and is not built yet, so this shows an honest
- * empty state rather than sample notifications.
- */
+/** Live notices from the event stream (messages, tasks, report requests). */
 export function NotificationArea() {
+  const { notices, clearNotices, connected } = useRealtime();
   return (
     <Popover
       label="Notifications"
@@ -21,21 +20,38 @@ export function NotificationArea() {
           ref={ref}
           type="button"
           className={styles.headerIconButton}
-          aria-label="Notifications"
+          aria-label={notices.length ? `Notifications, ${notices.length} new` : "Notifications"}
           {...props}
         >
           <LuBell aria-hidden="true" />
+          {notices.length > 0 && <span className={styles.badgeDot} aria-hidden="true" />}
         </button>
       )}
     >
       <div className={styles.popoverHeader}>
         <p className={styles.popoverTitle}>Notifications</p>
+        {notices.length > 0 && (
+          <Button size="sm" variant="ghost" onClick={clearNotices}>
+            Clear
+          </Button>
+        )}
       </div>
       <div className={styles.popoverBody}>
-        <EmptyState icon={<LuBell />} title="No notifications">
-          Approvals, alerts and messages will appear here once sign-in and the notification service
-          are live.
-        </EmptyState>
+        {notices.length === 0 ? (
+          <EmptyState icon={<LuBell />} title="Nothing new">
+            {connected
+              ? "You are up to date."
+              : "Live updates are reconnecting; pages still refresh when opened."}
+          </EmptyState>
+        ) : (
+          <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 8 }}>
+            {notices.map((n) => (
+              <li key={n.id}>
+                <Link href={n.href}>{n.text}</Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </Popover>
   );

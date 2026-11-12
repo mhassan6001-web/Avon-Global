@@ -22,6 +22,18 @@ class ProfileIn(BaseModel):
     headquarters_city: str | None = Field(default=None, max_length=120)
     headquarters_country_code: str | None = Field(default=None, pattern="^[A-Z]{2}$")
     functional_currency: str = Field(default="MWK", pattern="^[A-Z]{3}$")
+    address_line1: str | None = Field(default=None, max_length=200)
+    address_line2: str | None = Field(default=None, max_length=200)
+    phone: str | None = Field(default=None, max_length=40)
+    email: str | None = Field(default=None, max_length=200)
+    tpin: str | None = Field(default=None, max_length=40)
+    vat_number: str | None = Field(default=None, max_length=40)
+    # Director's approval to print each item on documents. Off by default.
+    print_address: bool = False
+    print_phone: bool = False
+    print_email: bool = False
+    print_tpin: bool = False
+    print_vat: bool = False
 
     @model_validator(mode="after")
     def _rules(self) -> ProfileIn:
@@ -34,6 +46,15 @@ class ProfileIn(BaseModel):
             and not self.registration_number
         ):
             raise ValueError("A registration number is required when status is 'registered'.")
+        for flag, value, label in (
+            (self.print_address, self.address_line1, "address"),
+            (self.print_phone, self.phone, "telephone number"),
+            (self.print_email, self.email, "email address"),
+            (self.print_tpin, self.tpin, "TPIN"),
+            (self.print_vat, self.vat_number, "VAT number"),
+        ):
+            if flag and not value:
+                raise ValueError(f"Enter the {label} before approving it for print.")
         return self
 
 
@@ -51,13 +72,7 @@ def get_profile(db: DbSession, _: Principal = Depends(require("org.profile.view"
     if row is None:
         return ProfileOut(trading_name="AVEN GLOBAL", configured=False)
     return ProfileOut(
-        trading_name=row.trading_name,
-        legal_name=row.legal_name,
-        registration_status=RegistrationStatus(row.registration_status),
-        registration_number=row.registration_number,
-        headquarters_city=row.headquarters_city,
-        headquarters_country_code=row.headquarters_country_code,
-        functional_currency=row.functional_currency,
+        **{name: getattr(row, name) for name in ProfileIn.model_fields},
         configured=True,
     )
 
@@ -73,12 +88,10 @@ def put_profile(
         db.add(row)
     else:
         before = {"legal_name": row.legal_name, "registration_status": row.registration_status}
+    for name, value in body.model_dump(mode="json").items():
+        # Empty strings are stored as "not provided"; booleans are kept as given.
+        setattr(row, name, value if isinstance(value, bool) else (value or None))
     row.trading_name = body.trading_name
-    row.legal_name = body.legal_name
-    row.registration_status = body.registration_status.value
-    row.registration_number = body.registration_number
-    row.headquarters_city = body.headquarters_city
-    row.headquarters_country_code = body.headquarters_country_code
     row.functional_currency = body.functional_currency
     db.flush()
     audit.record(

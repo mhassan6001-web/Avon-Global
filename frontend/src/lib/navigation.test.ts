@@ -1,15 +1,20 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { BUSINESS_MODULES, findModule, isActive, titleForPath } from "./navigation";
+import { BUSINESS_MODULES, findModule, isActive, plannedModules, titleForPath } from "./navigation";
 
 describe("navigation", () => {
-  it("marks every business module as planned (no fake working modules)", () => {
+  it("planned modules link to their information page; built ones declare a permission", () => {
     assert.ok(BUSINESS_MODULES.length > 0);
     for (const entry of BUSINESS_MODULES) {
-      assert.equal(entry.status, "planned", `${entry.slug} must be planned in Stage 1`);
-      assert.equal(entry.href, `/modules/${entry.slug}`);
+      if (entry.status === "planned") assert.equal(entry.href, `/modules/${entry.slug}`);
+      else assert.ok(entry.permission, `${entry.slug} needs a permission`);
     }
+    assert.deepEqual(
+      plannedModules().map((m) => m.slug),
+      BUSINESS_MODULES.filter((m) => m.status === "planned").map((m) => m.slug),
+    );
+    assert.equal(findModule("crm")?.href, "/crm");
   });
 
   it("has unique slugs", () => {
@@ -20,11 +25,13 @@ describe("navigation", () => {
   it("resolves titles and active state", () => {
     assert.equal(titleForPath("/"), "Command Centre");
     assert.equal(titleForPath("/system"), "System Status");
-    assert.equal(titleForPath("/modules/finance"), "Finance");
+    assert.equal(titleForPath("/finance/invoices"), "Finance");
+    assert.equal(titleForPath("/hr"), "HR & Payroll");
     assert.equal(titleForPath("/unknown"), "AVEN GLOBAL");
     assert.equal(isActive("/system", "/"), false);
     assert.equal(isActive("/", "/"), true);
-    assert.equal(isActive("/modules/crm", "/modules/crm"), true);
+    assert.equal(isActive("/crm/customers/1", "/crm"), true);
+    assert.equal(titleForPath("/crm/customers/1"), "CRM & Sales");
     assert.equal(findModule("nope"), undefined);
   });
 });

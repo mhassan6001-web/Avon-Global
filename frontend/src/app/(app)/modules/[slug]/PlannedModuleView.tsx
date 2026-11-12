@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { JarvisPreview } from "@/components/jarvis/JarvisPreview";
 import { Badge, EmptyState, PageHeader, Panel } from "@/components/ui";
 import { findModule } from "@/lib/navigation";
 
@@ -49,6 +50,7 @@ export function PlannedModuleView({ slug }: { slug: string }) {
           </Panel>
         </div>
       </div>
+      {slug === "jarvis" && <JarvisPreview />}
     </>
   );
 }

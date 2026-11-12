@@ -196,3 +196,25 @@ class LoginEvent(Base):
     ip: Mapped[str | None] = mapped_column(INET)
     user_agent: Mapped[str | None] = mapped_column(String(400))
     occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class UserPreferences(Base):
+    """Per-user interface preferences (display and sound), synced across devices.
+
+    Validated by ``schemas.PreferencesIn`` before storage; never security-relevant.
+    """
+
+    __tablename__ = "auth_user_preferences"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("auth_users.id", ondelete="CASCADE"), primary_key=True
+    )
+    display: Mapped[dict[str, object]] = mapped_column(
+        JSONB, nullable=False, server_default=text("'{}'::jsonb")
+    )
+    sound: Mapped[dict[str, object]] = mapped_column(
+        JSONB, nullable=False, server_default=text("'{}'::jsonb")
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=text("now()")
+    )

@@ -14,10 +14,18 @@ import os
 from collections.abc import Mapping
 from enum import StrEnum
 from functools import lru_cache
-from typing import Annotated
+from typing import Annotated, Literal
 from urllib.parse import urlsplit
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    SecretStr,
+    ValidationError,
+    field_validator,
+    model_validator,
+)
 
 # Hosts that must never appear in production URLs. Matched only, never bound.
 LOCAL_HOSTS = frozenset({"localhost", "127.0.0.1", "0.0.0.0", "::1"})  # noqa: S104  # nosec B104
@@ -95,6 +103,31 @@ class Settings(BaseModel):
     argon2_time_cost: Annotated[int, Field(ge=1, le=10)] = 3
     argon2_memory_kib: Annotated[int, Field(ge=8 * 1024, le=1024 * 1024)] = 64 * 1024
 
+    # --- JARVIS AI (Stage 11) ---------------------------------------------
+    # "disabled" until the Director supplies a key; "fake" is a deterministic
+    # test provider and is refused in production.
+    ai_provider: Literal["disabled", "anthropic", "fake"] = "disabled"
+    anthropic_api_key: SecretStr = SecretStr("")
+    # Director's decision (2026-11-12): Sonnet for everyday work; Opus only when
+    # the user asks for deep analysis. Both are configuration, never code.
+    anthropic_model: str = Field(default="claude-sonnet-5-5", min_length=3, max_length=80)
+    anthropic_advanced_model: str = Field(default="claude-opus-5-5", min_length=3, max_length=80)
+    anthropic_base_url: str = "https://api.anthropic.com"
+    ai_max_tool_rounds: Annotated[int, Field(ge=1, le=10)] = 5
+    ai_max_output_tokens: Annotated[int, Field(ge=256, le=8192)] = 2048
+    ai_timeout_seconds: Annotated[float, Field(gt=0, le=300)] = 60.0
+
+    # --- JARVIS voice (Stage 12) -----------------------------------------
+    # Providers are chosen by the Director after voice auditions; until then
+    # voice falls back to text. "fake" is for tests only.
+    stt_provider: Literal["disabled", "fake"] = "disabled"
+    tts_provider: Literal["disabled", "fake"] = "disabled"
+    # Picovoice Porcupine AccessKey (paid licence). Porcupine Web runs in the
+    # browser, so the key is released only to consenting JARVIS users.
+    picovoice_access_key: SecretStr = SecretStr("")
+    wake_word_model_url: str | None = None  # trained .ppn served from our origin
+    voice_max_clip_kb: Annotated[int, Field(ge=64, le=10_240)] = 2048
+
     # --- validators -------------------------------------------------------
 
     @field_validator("cors_origins", "field_encryption_keys", mode="before")
@@ -158,6 +191,12 @@ class Settings(BaseModel):
             problems.append("COOKIE_SECURE cannot be false in production")
         if not self.public_base_url.startswith("https://"):
             problems.append("PUBLIC_BASE_URL must be https in production")
+        if self.ai_provider == "fake":
+            problems.append("AI_PROVIDER=fake is for tests only")
+        if "fake" in (self.stt_provider, self.tts_provider):
+            problems.append("STT_PROVIDER/TTS_PROVIDER=fake are for tests only")
+        if self.ai_provider == "anthropic" and not self.anthropic_base_url.startswith("https://"):
+            problems.append("ANTHROPIC_BASE_URL must be https in production")
         if problems:
             raise ValueError("unsafe production configuration: " + "; ".join(problems))
         return self

@@ -33,7 +33,7 @@
 .drawer {
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, rgba(11, 20, 40, 0.92), rgba(7, 13, 31, 0.96));
+  background: linear-gradient(180deg, #0f1014, #0a0b0e);
   border-right: 1px solid var(--border-subtle);
 }
 .sidebar {
@@ -132,25 +132,15 @@
   color: var(--text-secondary);
 }
 .navLink[data-active] {
-  color: var(--ivory-50);
+  color: var(--ink-950);
+  font-weight: 600;
 }
 .navActive {
   position: absolute;
   inset: 0;
   border-radius: var(--radius-md);
-  background: linear-gradient(90deg, rgba(214, 187, 131, 0.16), rgba(214, 187, 131, 0.03));
-  border: 1px solid rgba(214, 187, 131, 0.22);
-}
-.navActive::before {
-  content: "";
-  position: absolute;
-  left: -1px;
-  top: 8px;
-  bottom: 8px;
-  width: 2px;
-  border-radius: 2px;
-  background: var(--gold-400);
-  box-shadow: var(--glow-gold);
+  background: linear-gradient(180deg, var(--gold-fill-strong), var(--gold-fill));
+  box-shadow: 0 6px 18px -8px rgba(179, 146, 85, 0.7);
 }
 .navIcon {
   position: relative;
@@ -159,7 +149,11 @@
   height: 18px;
 }
 .navLink[data-active] .navIcon {
-  color: var(--gold-300);
+  color: var(--ink-950);
+}
+.navLink[data-active] .navTag {
+  color: var(--ink-900);
+  border-color: rgba(8, 9, 12, 0.35);
 }
 .navLabel {
   position: relative;
@@ -263,7 +257,7 @@
   gap: var(--space-4);
   height: var(--header-height);
   padding: 0 var(--space-6) 0 var(--space-8);
-  background: rgba(7, 13, 31, 0.72);
+  background: rgba(10, 11, 14, 0.78);
   backdrop-filter: blur(var(--blur-glass)) saturate(1.3);
   -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(1.3);
   border-bottom: 1px solid var(--border-subtle);
@@ -526,4 +520,42 @@ button.menuItem:hover {
   .bottomItem[data-active] {
     color: var(--gold-300);
   }
+}
+
+.headerIconButton {
+  position: relative;
+}
+.badgeDot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold-highlight);
+  box-shadow: 0 0 0 2px var(--ink-950);
+}
+
+.brandMark {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 71px;
+  height: 30px;
+  overflow: hidden;
+}
+.brandMark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.brandWordmark img {
+  width: 125px;
+  height: auto;
+}
+/* Collapsed rail: show the "A" of the emblem only. */
+.sidebar[data-collapsed] .brandMark {
+  width: 32px;
+}
+.sidebar[data-collapsed] .brandMark img {
+  object-position: 26% 50%;
 }

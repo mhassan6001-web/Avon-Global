@@ -16,8 +16,28 @@ interface Profile {
   headquarters_city: string | null;
   headquarters_country_code: string | null;
   functional_currency: string;
+  address_line1: string | null;
+  address_line2: string | null;
+  phone: string | null;
+  email: string | null;
+  tpin: string | null;
+  vat_number: string | null;
+  print_address: boolean;
+  print_phone: boolean;
+  print_email: boolean;
+  print_tpin: boolean;
+  print_vat: boolean;
   configured?: boolean;
 }
+
+const CONTACT_FIELDS = [
+  { key: "address_line1", label: "Address line 1", flag: "print_address" },
+  { key: "address_line2", label: "Address line 2", flag: null },
+  { key: "phone", label: "Business telephone", flag: "print_phone" },
+  { key: "email", label: "Business email", flag: "print_email" },
+  { key: "tpin", label: "TPIN", flag: "print_tpin" },
+  { key: "vat_number", label: "VAT registration number", flag: "print_vat" },
+] as const;
 
 export default function OrganisationPage() {
   const withStepUp = useStepUp();
@@ -47,6 +67,7 @@ export default function OrganisationPage() {
             registration_number: body.registration_number || null,
             headquarters_city: body.headquarters_city || null,
             headquarters_country_code: body.headquarters_country_code || null,
+            ...Object.fromEntries(CONTACT_FIELDS.map((f) => [f.key, body[f.key] || null])),
           },
         }),
       );
@@ -119,12 +140,37 @@ export default function OrganisationPage() {
             onChange={(e) => set({ functional_currency: e.target.value })}
             options={["MWK", "USD", "ZAR", "ZMW"].map((c) => ({ value: c, label: c }))}
           />
+          {CONTACT_FIELDS.map((f) => (
+            <div key={f.key} className={styles.field}>
+              <TextField
+                label={f.label}
+                value={profile[f.key] ?? ""}
+                onChange={(e) => set({ [f.key]: e.target.value } as Partial<Profile>)}
+              />
+              {f.flag && (
+                <label style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 6 }}>
+                  <input
+                    type="checkbox"
+                    checked={profile[f.flag]}
+                    disabled={!profile[f.key]}
+                    onChange={(e) => set({ [f.flag]: e.target.checked } as Partial<Profile>)}
+                  />
+                  Approved to print on documents
+                </label>
+              )}
+            </div>
+          ))}
           <div className={styles.field}>
             <Button variant="primary" type="submit">
               Save profile
             </Button>
           </div>
         </form>
+        <p className={styles.note}>
+          Address, telephone, email, TPIN and VAT number appear on letterheads, quotations and
+          invoices only after you tick “Approved to print”. Leave tax numbers unticked until the
+          Malawi Revenue Authority has confirmed them.
+        </p>
         <FormError message={error} />
         {saved && (
           <p className={styles.notice} role="status">

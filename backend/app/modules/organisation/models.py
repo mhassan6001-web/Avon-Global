@@ -14,7 +14,7 @@ from __future__ import annotations
 import uuid
 from enum import StrEnum
 
-from sqlalchemy import CheckConstraint, String, Uuid, text
+from sqlalchemy import Boolean, CheckConstraint, String, Uuid, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, TimestampMixin
@@ -44,6 +44,14 @@ class OrganisationProfile(TimestampMixin, Base):
             "registration_status <> 'registered' OR registration_number IS NOT NULL",
             name="registered_requires_number",
         ),
+        CheckConstraint(
+            "(NOT print_address OR address_line1 IS NOT NULL) AND "
+            "(NOT print_phone OR phone IS NOT NULL) AND "
+            "(NOT print_email OR email IS NOT NULL) AND "
+            "(NOT print_tpin OR tpin IS NOT NULL) AND "
+            "(NOT print_vat OR vat_number IS NOT NULL)",
+            name="print_requires_value",
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -60,3 +68,19 @@ class OrganisationProfile(TimestampMixin, Base):
     functional_currency: Mapped[str] = mapped_column(
         String(3), nullable=False, server_default="MWK"
     )
+    # Contact and tax identity (Stage 16). Each item prints on documents only
+    # after the Director approves it for print; tax numbers are never shown
+    # on the strength of an unconfirmed value.
+    address_line1: Mapped[str | None] = mapped_column(String(200))
+    address_line2: Mapped[str | None] = mapped_column(String(200))
+    phone: Mapped[str | None] = mapped_column(String(40))
+    email: Mapped[str | None] = mapped_column(String(200))
+    tpin: Mapped[str | None] = mapped_column(String(40))
+    vat_number: Mapped[str | None] = mapped_column(String(40))
+    print_address: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("false")
+    )
+    print_phone: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
+    print_email: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
+    print_tpin: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
+    print_vat: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))

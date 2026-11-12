@@ -1,23 +1,26 @@
 /**
  * Navigation and module registry.
  *
- * Business modules are listed so the Director can see the planned structure,
- * but every one is marked `planned` and routes to an information page — no
- * module pretends to work before it is built.
+ * Business modules are listed so the Director can see the planned structure.
+ * A module is `available` only once it is built and tested; until then it is
+ * `planned` and routes to an information page, so nothing pretends to work.
  */
 
 import type { IconType } from "react-icons";
 import {
+  LuBadgeCheck,
   LuBot,
   LuBoxes,
   LuBriefcase,
   LuBuilding2,
   LuFileText,
-  LuGauge,
   LuGavel,
+  LuIdCard,
   LuLandmark,
+  LuListChecks,
   LuLayoutDashboard,
   LuMessagesSquare,
+  LuNotebookPen,
   LuServer,
   LuSettings2,
   LuShieldCheck,
@@ -47,10 +50,15 @@ export interface BusinessModule extends NavItem {
 
 export const WORKSPACE_NAV: NavItem[] = [
   { label: "Command Centre", href: "/", icon: LuLayoutDashboard, status: "available" },
+  { label: "Messages", href: "/messages", icon: LuMessagesSquare, status: "available" },
+  { label: "Tasks", href: "/tasks", icon: LuListChecks, status: "available" },
+  { label: "Work reports", href: "/reports", icon: LuNotebookPen, status: "available" },
+  { label: "Approvals", href: "/approvals", icon: LuBadgeCheck, status: "available" },
   { label: "System Status", href: "/system", icon: LuServer, status: "available" },
 ];
 
 export const SETTINGS_NAV: NavItem[] = [
+  { label: "My HR", href: "/me", icon: LuIdCard, status: "available" },
   { label: "My account", href: "/account", icon: LuUserRound, status: "available" },
   { label: "Preferences", href: "/settings", icon: LuSettings2, status: "available" },
 ];
@@ -79,7 +87,8 @@ export const ADMIN_NAV: NavItem[] = [
   },
 ];
 
-function planned(
+/** Helper for a future module that is listed before it is built. */
+export function planned(
   slug: string,
   label: string,
   icon: IconType,
@@ -89,25 +98,33 @@ function planned(
   return { slug, label, icon, summary, scope, href: `/modules/${slug}`, status: "planned" };
 }
 
+function available(
+  slug: string,
+  label: string,
+  icon: IconType,
+  summary: string,
+  scope: string[],
+  href: string,
+  permission: string,
+): BusinessModule {
+  return { slug, label, icon, summary, scope, href, status: "available", permission };
+}
+
 export const BUSINESS_MODULES: BusinessModule[] = [
-  planned(
-    "director",
-    "Director",
-    LuGauge,
-    "Executive dashboard, approvals and management reporting.",
+  available(
+    "crm",
+    "CRM & Sales",
+    LuBriefcase,
+    "Customers, contacts, opportunities and follow-ups.",
     [
-      "Cash and revenue overview from posted records",
-      "Profitability by contract and division",
-      "Approval queue and business alerts",
-      "Staff overview and management reports",
+      "Customer profiles and contacts",
+      "Opportunities, meetings and follow-ups",
+      "Customer history and quotations",
     ],
+    "/crm",
+    "crm.records.view",
   ),
-  planned("crm", "CRM & Sales", LuBriefcase, "Customers, contacts, opportunities and follow-ups.", [
-    "Customer profiles and contacts",
-    "Opportunities, meetings and follow-ups",
-    "Customer history and quotations",
-  ]),
-  planned(
+  available(
     "tenders",
     "Tenders",
     LuGavel,
@@ -117,8 +134,10 @@ export const BUSINESS_MODULES: BusinessModule[] = [
       "Eligibility and submission-document checklists",
       "Bid approvals and award tracking",
     ],
+    "/tenders",
+    "tenders.records.view",
   ),
-  planned(
+  available(
     "procurement",
     "Procurement",
     LuShoppingCart,
@@ -129,8 +148,10 @@ export const BUSINESS_MODULES: BusinessModule[] = [
       "Purchase requests, approvals and orders",
       "Landed-cost calculations",
     ],
+    "/procurement",
+    "procurement.records.view",
   ),
-  planned(
+  available(
     "finance",
     "Finance",
     LuLandmark,
@@ -141,8 +162,10 @@ export const BUSINESS_MODULES: BusinessModule[] = [
       "Bank reconciliation, debtors and creditors",
       "Multi-currency: MWK, USD, ZAR, ZMW",
     ],
+    "/finance",
+    "finance.records.view",
   ),
-  planned(
+  available(
     "inventory",
     "Inventory",
     LuBoxes,
@@ -152,19 +175,37 @@ export const BUSINESS_MODULES: BusinessModule[] = [
       "Goods received, dispatches and adjustments",
       "Reorder alerts and stock valuation",
     ],
+    "/inventory",
+    "inventory.records.view",
   ),
-  planned("logistics", "Logistics", LuTruck, "Shipments, freight, customs and proof of delivery.", [
-    "Shipment and freight records",
-    "Customs documentation",
-    "Delivery schedules, notes and proof of delivery",
-  ]),
-  planned("hr", "HR & Payroll", LuUsers, "Employees, contracts, leave, payroll and performance.", [
-    "Employee records and contracts",
-    "Leave and attendance",
-    "Payroll and commission (restricted access)",
-    "Performance reviews and agreed KPIs",
-  ]),
-  planned(
+  available(
+    "logistics",
+    "Logistics",
+    LuTruck,
+    "Shipments, freight, customs and proof of delivery.",
+    [
+      "Shipment and freight records",
+      "Customs documentation",
+      "Delivery schedules, notes and proof of delivery",
+    ],
+    "/logistics",
+    "logistics.records.view",
+  ),
+  available(
+    "hr",
+    "HR & Payroll",
+    LuUsers,
+    "Employees, contracts, leave, payroll and performance.",
+    [
+      "Employee records and contracts",
+      "Leave and attendance",
+      "Payroll and commission (restricted access)",
+      "Performance reviews and agreed KPIs",
+    ],
+    "/hr",
+    "hr.records.view",
+  ),
+  available(
     "communications",
     "Communications",
     LuMessagesSquare,
@@ -174,19 +215,24 @@ export const BUSINESS_MODULES: BusinessModule[] = [
       "Announcements with acknowledgements",
       "Tasks, deadlines, work plans and reports",
     ],
+    "/messages",
+    "comms.own.use",
   ),
-  planned(
+  available(
     "documents",
     "Documents",
     LuFileText,
     "Branded PDF, Excel and Word documents from validated records.",
     [
-      "Quotations, invoices, receipts and statements",
-      "Purchase orders, delivery notes and contracts",
-      "Tender packs and financial reports",
+      "Invoices, receipts, purchase orders and delivery notes (PDF and Word)",
+      "Company letterhead for letters (Word and PDF)",
+      "Excel workbooks: trial balance, ageing and stock",
+      "A version register with a fingerprint for every download",
     ],
+    "/documents",
+    "org.profile.view",
   ),
-  planned(
+  available(
     "jarvis",
     "JARVIS",
     LuBot,
@@ -196,11 +242,18 @@ export const BUSINESS_MODULES: BusinessModule[] = [
       "Voice conversation (push-to-talk)",
       "Actions only through permission-checked, audited tools",
     ],
+    "/jarvis",
+    "jarvis.use",
   ),
 ];
 
 export function findModule(slug: string): BusinessModule | undefined {
   return BUSINESS_MODULES.find((entry) => entry.slug === slug);
+}
+
+/** Modules not built yet; each has an information page at /modules/<slug>. */
+export function plannedModules(): BusinessModule[] {
+  return BUSINESS_MODULES.filter((entry) => entry.status === "planned");
 }
 
 /** Title for the header, derived from the current path. */

@@ -39,3 +39,12 @@
   font-size: clamp(11px, 1.6vw, 14px);
   margin-top: 0.9em;
 }
+
+/* Logo artwork on its own near-black field: blend the field away. */
+.logo {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  mix-blend-mode: lighten;
+  user-select: none;
+}

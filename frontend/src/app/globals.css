@@ -6,6 +6,12 @@
 
 :root {
   /* --- raw palette --- */
+  /* Grey-black base (Director decision C1, ref 08), navy kept for depth. */
+  --ink-950: #08090c;
+  --ink-900: #0d0e12;
+  --ink-850: #121419;
+  --ink-800: #181a20;
+  --ink-700: #22252d;
   --navy-975: #04081a;
   --navy-950: #070d1f;
   --navy-900: #0b1428;
@@ -15,6 +21,10 @@
   --blue-600: #24427d;
   --blue-500: #2f5597;
 
+  /* Two-tier gold (C2): antique gold for fills, champagne for highlights. */
+  --gold-fill: #b39255;
+  --gold-fill-strong: #c9a464;
+  --gold-highlight: #e6c88a;
   --gold-200: #f2e6c8;
   --gold-300: #e7d3a4;
   --gold-400: #d6bb83;
@@ -37,11 +47,11 @@
   --danger-400: #e67a74;
 
   /* --- semantic --- */
-  --bg: var(--navy-950);
-  --bg-elevated: var(--navy-900);
-  --surface-glass: rgba(20, 34, 65, 0.55);
-  --surface-glass-strong: rgba(20, 34, 65, 0.82);
-  --surface-sunken: rgba(4, 8, 26, 0.45);
+  --bg: var(--ink-950);
+  --bg-elevated: var(--ink-900);
+  --surface-glass: rgba(20, 22, 28, 0.78);
+  --surface-glass-strong: rgba(18, 20, 25, 0.94);
+  --surface-sunken: rgba(0, 0, 0, 0.28);
   --surface-hover: rgba(214, 187, 131, 0.07);
 
   --border-subtle: rgba(214, 187, 131, 0.12);
@@ -55,7 +65,7 @@
   --text-accent: var(--gold-400);
   --text-on-accent: var(--navy-950);
 
-  --accent: var(--gold-400);
+  --accent: var(--gold-fill);
   --accent-strong: var(--gold-300);
   --signal: var(--ice-400);
   --focus-ring: 0 0 0 2px var(--navy-950), 0 0 0 4px var(--gold-400);
@@ -63,6 +73,8 @@
   /* --- typography --- */
   --font-display: "Sora", "Segoe UI", system-ui, sans-serif;
   --font-body: "Inter Variable", "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-hud: "Rajdhani", "Sora", system-ui, sans-serif; /* C9: JARVIS/HUD labels only */
+  --font-serif: "Cormorant Garamond", Georgia, serif; /* C8: long-form text only */
   --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Consolas, monospace;
 
   --text-xs: 0.75rem;
@@ -160,8 +172,8 @@ body {
 body {
   background-color: var(--bg);
   background-image:
-    radial-gradient(1200px 600px at 85% -10%, rgba(36, 66, 125, 0.35), transparent 60%),
-    radial-gradient(900px 500px at -10% 110%, rgba(214, 187, 131, 0.07), transparent 60%);
+    radial-gradient(1100px 560px at 85% -12%, rgba(28, 46, 85, 0.32), transparent 62%),
+    radial-gradient(900px 500px at -10% 110%, rgba(179, 146, 85, 0.07), transparent 60%);
   background-attachment: fixed;
   color: var(--text-primary);
   font-family: var(--font-body);
@@ -251,4 +263,16 @@ button {
     --dur-base: 100ms;
     --dur-slow: 160ms;
   }
+}
+
+.hud-label {
+  font-family: var(--font-hud);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.serif-text {
+  font-family: var(--font-serif);
+  font-size: 1.12em;
+  line-height: 1.6;
 }

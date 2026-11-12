@@ -3,8 +3,9 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 
-import { Emblem } from "@/components/brand/Emblem";
+import { Logo } from "@/components/brand/Logo";
 import { STARTUP_SEEN_KEY, type EffectiveMotion } from "@/lib/preferences/preferences";
+import { useSound } from "@/lib/sound/SoundProvider";
 import { usePreferences } from "@/lib/preferences/PreferencesProvider";
 import { EASE_OUT } from "@/lib/motion/tokens";
 
@@ -13,8 +14,6 @@ import styles from "./startup.module.css";
 /** Total on-screen time at full motion, in seconds. Kept short by design. */
 const FULL_SEQUENCE_S = 2.3;
 const REDUCED_SEQUENCE_S = 0.9;
-
-const LETTERS = ["A", "V", "E", "N"];
 
 /**
  * Restrained startup sequence, shown once per browser session.
@@ -29,6 +28,7 @@ export const REPLAY_STARTUP_EVENT = "aven:replay-startup";
 
 export function StartupScreen() {
   const { effectiveMotion } = usePreferences();
+  const { play } = useSound();
   const [visible, setVisible] = useState(true);
   // The level actually used for this run. Read from the attribute the pre-paint
   // script set, because stored preferences reach React state one tick later.
@@ -65,6 +65,8 @@ export function StartupScreen() {
     delete root.dataset.startup;
     setLevel(current);
     setVisible(true);
+    // Audio is only possible after a gesture, so the chime plays on replay (or later visits once unlocked).
+    play("startup");
     const total = current === "full" ? FULL_SEQUENCE_S : REDUCED_SEQUENCE_S;
     const timer = window.setTimeout(finish, total * 1000);
     return () => window.clearTimeout(timer);
@@ -104,37 +106,13 @@ export function StartupScreen() {
             </p>
 
             <motion.div
-              className={styles.emblem}
-              data-animate={full ? "draw" : "fade"}
-              initial={{ opacity: 0, scale: full ? 0.94 : 1 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6 * s, ease: EASE_OUT }}
+              className={styles.logo}
+              initial={{ opacity: 0, scale: full ? 0.92 : 1, filter: full ? "blur(6px)" : "none" }}
+              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+              transition={{ duration: 0.9 * s, ease: EASE_OUT }}
             >
-              <Emblem size={88} decorative />
+              <Logo variant="lockup" height={300} priority decorative />
             </motion.div>
-
-            <div className={styles.wordmark} aria-hidden="true">
-              <span className={styles.primary}>
-                {LETTERS.map((letter, i) => (
-                  <motion.span
-                    key={letter}
-                    initial={{ opacity: 0, y: full ? 14 : 0 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 * s, delay: (0.55 + i * 0.07) * s, ease: EASE_OUT }}
-                  >
-                    {letter}
-                  </motion.span>
-                ))}
-              </span>
-              <motion.span
-                className={styles.secondary}
-                initial={{ opacity: 0, letterSpacing: full ? "0.25em" : "0.62em" }}
-                animate={{ opacity: 1, letterSpacing: "0.62em" }}
-                transition={{ duration: 0.7 * s, delay: 0.95 * s, ease: EASE_OUT }}
-              >
-                GLOBAL
-              </motion.span>
-            </div>
 
             <motion.span
               className={styles.hairline}

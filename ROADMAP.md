@@ -1,28 +1,44 @@
 # AVEN GLOBAL — Roadmap
 
 This file is the stage order the Director set on 2026-11-12. The full wording
-of each stage is in `docs/director-stage-plan.md`. **Every stage ends with a
-test report and stops for Director approval.** The next stage starts only
-after that approval.
+of each stage is in `docs/director-stage-plan.md`. On 2026-11-12 the Director instructed that Stages 3–15 run consecutively,
+with questions collected at the end (`docs/stages-3-15-report.md`).
 
 | # | Stage (Stage 0 §10 naming) | Depends on | Key scope | Status |
 |---|------|-----------|-----------|--------|
 | 0 | Architecture and project blueprint | — | `docs/architecture/*`, `docs/security/*` (14 required documents) | **Approved 2026-11-12** |
 | 1 | Repository foundation and development environment | 0 | FastAPI/Next.js foundation, config, logging, errors, health, Alembic, Docker, CI | **Approved 2026-11-12. CI green on GitHub** (`docs/stage-1-readiness-checklist.md`) |
-| 2 | Authentication and security | 1 | Login, Argon2id, sessions, Director-issued reset links, 2FA, department-scoped roles, overrides, suspension, login history, audit log, rate limiting, secure files, module K admin basics | **Built and verified in CI** (123 backend tests, 6 e2e). **Awaiting approval.** See `docs/stage-2-report.md`. |
-| 3 | Core design system and interface | 1, 2 (sign-in screens) | Reference-faithful grey-black and gold system (C1–C9), rich motion graphics, charts, JARVIS placeholder head, sound engine and settings | Queued |
-| 4 | Director dashboard and CRM | 2, 3 | Command Centre from real records, CRM, quotations, contracts, search, outbox and events | Queued |
-| 5 | Tender management | 2, 3, 4 (CRM organisations) | Register, government, NGO and UN sources (permitted only), bid costing, checklists, deadline alerts, Celery | Queued |
-| 6 | Procurement and suppliers | 2, 3 | Suppliers, verification, quotations, landed cost, PRs and POs, encrypted bank details with dual control, supplier performance | Queued |
-| 7 | Finance and accounting | 4, 6 | Double-entry, periods, invoices, receipts, bills, payments, reconciliation, FX, tax configuration, reports, finance PDFs. **Accountant sign-off gate.** | Queued |
-| 8 | Inventory and logistics | 6, 7 | Stock movements, valuation, shipments, customs, deliveries, proof of delivery | Queued |
-| 9 | Human resources | 2, 7 | Employees, contracts, leave, attendance, payroll preparation (configurable statutory rules, professional sign-off), KPIs | Queued |
-| 10 | Staff communications | 2, 9 | Messaging, channels, announcements, tasks, reports, WebSockets, AI-message labelling | Queued |
-| 11 | JARVIS AI integration | 4–10 (tools gated per module) | Provider abstraction, ActionGateway, tools, briefings, usage ledger, task-execution visuals | Queued |
-| 12 | Voice activation and immersive audio | 3, 11 | CINEMATIC voice, Porcupine wake word (Director's key), push-to-talk, STT/TTS streaming | Queued |
-| 13 | Documents and external integrations | 4–10 | Document Centre (J), email, calendar, reminders, notifications | Queued |
-| 14 | Cloud deployment and production readiness | all | Hosting, HTTPS, secrets, backups and restore tests, monitoring, UAT, launch report. **Director approval to deploy.** | Queued |
-| 15 | Mobile experience and native application planning | 14 | PWA (icons, splash, push), mobile layouts (ref 06), then a native assessment | Queued |
+| 2 | Authentication and security | 1 | Login, Argon2id, sessions, Director-issued reset links, 2FA, department-scoped roles, overrides, suspension, login history, audit log, rate limiting, secure files, module K admin basics | **Built, CI green.** Awaiting approval (PR #2). |
+| 3 | Core design system and interface | 1, 2 (sign-in screens) | Reference-faithful grey-black and gold system (C1–C9), rich motion graphics, charts, JARVIS placeholder head, sound engine and settings | **Built, CI green** (PR #3) |
+| 4 | Director dashboard and CRM | 2, 3 | Command Centre from real records, CRM, quotations, contracts, search, outbox and events | **Built, CI green** |
+| 5 | Tender management | 2, 3, 4 (CRM organisations) | Register, government, NGO and UN sources (permitted only), bid costing, checklists, deadline alerts, Celery | **Built, CI green** |
+| 6 | Procurement and suppliers | 2, 3 | Suppliers, verification, quotations, landed cost, PRs and POs, encrypted bank details with dual control, supplier performance | **Built, CI green** |
+| 7 | Finance and accounting | 4, 6 | Double-entry, periods, invoices, receipts, bills, payments, reconciliation, FX, tax configuration, reports, finance PDFs. **Accountant sign-off gate.** | **Built, CI green.** Accountant sign-off pending. |
+| 8 | Inventory and logistics | 6, 7 | Stock movements, valuation, shipments, customs, deliveries, proof of delivery | **Built, CI green** |
+| 9 | Human resources | 2, 7 | Employees, contracts, leave, attendance, payroll preparation (configurable statutory rules, professional sign-off), KPIs | **Built, CI green.** Statutory review pending. |
+| 10 | Staff communications | 2, 9 | Messaging, channels, announcements, tasks, reports, WebSockets, AI-message labelling | **Built, CI green** |
+| 11 | JARVIS AI integration | 4–10 (tools gated per module) | Provider abstraction, ActionGateway, tools, briefings, usage ledger, task-execution visuals | **Built, CI green.** Anthropic key pending. |
+| 12 | Voice activation and immersive audio | 3, 11 | CINEMATIC voice, Porcupine wake word (Director's key), push-to-talk, STT/TTS streaming | **Built, CI green.** STT/TTS and Porcupine key pending. |
+| 13 | Documents and external integrations | 4–10 | Document Centre (J), email, calendar, reminders, notifications | **Documents built, CI green.** Email, calendar and reminders wait for providers. |
+| 14 | Cloud deployment and production readiness | all | Hosting, HTTPS, secrets, backups and restore tests, monitoring, UAT, launch report. **Director approval to deploy.** | **Runbooks written.** Not provisioned; deploy only with Director approval. |
+| 15 | Mobile experience and native application planning | 14 | PWA (icons, splash, push), mobile layouts (ref 06), then a native assessment | **PWA built, CI green.** Native assessment not started. |
+
+## Phase 2 (proposed 2026-11-12 from the Director's answers; **each stage needs approval before it starts**)
+
+| # | Stage | Scope | Status |
+|---|-------|-------|--------|
+| R | Research and comparisons (no purchases) | Voice shortlist with samples; Porcupine "Hey JARVIS" licence and compatibility check; preliminary trademark search (Malawi and international); Azure South Africa North costing against alternatives; monitoring comparison; domain availability; Reserve Bank of Malawi rate source | **Done 2026-11-12.** Findings in `docs/research/STAGE_R_FINDINGS.md`; six decisions requested. |
+| 16 | Company identity, quotations and approval rules | Editable address, phone, TPIN and VAT fields with print approval (hidden until approved); letterhead from these fields; **quotations** (records and PDF/Word); configurable approval limits and the second-approver block; JARVIS model routing (Sonnet default, Opus advanced) | **Built, CI green** (210 backend, 64 frontend, 28 browser tests). Awaiting review. |
+| 17 | Statements and supplier documents | Customer account statements; invoice and receipt layout refinements; supplier quotation documents | **Next. Awaiting approval.** |
+| 18 | Perpetual inventory accounting | Real-time ledger entries for receipts, transfers, sales, deliveries, returns, damage and adjustments; monthly valuation and reconciliation; live posting gated on accountant approval of the method | Queued |
+| 19 | Exchange rates and date-effective payroll | Daily Reserve Bank of Malawi rates where a reliable source exists, with source records; date-effective statutory tables | Queued |
+| 20 | Microsoft 365 integration | Email outbox, Outlook calendar, reminders and document storage through a replaceable interface; connected only with approval | Queued |
+| 21 | Retention and archival | Configurable policies, legal hold, authorised deletion procedure | Queued (after legal confirmation) |
+| 22 | Contracts and tender packs | Contracts and service agreements; EOI, RFQ and RFP packs with company documents | Queued |
+| 23 | Azure provisioning and launch | Only after cost approval, the accountant's review and user acceptance tests | Queued |
+
+Decisions and pending information: `docs/DIRECTOR_DECISIONS.md` and
+`docs/OUTSTANDING_INFORMATION.md`.
 
 **Additional work identified (folded into stages, not new stages):**
 

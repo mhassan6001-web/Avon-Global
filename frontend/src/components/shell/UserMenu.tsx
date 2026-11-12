@@ -4,6 +4,7 @@ import Link from "next/link";
 import { LuLogOut, LuSettings2, LuShieldCheck, LuUserRound } from "react-icons/lu";
 
 import { useAuth } from "@/lib/auth/AuthProvider";
+import { useSound } from "@/lib/sound/SoundProvider";
 
 import { Popover } from "./Popover";
 import styles from "./shell.module.css";
@@ -20,6 +21,7 @@ function initials(name: string): string {
 /** Profile area: the signed-in user, their role and account actions. */
 export function UserMenu() {
   const { me, signOut } = useAuth();
+  const { play } = useSound();
   const { user } = me;
   return (
     <Popover
@@ -61,7 +63,14 @@ export function UserMenu() {
           </Link>
         </li>
         <li>
-          <button type="button" className={styles.menuItem} onClick={() => void signOut()}>
+          <button
+            type="button"
+            className={styles.menuItem}
+            onClick={() => {
+              play("shutdown");
+              void signOut();
+            }}
+          >
             <LuLogOut aria-hidden="true" /> Sign out
           </button>
         </li>

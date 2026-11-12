@@ -1,0 +1,202 @@
+/* Command Centre composition after reference 08. */
+.layout {
+  display: grid;
+  gap: var(--space-5);
+}
+@media (min-width: 1200px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    align-items: start;
+  }
+}
+.main,
+.side,
+.stack {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+}
+.kpis {
+  display: grid;
+  gap: var(--space-4);
+}
+@media (min-width: 760px) {
+  .kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.centre {
+  display: grid;
+  gap: var(--space-5);
+}
+@media (min-width: 980px) {
+  .centre {
+    grid-template-columns: minmax(0, 1fr) 260px;
+    align-items: start;
+  }
+}
+
+.tableCard {
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: linear-gradient(180deg, rgba(26, 28, 34, 0.9), rgba(16, 17, 21, 0.92));
+  overflow-x: auto;
+}
+.tableHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+.tableHead h3 {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+.table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+.table th {
+  text-align: left;
+  font-family: var(--font-hud);
+  font-weight: 600;
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0 var(--space-3) var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.table td {
+  padding: var(--space-3);
+}
+.num {
+  text-align: right !important;
+}
+.emptyRow {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: var(--space-6) var(--space-3) !important;
+}
+
+.jarvisCard {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(140, 203, 232, 0.2);
+  background:
+    radial-gradient(circle at 25% 60%, rgba(30, 60, 120, 0.35), transparent 65%),
+    linear-gradient(180deg, rgba(20, 22, 28, 0.95), rgba(12, 13, 17, 0.95));
+}
+.jarvisCard > figure {
+  margin: -12px;
+}
+.jarvisText {
+  margin: var(--space-2) 0;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  line-height: 1.35;
+  color: var(--text-primary);
+}
+.jarvisLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-sm);
+  color: var(--gold-highlight);
+  text-decoration: none;
+}
+.jarvisLink:hover,
+.jarvisLink:focus-visible {
+  text-decoration: underline;
+}
+@media (min-width: 1200px) {
+  .jarvisCard {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+}
+
+.lower {
+  display: grid;
+  gap: var(--space-5);
+  margin-top: var(--space-5);
+}
+@media (min-width: 980px) {
+  .lower {
+    grid-template-columns: 7fr 5fr;
+    align-items: start;
+  }
+}
+.stageList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+.stageRow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: var(--text-sm);
+}
+.stageRow:last-child {
+  border-bottom: 0;
+}
+.stageNumber {
+  font-family: var(--font-hud);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+.stageTitle {
+  min-width: 0;
+}
+
+.securityStrip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(140, 203, 232, 0.22);
+  background: linear-gradient(90deg, rgba(140, 203, 232, 0.07), transparent 70%);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+.securityStrip svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--ice-400);
+}
+.securityStrip p {
+  margin: 0;
+}
+.followUps {
+  display: flex;
+  gap: var(--space-5);
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+.followUps strong {
+  font-size: 1.4rem;
+  color: var(--text-primary);
+  margin-right: 4px;
+}
+.alert strong,
+.alert {
+  color: var(--danger-400);
+}
