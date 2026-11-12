@@ -20,6 +20,7 @@ from app.modules.comms.models import (
     TaskUpdate,
 )
 from app.modules.crm.models import Activity, Contact, Customer, Opportunity
+from app.modules.documents.models import GeneratedDocument
 from app.modules.finance.models import (
     Account,
     BankStatementLine,
@@ -120,6 +121,7 @@ __all__ = [
     "Department",
     "Employee",
     "ExchangeRate",
+    "GeneratedDocument",
     "GoodsReceipt",
     "Invoice",
     "InvoiceLine",
