@@ -39,6 +39,7 @@ REPORTS = {
     "stock": "inventory.records.view",
 }
 KIND_PERMISSION = {k: perm for k, (_, perm) in builders.BUILDERS.items()} | REPORTS
+KIND_PERMISSION["letterhead"] = "org.profile.view"
 
 
 class RegisterRow(BaseModel):
@@ -151,6 +152,23 @@ def report_workbook(
     subject = name if name == "stock" else f"{name}:{when.isoformat()}"
     number = f"{name.replace('_', '-')}-{when.isoformat()}"
     return _deliver(db, principal, name, subject, number, "xlsx", xlsx.render(sheet))
+
+
+@router.get("/letterhead")
+def letterhead(
+    principal: CurrentPrincipal,
+    db: DbSession,
+    fmt: Literal["pdf", "docx"] = Query(default="docx", alias="format"),
+) -> Response:
+    """Blank company letterhead (Word to type in, or PDF to print). Every
+    signed-in user may download it; it carries no signature or approval."""
+    now = datetime.now(UTC)
+    issuer = builders.issuer_lines(db)
+    if fmt == "pdf":
+        data = pdf.letterhead(issuer)
+    else:
+        data = docx.letterhead(issuer, now.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    return _deliver(db, principal, "letterhead", "letterhead", "AVEN-GLOBAL-letterhead", fmt, data)
 
 
 @router.get("/register", response_model=list[RegisterRow])

@@ -5,8 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LuPanelLeftClose, LuPanelLeftOpen, LuX } from "react-icons/lu";
 
-import { Emblem } from "@/components/brand/Emblem";
-import { Wordmark } from "@/components/brand/Wordmark";
+import { Logo } from "@/components/brand/Logo";
 import { IconButton } from "@/components/ui";
 import { usePreferences } from "@/lib/preferences/PreferencesProvider";
 import { useOptionalAuth } from "@/lib/auth/AuthProvider";
@@ -92,9 +91,11 @@ function SidebarContents({
     <>
       <div className={styles.brand}>
         <Link href="/" className={styles.brandLink} aria-label="AVEN GLOBAL — Command Centre">
-          <Emblem size={34} decorative />
+          <span className={styles.brandMark}>
+            <Logo variant="emblem" height={30} decorative priority />
+          </span>
           <span className={styles.brandWordmark}>
-            <Wordmark size="sm" />
+            <Logo variant="wordmark" height={26} decorative priority />
           </span>
         </Link>
         {onClose && (

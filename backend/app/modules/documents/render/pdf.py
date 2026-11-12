@@ -4,8 +4,11 @@ Type 1 fonts, WinAnsi encoding), text, lines and filled rectangles."""
 
 from __future__ import annotations
 
+import struct
 import zlib
 from dataclasses import dataclass, field
+from functools import lru_cache
+from pathlib import Path
 
 from ..model import Document
 
@@ -31,6 +34,31 @@ GREY = (0.45, 0.47, 0.52)
 LIGHT = (0.95, 0.94, 0.91)
 
 
+ASSETS = Path(__file__).resolve().parent.parent / "assets"
+WHITE = (1.0, 1.0, 1.0)
+
+
+def jpeg_size(data: bytes) -> tuple[int, int]:
+    """Width and height from a baseline or progressive JPEG's SOF marker."""
+    i = 2
+    while i < len(data):
+        if data[i] != 0xFF:
+            i += 1
+            continue
+        marker = data[i + 1]
+        length = struct.unpack(">H", data[i + 2 : i + 4])[0]
+        if marker in (0xC0, 0xC1, 0xC2):
+            height, width = struct.unpack(">HH", data[i + 5 : i + 9])
+            return width, height
+        i += 2 + length
+    raise ValueError("not a JPEG image")
+
+
+@lru_cache(maxsize=4)
+def asset(name: str) -> bytes:
+    return (ASSETS / name).read_bytes()
+
+
 def text_width(text: str, size: float, font: str = "F1") -> float:
     widths = FONTS[font]
     total = 0
@@ -48,6 +76,7 @@ def _esc(text: str) -> bytes:
 @dataclass
 class Canvas:
     pages: list[list[bytes]] = field(default_factory=lambda: [[]])
+    images: dict[str, bytes] = field(default_factory=dict)  # name -> JPEG bytes
 
     @property
     def ops(self) -> list[bytes]:
@@ -96,11 +125,18 @@ class Canvas:
         r, g, b = color
         self.ops.append(b"%.3f %.3f %.3f rg %.2f %.2f %.2f %.2f re f" % (r, g, b, x, y, w, h))
 
+    def image(self, name: str, jpeg: bytes, x: float, y: float, w: float, h: float) -> None:
+        """Draw a JPEG (embedded once per document, DCTDecode)."""
+        self.images.setdefault(name, jpeg)
+        self.ops.append(b"q %.2f 0 0 %.2f %.2f %.2f cm /%s Do Q" % (w, h, x, y, name.encode()))
+
     def output(self) -> bytes:
         objects: list[bytes] = []
         n_pages = len(self.pages)
-        # 1 catalog, 2 pages, 3 F1, 4 F2, then (page, content) pairs.
-        kids = " ".join(f"{5 + 2 * i} 0 R" for i in range(n_pages)).encode()
+        names = list(self.images)
+        first_page = 5 + len(names)
+        # 1 catalog, 2 pages, 3 F1, 4 F2, images, then (page, content) pairs.
+        kids = " ".join(f"{first_page + 2 * i} 0 R" for i in range(n_pages)).encode()
         objects.append(b"<< /Type /Catalog /Pages 2 0 R >>")
         objects.append(b"<< /Type /Pages /Kids [" + kids + b"] /Count %d >>" % n_pages)
         for name in (b"Helvetica", b"Helvetica-Bold"):
@@ -109,12 +145,24 @@ class Canvas:
                 + name
                 + b" /Encoding /WinAnsiEncoding >>"
             )
+        for name in names:
+            data = self.images[name]
+            width, height = jpeg_size(data)
+            objects.append(
+                b"<< /Type /XObject /Subtype /Image /Width %d /Height %d " % (width, height)
+                + b"/ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode "
+                + b"/Length %d >>\nstream\n" % len(data)
+                + data
+                + b"\nendstream"
+            )
+        xobjects = b" ".join(b"/%s %d 0 R" % (n.encode(), 5 + k) for k, n in enumerate(names))
         for i, ops in enumerate(self.pages):
             content = zlib.compress(b"\n".join(ops))
             objects.append(
                 b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 %.2f %.2f] " % A4
-                + b"/Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents %d 0 R >>"
-                % (6 + 2 * i)
+                + b"/Resources << /Font << /F1 3 0 R /F2 4 0 R >> /XObject << "
+                + xobjects
+                + b" >> >> /Contents %d 0 R >>" % (first_page + 1 + 2 * i)
             )
             objects.append(
                 b"<< /Length %d /Filter /FlateDecode >>\nstream\n" % len(content)
@@ -154,23 +202,26 @@ def _wrap(text: str, width: float, size: float, font: str = "F1") -> list[str]:
 def render(doc: Document) -> bytes:
     c = Canvas()
     w, h = A4
-    left, right, top, bottom = 48.0, w - 48.0, h - 48.0, 60.0
+    left, right, bottom = 48.0, w - 48.0, 60.0
+
+    banner = asset("letterhead-banner.jpg")
+    bw, bh = jpeg_size(banner)
+    band = w * bh / bw  # full-width letterhead band, aspect preserved
 
     def header() -> float:
-        c.rect(0, h - 8, w, 8, NAVY)
-        c.text(left, top - 6, "AVEN GLOBAL", 16, "F2", color=NAVY)
-        c.line(left, top - 14, left + 104, top - 14, GOLD, 1.2)
-        y = top - 30
+        c.image("Logo", banner, 0, h - band, w, band)
+        mid = h - band / 2
+        c.text(right, mid + 8, doc.kind.upper(), 17, "F2", "right", WHITE)
+        c.text(right, mid - 10, doc.number, 11, "F1", "right", GOLD)
+        yy = mid - 26
+        for b in doc.banners:
+            c.text(right, yy, b, 8, "F2", "right", (0.98, 0.55, 0.50))
+            yy -= 11
+        y = h - band - 18
         for line in doc.issuer:
             c.text(left, y, line, 8, color=GREY)
             y -= 11
-        c.text(right, top - 6, doc.kind.upper(), 14, "F2", "right")
-        c.text(right, top - 22, doc.number, 11, "F1", "right", GOLD)
-        yy = top - 38
-        for banner in doc.banners:
-            c.text(right, yy, banner, 9, "F2", "right", (0.70, 0.18, 0.15))
-            yy -= 12
-        return min(y, yy) - 10
+        return y - 8
 
     def footer(page: int) -> None:
         c.line(left, bottom - 6, right, bottom - 6, GOLD, 0.4)
@@ -254,4 +305,20 @@ def render(doc: Document) -> bytes:
             c.text(left, y, part, 8, color=GREY)
             y -= 11
     footer(page)
+    return c.output()
+
+
+def letterhead(issuer: list[str]) -> bytes:
+    """A blank A4 page on the AVEN GLOBAL letterhead, for printing letters."""
+    c = Canvas()
+    w, h = A4
+    banner = asset("letterhead-banner-centred.jpg")
+    bw, bh = jpeg_size(banner)
+    band = w * bh / bw
+    c.image("Logo", banner, 0, h - band, w, band)
+    y = h - band - 18
+    for line in issuer:
+        c.text(48, y, line, 8, color=GREY)
+        y -= 11
+    c.line(48, 54, w - 48, 54, GOLD, 0.4)
     return c.output()

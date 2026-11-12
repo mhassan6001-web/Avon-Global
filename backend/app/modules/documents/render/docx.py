@@ -8,12 +8,64 @@ import zipfile
 from xml.sax.saxutils import escape
 
 from ..model import Document
+from .pdf import asset, jpeg_size
+
+_DOC_RELS = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rIdHeader1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/>
+</Relationships>"""
+_HDR_RELS = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rIdLogo" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/letterhead.jpg"/>
+</Relationships>"""
+_NS = (
+    'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" '
+    'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" '
+    'xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" '
+    'xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" '
+    'xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"'
+)
+PAGE_W_TWIPS, MARGIN_TWIPS = 11906, 1134
+EMU_PER_TWIP = 635
+BANNER = "letterhead-banner-centred.jpg"
+
+
+def _header_xml() -> str:
+    """Full-width letterhead banner repeated on every page (bleeds to the edges)."""
+    bw, bh = jpeg_size(asset(BANNER))
+    cx = PAGE_W_TWIPS * EMU_PER_TWIP
+    cy = cx * bh // bw
+    pic = (
+        '<pic:pic><pic:nvPicPr><pic:cNvPr id="1" name="AVEN GLOBAL logo"/><pic:cNvPicPr/></pic:nvPicPr>'
+        '<pic:blipFill><a:blip r:embed="rIdLogo"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>'
+        f'<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="{cx}" cy="{cy}"/></a:xfrm>'
+        '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic>'
+    )
+    drawing = (
+        f'<w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="{cx}" cy="{cy}"/>'
+        '<wp:docPr id="1" name="AVEN GLOBAL letterhead" descr="AVEN GLOBAL logo"/>'
+        '<a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">'
+        f"{pic}</a:graphicData></a:graphic></wp:inline></w:drawing>"
+    )
+    return (
+        f'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:hdr {_NS}>'
+        f'<w:p><w:pPr><w:spacing w:before="0" w:after="0"/><w:ind w:left="-{MARGIN_TWIPS}" w:right="-{MARGIN_TWIPS}"/></w:pPr>'
+        f"<w:r>{drawing}</w:r></w:p></w:hdr>"
+    )
+
+
+def _banner_twips() -> int:
+    bw, bh = jpeg_size(asset(BANNER))
+    return PAGE_W_TWIPS * bh // bw
+
 
 _CT = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
 <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
 <Default Extension="xml" ContentType="application/xml"/>
+<Default Extension="jpg" ContentType="image/jpeg"/>
 <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+<Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/>
 <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
 </Types>"""
 _RELS = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -84,7 +136,6 @@ def _table(
 
 def render(doc: Document, generated_at_iso: str) -> bytes:
     body = [
-        _p("AVEN GLOBAL", bold=True, size=32, color=NAVY),
         *(_p(line, size=16, color=GREY) for line in doc.issuer),
         _p(),
         _p(doc.kind.upper(), bold=True, size=28, color=NAVY),
@@ -120,12 +171,17 @@ def render(doc: Document, generated_at_iso: str) -> bytes:
     body.append(_p())
     for line in doc.footer:
         body.append(_p(line, size=14, color=GREY))
+    return package(body, f"{doc.kind} {doc.number}", generated_at_iso)
+
+
+def package(body: list[str], title: str, generated_at_iso: str) -> bytes:
+    top = _banner_twips() + 400
     xml = (
-        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-        '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>'
+        f'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document {_NS}><w:body>'
         + "".join(body)
-        + '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/>'
-        '<w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="567" w:footer="567" w:gutter="0"/>'
+        + '<w:sectPr><w:headerReference w:type="default" r:id="rIdHeader1"/>'
+        '<w:pgSz w:w="11906" w:h="16838"/>'
+        f'<w:pgMar w:top="{top}" w:right="1134" w:bottom="1134" w:left="1134" w:header="0" w:footer="567" w:gutter="0"/>'
         "</w:sectPr></w:body></w:document>"
     )
     core = (
@@ -133,7 +189,7 @@ def render(doc: Document, generated_at_iso: str) -> bytes:
         '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" '
         'xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" '
         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
-        f"<dc:title>{escape(doc.kind)} {escape(doc.number)}</dc:title><dc:creator>AVEN GLOBAL</dc:creator>"
+        f"<dc:title>{escape(title)}</dc:title><dc:creator>AVEN GLOBAL</dc:creator>"
         f'<dcterms:created xsi:type="dcterms:W3CDTF">{generated_at_iso}</dcterms:created>'
         "</cp:coreProperties>"
     )
@@ -142,5 +198,27 @@ def render(doc: Document, generated_at_iso: str) -> bytes:
         z.writestr("[Content_Types].xml", _CT)
         z.writestr("_rels/.rels", _RELS)
         z.writestr("word/document.xml", xml)
+        z.writestr("word/_rels/document.xml.rels", _DOC_RELS)
+        z.writestr("word/header1.xml", _header_xml())
+        z.writestr("word/_rels/header1.xml.rels", _HDR_RELS)
+        z.writestr("word/media/letterhead.jpg", asset(BANNER))
         z.writestr("docProps/core.xml", core)
     return buf.getvalue()
+
+
+def letterhead(issuer: list[str], generated_at_iso: str) -> bytes:
+    """A blank AVEN GLOBAL letter on the letterhead, ready to type in Word."""
+    body = [
+        *(_p(line, size=16, color=GREY) for line in issuer),
+        _p(),
+        _p("Date:", size=20),
+        _p(),
+        _p("To:", size=20),
+        _p(),
+        _p("Dear ", size=22),
+        _p(),
+        _p(),
+        _p("Yours faithfully,", size=22),
+        _p(),
+    ]
+    return package(body, "AVEN GLOBAL letterhead", generated_at_iso)

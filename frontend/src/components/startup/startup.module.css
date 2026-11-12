@@ -141,3 +141,12 @@
   color: var(--text-primary);
   border-color: var(--border-strong);
 }
+
+.logo {
+  width: min(78vw, 487px);
+  margin-bottom: var(--space-4);
+}
+.logo img {
+  width: 100%;
+  height: auto;
+}

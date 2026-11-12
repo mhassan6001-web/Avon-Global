@@ -33,7 +33,7 @@ def _doc(rows: int = 3) -> Document:
 
 def _pdf_text(data: bytes) -> bytes:
     out = b""
-    for m in re.finditer(rb"stream\n(.*?)\nendstream", data, re.DOTALL):
+    for m in re.finditer(rb"/FlateDecode >>\nstream\n(.*?)\nendstream", data, re.DOTALL):
         out += zlib.decompress(m.group(1))
     return out
 
@@ -90,3 +90,22 @@ def test_xlsx_numbers_and_formula_injection() -> None:
         ElementTree.fromstring(z.read("xl/styles.xml"))
     assert "<v>10.5</v>" in ws
     assert "'=HYPERLINK" in ws and "<f>" not in ws
+
+
+def test_pdf_letterhead_embeds_the_logo_once() -> None:
+    data = pdf.render(_doc(rows=120))
+    assert data.count(b"/Subtype /Image") == 1  # one embedded copy for all pages
+    assert b"/Filter /DCTDecode" in data
+    assert _pdf_text(data).count(b"/Logo Do") >= 3  # letterhead on every page
+    assert pdf.jpeg_size(pdf.asset("letterhead-banner.jpg")) == (2480, 500)
+
+
+def test_letterheads_carry_the_logo() -> None:
+    data = pdf.letterhead(["AVEN GLOBAL (legal name not yet confirmed)"])
+    assert data.startswith(b"%PDF") and b"/DCTDecode" in data
+    word = docx.letterhead(["Lilongwe, MW"], "2026-11-12T10:00:00Z")
+    with zipfile.ZipFile(io.BytesIO(word)) as z:
+        names = set(z.namelist())
+        assert {"word/header1.xml", "word/media/letterhead.jpg"} <= names
+        ElementTree.fromstring(z.read("word/header1.xml"))
+        assert z.read("word/media/letterhead.jpg")[:2] == b"\xff\xd8"

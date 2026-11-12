@@ -21,6 +21,13 @@ export const metadata: Metadata = {
   description: "AVEN GLOBAL business operating system",
   applicationName: "AVEN GLOBAL",
   robots: { index: false, follow: false },
+  icons: {
+    icon: [
+      { url: "/brand/icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/brand/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: { url: "/brand/icon-180.png", sizes: "180x180" },
+  },
 };
 
 export const viewport: Viewport = {

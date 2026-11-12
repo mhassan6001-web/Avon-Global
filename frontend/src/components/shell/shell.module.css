@@ -535,3 +535,27 @@ button.menuItem:hover {
   background: var(--gold-highlight);
   box-shadow: 0 0 0 2px var(--ink-950);
 }
+
+.brandMark {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 71px;
+  height: 30px;
+  overflow: hidden;
+}
+.brandMark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.brandWordmark img {
+  width: 125px;
+  height: auto;
+}
+/* Collapsed rail: show the "A" of the emblem only. */
+.sidebar[data-collapsed] .brandMark {
+  width: 32px;
+}
+.sidebar[data-collapsed] .brandMark img {
+  object-position: 26% 50%;
+}

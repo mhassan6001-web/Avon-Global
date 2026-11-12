@@ -23,7 +23,7 @@ API = "/api/v1/documents"
 def _pdf_text(data: bytes) -> bytes:
     return b"".join(
         zlib.decompress(m.group(1))
-        for m in re.finditer(rb"stream\n(.*?)\nendstream", data, re.DOTALL)
+        for m in re.finditer(rb"/FlateDecode >>\nstream\n(.*?)\nendstream", data, re.DOTALL)
     )
 
 
@@ -98,3 +98,13 @@ def test_missing_records_are_404(app: FastAPI, db: Session) -> None:
     missing = "00000000-0000-0000-0000-000000000000"
     assert director.get(f"{API}/records/receipt/{missing}").status_code == 404
     assert director.get(f"{API}/records/unknown/{missing}").status_code == 422
+
+
+def test_everyone_can_download_the_letterhead(app: FastAPI, db: Session) -> None:
+    staff = sign_in(app, make_user(db, "logistics"))
+    word = staff.get(f"{API}/letterhead")
+    assert word.status_code == 200
+    assert word.headers["content-type"].startswith("application/vnd.openxmlformats")
+    printable = staff.get(f"{API}/letterhead", params={"format": "pdf"})
+    assert printable.content.startswith(b"%PDF")
+    assert [r["kind"] for r in staff.get(f"{API}/register").json()] == ["letterhead", "letterhead"]
