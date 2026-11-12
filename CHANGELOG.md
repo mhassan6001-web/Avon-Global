@@ -142,3 +142,47 @@ No existing requirement was removed.
   alerts, backup management, system configuration).
 - `ROADMAP.md`: Stage 0 §10 naming, with dependencies and key scope.
 - `CLAUDE.md` and `README.md`: document index and the CI verification rule.
+
+## [0.2.0] — 2026-11-12 — Stage 2: Authentication and security (awaiting approval)
+
+### Added
+
+- **Identity and sessions:**
+  - Argon2id passwords with policy
+  - server-side sessions (hashed tokens, 30-minute idle and 12-hour absolute
+    expiry)
+  - CSRF double-submit protection
+  - logout and session revocation
+- **Two-factor authentication:**
+  - TOTP (RFC 6238, replay-protected) with recovery codes
+  - mandatory for Director, Finance and HR/Admin
+  - step-up verification for sensitive changes
+- **Links and accounts:**
+  - Director-issued invitation and password-reset links (single use, hash
+    only)
+  - `create-director` command; `seed-dev-users` (development only)
+- **Permissions:**
+  - department-scoped catalogue for every planned module
+  - individual grant/deny overrides (Director-only permissions can never be
+    granted)
+  - backend `require()` enforcement and a route-coverage guard
+- **Audit and alerts:**
+  - append-only, hash-chained audit log (database triggers), verification
+  - login history and security alerts
+  - Redis rate limiting and lockout (fail closed)
+- **Files:** content-sniffed uploads, size limits, permission-checked and
+  audited downloads, 60-second signed URLs.
+- **Approvals:** approval requests with separation of duties (service plus
+  database constraint).
+- **APIs:** organisation profile API (Director edits with step-up).
+- **Screens:**
+  - sign-in, 2FA, authenticator setup, invitation, reset
+  - account (password, sessions, history)
+  - admin users and access, security and audit, organisation
+  - real user menu, development-account banner
+- **Migration `0002`.** CI `e2e` job (Playwright against the real stack).
+
+### Fixed
+
+- Non-IP client addresses broke login inserts (found by CI).
+- An over-long login-outcome label (found by CI).

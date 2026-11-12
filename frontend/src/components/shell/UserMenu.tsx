@@ -1,20 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { LuLogIn, LuSettings2, LuUserRound } from "react-icons/lu";
+import { LuLogOut, LuSettings2, LuShieldCheck, LuUserRound } from "react-icons/lu";
+
+import { useAuth } from "@/lib/auth/AuthProvider";
 
 import { Popover } from "./Popover";
 import styles from "./shell.module.css";
 
-/**
- * User profile area. Authentication arrives in Stage 2; until then the shell
- * states plainly that nobody is signed in instead of showing a placeholder user.
- */
+function initials(name: string): string {
+  return name
+    .replace(/^DEV-ONLY\s+/i, "")
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
+/** Profile area: the signed-in user, their role and account actions. */
 export function UserMenu() {
+  const { me, signOut } = useAuth();
+  const { user } = me;
   return (
     <Popover
       label="Account"
-      width={280}
+      width={290}
       trigger={({ ref, ...props }) => (
         <button
           ref={ref}
@@ -24,29 +34,36 @@ export function UserMenu() {
           {...props}
         >
           <span className={styles.avatar} aria-hidden="true">
-            <LuUserRound />
+            {initials(user.display_name) || <LuUserRound />}
           </span>
           <span className={styles.profileText}>
-            <span className={styles.profileName}>Not signed in</span>
-            <span className={styles.profileRole}>Sign-in arrives in Stage 2</span>
+            <span className={styles.profileName}>{user.display_name}</span>
+            <span className={styles.profileRole}>{user.role_name}</span>
           </span>
         </button>
       )}
     >
       <div className={styles.popoverHeader}>
-        <p className={styles.popoverTitle}>Account</p>
+        <p className={styles.popoverTitle}>{user.display_name}</p>
+        <p className={styles.profileRole}>
+          {user.email} · {user.department}
+        </p>
       </div>
       <ul className={styles.menuList}>
+        <li>
+          <Link href="/account" className={styles.menuItem}>
+            <LuShieldCheck aria-hidden="true" /> Account & security
+          </Link>
+        </li>
         <li>
           <Link href="/settings" className={styles.menuItem}>
             <LuSettings2 aria-hidden="true" /> Display preferences
           </Link>
         </li>
         <li>
-          <span className={styles.menuItem} aria-disabled="true">
-            <LuLogIn aria-hidden="true" /> Sign in
-            <span className={styles.menuHint}>Stage 2</span>
-          </span>
+          <button type="button" className={styles.menuItem} onClick={() => void signOut()}>
+            <LuLogOut aria-hidden="true" /> Sign out
+          </button>
         </li>
       </ul>
     </Popover>

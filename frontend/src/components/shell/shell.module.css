@@ -416,7 +416,15 @@
   font-size: var(--text-sm);
   color: var(--text-secondary);
 }
-a.menuItem:hover {
+button.menuItem {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+a.menuItem:hover,
+button.menuItem:hover {
   background: var(--surface-hover);
   color: var(--text-primary);
 }
@@ -430,6 +438,17 @@ a.menuItem:hover {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-muted);
+}
+
+.devBanner {
+  padding: 6px var(--space-4);
+  text-align: center;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #1a1407;
+  background: repeating-linear-gradient(135deg, #e3b85c 0 14px, #d6a84a 14px 28px);
 }
 
 /* ================= Bottom nav (phones) ================= */

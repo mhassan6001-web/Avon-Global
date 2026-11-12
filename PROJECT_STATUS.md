@@ -6,9 +6,9 @@ _Last updated: 2026-11-12_
 
 | Stage | Status |
 |-------|--------|
-| 0: Architecture and blueprint | Approved 2026-11-12. All **14 required documents** now completed from the full Stage 0 text. **Awaiting Director review.** |
+| 0: Architecture and blueprint | **Approved 2026-11-12** (14 required documents). |
 | 1: Repository foundation | **Approved, and verified green in GitHub CI** (PR #1 on `mhassan6001-web/Avon-Global`): 62 backend tests including 9 integration tests on real PostgreSQL and Redis, migration round-trip, mypy clean, 15 frontend tests, `next build`. See `docs/stage-1-readiness-checklist.md`. |
-| 2: Authentication and security | **Plan approved with Director decisions** (`docs/stage-2-plan.md`). Waiting for Stage 0 review, per the Stage 0 rule "STOP after Stage 0". |
+| 2: Authentication and security | **Built and verified in CI. Awaiting Director approval.** PR #2. Backend: 123 tests, 46 of them integration tests. Migration `0002` with no drift. mypy, bandit and pip-audit clean. Frontend: tsc, ESLint, 21 tests and the build pass. **E2E: 6/6 browser tests** against the real stack. See `docs/stage-2-report.md`. |
 
 ## Director decisions on record (2026-11-12)
 
@@ -31,6 +31,20 @@ _Last updated: 2026-11-12_
   into `main`.
 
 ## What exists
+
+- **Identity and security (Stage 2):**
+  - sign-in with Argon2id passwords
+  - server-side sessions, CSRF protection
+  - TOTP 2FA, mandatory for Director, Finance and HR/Admin; step-up for
+    sensitive changes
+  - Director-issued invitation and reset links
+  - department-scoped roles with individual grant/deny overrides
+  - append-only, hash-chained audit log; login history; security alerts
+  - rate limiting and lockout
+  - permission-checked file storage
+  - approval requests with separation of duties
+  - organisation profile editing
+  - admin, account, sign-in and 2FA screens
 
 - **Backend:** FastAPI, config, logging, errors, health, SQLAlchemy and
   Alembic (`0001`).
@@ -58,5 +72,6 @@ See `docs/architecture/SYSTEM_ARCHITECTURE.md` §13:
 
 ## Next
 
-On Director approval of the Stage 0 documents, **Stage 2 implementation
-begins**, delivered as a pull request with CI evidence.
+On Director approval of Stage 2, **Stage 3 (core design system and
+interface)** begins. It applies reference decisions C1–C9 and the sound
+engine.

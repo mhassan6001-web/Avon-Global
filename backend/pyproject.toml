@@ -11,6 +11,11 @@ dependencies = [
     "alembic>=1.14,<2",
     "psycopg[binary]>=3.2,<4",
     "python-dotenv>=1.0",
+    "argon2-cffi>=23.1",
+    "cryptography>=43",
+    "redis>=5.0",
+    "segno>=1.6",
+    "python-multipart>=0.0.18",
 ]
 
 [project.optional-dependencies]
@@ -32,6 +37,13 @@ select = ["E", "F", "W", "I", "N", "UP", "B", "S", "A", "C4", "SIM", "RUF", "ASY
 # ASYNC109: probes take an explicit timeout argument by design; they apply it with asyncio.wait_for.
 ignore = ["S101", "ASYNC109"]
 
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI dependency markers are designed to be used as argument defaults.
+extend-immutable-calls = [
+    "fastapi.Depends", "fastapi.File", "fastapi.Form", "fastapi.Query",
+    "app.platform.authz.deps.require",
+]
+
 [tool.ruff.lint.isort]
 known-first-party = ["app"]
 known-third-party = ["alembic"]
@@ -45,6 +57,10 @@ python_version = "3.12"
 strict = true
 plugins = ["pydantic.mypy"]
 exclude = ["alembic/versions"]
+
+[[tool.mypy.overrides]]
+module = ["segno", "segno.*"]
+ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = ["tests.*"]

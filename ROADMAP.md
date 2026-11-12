@@ -7,9 +7,9 @@ after that approval.
 
 | # | Stage (Stage 0 §10 naming) | Depends on | Key scope | Status |
 |---|------|-----------|-----------|--------|
-| 0 | Architecture and project blueprint | — | `docs/architecture/*`, `docs/security/*` (14 required documents) | Approved 2026-11-12. **Full-text documents completed, awaiting review.** |
+| 0 | Architecture and project blueprint | — | `docs/architecture/*`, `docs/security/*` (14 required documents) | **Approved 2026-11-12** |
 | 1 | Repository foundation and development environment | 0 | FastAPI/Next.js foundation, config, logging, errors, health, Alembic, Docker, CI | **Approved 2026-11-12. CI green on GitHub** (`docs/stage-1-readiness-checklist.md`) |
-| 2 | Authentication and security | 1 | Login, Argon2id, sessions, Director-issued reset links, 2FA, department-scoped roles, overrides, suspension, login history, audit log, rate limiting, secure files, module K admin basics | **Plan approved with Director decisions.** Starts after Stage 0 review. |
+| 2 | Authentication and security | 1 | Login, Argon2id, sessions, Director-issued reset links, 2FA, department-scoped roles, overrides, suspension, login history, audit log, rate limiting, secure files, module K admin basics | **Built and verified in CI** (123 backend tests, 6 e2e). **Awaiting approval.** See `docs/stage-2-report.md`. |
 | 3 | Core design system and interface | 1, 2 (sign-in screens) | Reference-faithful grey-black and gold system (C1–C9), rich motion graphics, charts, JARVIS placeholder head, sound engine and settings | Queued |
 | 4 | Director dashboard and CRM | 2, 3 | Command Centre from real records, CRM, quotations, contracts, search, outbox and events | Queued |
 | 5 | Tender management | 2, 3, 4 (CRM organisations) | Register, government, NGO and UN sources (permitted only), bid costing, checklists, deadline alerts, Celery | Queued |

@@ -135,3 +135,90 @@ export async function getJson<T>(
     body,
   });
 }
+
+export const CSRF_COOKIE = "aven_csrf";
+
+/** Read a cookie value (the CSRF token is deliberately readable by the app). */
+export function readCookie(name: string, cookieString?: string): string | null {
+  const source = cookieString ?? (typeof document === "undefined" ? "" : document.cookie);
+  for (const part of source.split(";")) {
+    const [key, ...rest] = part.trim().split("=");
+    if (key === name) return decodeURIComponent(rest.join("="));
+  }
+  return null;
+}
+
+export interface SendOptions extends RequestOptions {
+  body?: unknown;
+  csrfToken?: string | null;
+}
+
+/**
+ * JSON request for any method. State-changing requests carry the CSRF token
+ * (double-submit) read from the ``aven_csrf`` cookie.
+ */
+export async function send<T>(
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
+  path: string,
+  options: SendOptions = {},
+): Promise<ApiResponse<T>> {
+  const { timeoutMs = 15000, acceptStatuses = [], fetchImpl = fetch } = options;
+  const headers: Record<string, string> = { Accept: "application/json" };
+  if (options.body !== undefined) headers["Content-Type"] = "application/json";
+  if (method !== "GET") {
+    const csrf = options.csrfToken !== undefined ? options.csrfToken : readCookie(CSRF_COOKIE);
+    if (csrf) headers["X-CSRF-Token"] = csrf;
+  }
+  const controller = new AbortController();
+  const timer = setTimeout(
+    () => controller.abort(new DOMException("Timed out", "TimeoutError")),
+    timeoutMs,
+  );
+  let response: Response;
+  try {
+    response = await fetchImpl(`${API_PREFIX}${path}`, {
+      method,
+      headers,
+      body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+      cache: "no-store",
+      credentials: "same-origin",
+      signal: options.signal ?? controller.signal,
+    });
+  } catch (cause) {
+    throw new ApiError({
+      status: 0,
+      code: "network_error",
+      message: "The server could not be reached.",
+      requestId: null,
+      body: cause,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+  const requestId = response.headers.get("x-request-id");
+  let parsed: unknown = null;
+  try {
+    parsed = await response.json();
+  } catch {
+    parsed = null;
+  }
+  if (response.ok || acceptStatuses.includes(response.status)) {
+    return { data: parsed as T, status: response.status, requestId };
+  }
+  if (isErrorEnvelope(parsed)) {
+    throw new ApiError({
+      status: response.status,
+      code: parsed.error.code,
+      message: parsed.error.message,
+      requestId: parsed.error.request_id ?? requestId,
+      body: parsed,
+    });
+  }
+  throw new ApiError({
+    status: response.status,
+    code: response.status >= 500 ? "server_error" : "http_error",
+    message: `Request failed with status ${response.status}.`,
+    requestId,
+    body: parsed,
+  });
+}

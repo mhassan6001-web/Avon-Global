@@ -1,6 +1,38 @@
-"""Import every module's models so Alembic sees the full metadata."""
+"""Import every model so Alembic and the metadata see the full schema."""
 
 from app.db.base import Base
 from app.modules.organisation.models import OrganisationProfile
+from app.platform.approvals.models import ApprovalRequest
+from app.platform.audit.models import AuditEvent, SecurityAlert
+from app.platform.files.models import StoredFile
+from app.platform.identity.models import (
+    AuthSession,
+    Department,
+    LoginEvent,
+    OneTimeToken,
+    Permission,
+    PermissionOverride,
+    Role,
+    RolePermission,
+    User,
+    UserMfa,
+)
 
-__all__ = ["Base", "OrganisationProfile"]
+__all__ = [
+    "ApprovalRequest",
+    "AuditEvent",
+    "AuthSession",
+    "Base",
+    "Department",
+    "LoginEvent",
+    "OneTimeToken",
+    "OrganisationProfile",
+    "Permission",
+    "PermissionOverride",
+    "Role",
+    "RolePermission",
+    "SecurityAlert",
+    "StoredFile",
+    "User",
+    "UserMfa",
+]

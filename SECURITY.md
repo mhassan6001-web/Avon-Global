@@ -1,16 +1,17 @@
 # Security
 
-## Current position (Stage 1)
+## Current position (Stage 2, awaiting approval)
 
-**There is no authentication yet.** That is Stage 2. Until then:
+Authentication and access control are implemented and tested (see
+`docs/stage-2-report.md`).
 
-- The API exposes only health endpoints. These reveal service name, version,
-  environment and dependency up/down state. They expose no hostnames,
-  credentials or error internals.
-- No business data is stored. The one table (`organisation_profile`) has no
-  API and no rows.
-- The system must not be deployed anywhere reachable from the internet
-  before Stage 2 is approved.
+**Before any internet-facing deployment (Stage 14) the system still needs:**
+
+- production object storage
+- secrets in a secret manager
+- HTTPS
+- monitoring
+- a breached-password check (optional enhancement)
 
 ## Controls already in place
 
@@ -27,14 +28,28 @@
 | Containers | Run as a non-root user. Development ports bind to 127.0.0.1 only. |
 | Supply chain | CI runs `bandit` and `pip-audit`. Exact dependency pins (lock files) are required before the first production deployment. |
 
-## Planned (Stage 2 onward)
+## Identity and access controls (Stage 2)
 
-Login and logout, Argon2id password hashing, password reset, server-side
-sessions with secure cookies, two-factor authentication (TOTP), backend-enforced
-roles and individual permissions, account suspension, login history, an
-append-only audit log, rate limiting, secure file access, a ban on self-approval
-of restricted transactions, and restricted access to payroll, financial data and
-supplier bank details.
+| Area | Control |
+|------|---------|
+| Passwords | Argon2id (argon2-cffi), rehash on parameter change. 12-character minimum. Common-password and personal-information checks. |
+| Sessions | 256-bit random token in an HttpOnly, SameSite=Lax cookie (Secure outside development). Only the SHA-256 is stored. Idle 30 minutes, absolute 12 hours. Revoked on logout, suspension, password change or reset. |
+| CSRF | Per-session token. `X-CSRF-Token` header required on every state-changing request. |
+| 2FA | TOTP (RFC 6238 vectors tested), replay protection, 10 hashed single-use recovery codes. Secrets encrypted with Fernet (`FIELD_ENCRYPTION_KEYS`, rotatable). Mandatory for Director, Finance and HR/Admin. |
+| Step-up | Fresh 2FA (or password) within 5 minutes for every administrative change and organisation edit |
+| Links | Invitation (72 h) and reset (60 min) links: single use, hash only, issued by the Director |
+| Authorisation | Department-scoped roles. Individual overrides (deny wins; Director-only permissions not grantable). `require()` on every route, enforced by the coverage test. |
+| Lockout | 5 failed attempts per account per 15 minutes locks it for 15 minutes and raises a security alert. 20 per IP per 15 minutes. **Fails closed** if Redis is unavailable. |
+| Enumeration | Identical responses for unknown emails and wrong passwords, with dummy hashing for timing |
+| Audit | Append-only table (UPDATE, DELETE and TRUNCATE blocked by triggers), SHA-256 hash chain with verification and an alert on failure |
+| Files | Content sniffing against an allow-list, size limit, private storage, permission check at every download, owner-bound 60-second signed URLs, audited |
+| Separation of duties | Approval requests can't be decided by their requester (service plus database CHECK constraint) |
+
+## Planned (Stage 3 onward)
+
+Field-level encryption of supplier bank details (Stage 6). Restricted
+payroll views (Stage 9). Production secrets, HTTPS, object storage, backups
+and monitoring (Stage 14). Breached-password checking (optional).
 
 Each later stage adds its own threat review to this file.
 

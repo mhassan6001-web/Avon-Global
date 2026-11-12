@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 
+import { useOptionalAuth } from "@/lib/auth/AuthProvider";
 import { SystemStatusProvider } from "@/lib/system/SystemStatusProvider";
 
 import { BottomNav } from "./BottomNav";
@@ -14,6 +15,7 @@ const COLLAPSE_KEY = "aven.sidebar.collapsed";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const auth = useOptionalAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -65,6 +67,11 @@ export function AppShell({ children }: { children: ReactNode }) {
           onCloseDrawer={() => setDrawerOpen(false)}
         />
         <div className={styles.workspace}>
+          {auth?.me.user.is_dev_account && (
+            <div className={styles.devBanner} role="note">
+              Development-only test account. Not a real person.
+            </div>
+          )}
           <Header onOpenNavigation={() => setDrawerOpen(true)} />
           <main id="main-content" className={styles.main} tabIndex={-1}>
             <div className={styles.content}>{children}</div>

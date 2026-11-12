@@ -11,7 +11,7 @@ import { BUSINESS_MODULES } from "@/lib/navigation";
 import { usePreferences } from "@/lib/preferences/PreferencesProvider";
 import { STAGES, STAGE_STATE_LABEL, TOTAL_STAGES } from "@/lib/roadmap";
 
-import styles from "./pages.module.css";
+import styles from "@/app/pages.module.css";
 
 export default function CommandCentrePage() {
   const { motionScale } = usePreferences();
@@ -102,8 +102,8 @@ export default function CommandCentrePage() {
           <div className={styles.securityStrip}>
             <LuShieldCheck aria-hidden="true" />
             <p>
-              Sign-in, roles and audit logging are the next stage. Until then, no business data is
-              stored or exposed by this system.
+              Sign-in, department roles, two-factor verification and the audit log are active. No
+              business data is stored yet: modules arrive stage by stage.
             </p>
           </div>
         </motion.div>

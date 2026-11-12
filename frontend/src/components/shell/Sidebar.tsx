@@ -9,7 +9,9 @@ import { Emblem } from "@/components/brand/Emblem";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { IconButton } from "@/components/ui";
 import { usePreferences } from "@/lib/preferences/PreferencesProvider";
+import { useOptionalAuth } from "@/lib/auth/AuthProvider";
 import {
+  ADMIN_NAV,
   BUSINESS_MODULES,
   SETTINGS_NAV,
   WORKSPACE_NAV,
@@ -79,6 +81,8 @@ function SidebarContents({
   onToggleCollapsed?: () => void;
   onClose?: () => void;
 }) {
+  const auth = useOptionalAuth();
+  const admin = ADMIN_NAV.filter((item) => !item.permission || auth?.can(item.permission));
   return (
     <>
       <div className={styles.brand}>
@@ -98,13 +102,16 @@ function SidebarContents({
       <nav className={styles.nav} aria-label="Main">
         <NavSection title="Workspace" items={WORKSPACE_NAV} collapsed={collapsed} />
         <NavSection title="Business modules" items={BUSINESS_MODULES} collapsed={collapsed} />
+        {admin.length > 0 && (
+          <NavSection title="Administration" items={admin} collapsed={collapsed} />
+        )}
         <NavSection title="Settings" items={SETTINGS_NAV} collapsed={collapsed} />
       </nav>
 
       <div className={styles.sidebarFooter}>
         <p className={styles.buildTag}>
           <span className={styles.buildDot} aria-hidden="true" />
-          <span className={styles.navLabel}>Stage 1 · Core infrastructure</span>
+          <span className={styles.navLabel}>Stage 2 · Identity & security</span>
         </p>
         {onToggleCollapsed && (
           <IconButton

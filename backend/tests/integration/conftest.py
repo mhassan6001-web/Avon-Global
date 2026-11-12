@@ -21,7 +21,9 @@ if not TEST_DATABASE_URL:
 
 from alembic import command  # noqa: E402
 from alembic.config import Config  # noqa: E402
+from fastapi import FastAPI  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
+from sqlalchemy.orm import Session  # noqa: E402
 
 from app.core.config import Settings, get_settings  # noqa: E402
 from app.db import session as db_session  # noqa: E402
@@ -30,8 +32,13 @@ from app.main import create_app  # noqa: E402
 
 
 @pytest.fixture(scope="session")
-def settings() -> Settings:
+def settings(tmp_path_factory: pytest.TempPathFactory) -> Settings:
     os.environ["APP_ENV"] = "test"
+    # Fast password hashing and small upload limit for tests only.
+    os.environ["ARGON2_TIME_COST"] = "1"
+    os.environ["ARGON2_MEMORY_KIB"] = "8192"
+    os.environ["MAX_UPLOAD_MB"] = "1"
+    os.environ["STORAGE_DIR"] = str(tmp_path_factory.mktemp("files"))
     os.environ["DATABASE_URL"] = TEST_DATABASE_URL  # type: ignore[assignment]
     os.environ.setdefault("REDIS_URL", os.environ.get("TEST_REDIS_URL", "redis://localhost:6379/0"))
     get_settings.cache_clear()
@@ -58,3 +65,31 @@ def client(settings: Settings, migrated: None) -> Iterator[TestClient]:
     app = create_app(settings)
     with TestClient(app, raise_server_exceptions=False) as test_client:
         yield test_client
+
+
+@pytest.fixture(autouse=True)
+def _clean_rate_limits(settings: Settings) -> Iterator[None]:
+    """Each test starts with empty rate-limit counters and lockouts."""
+    from app.platform import ratelimit
+
+    ratelimit.client.cache_clear()
+    ratelimit.client().flushdb()
+    yield
+
+
+@pytest.fixture
+def db(settings: Settings, migrated: None) -> Iterator[Session]:
+    from app.platform.authz.sync import sync_catalogue
+
+    session = db_session.get_session_factory()()
+    sync_catalogue(session)
+    try:
+        yield session
+    finally:
+        session.rollback()
+        session.close()
+
+
+@pytest.fixture
+def app(settings: Settings, migrated: None, db: Session) -> FastAPI:
+    return create_app(settings)

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Badge, EmptyState, PageHeader, Panel } from "@/components/ui";
 import { findModule } from "@/lib/navigation";
 
-import styles from "../../pages.module.css";
+import styles from "@/app/pages.module.css";
 
 /**
  * Information view for a module that has not been built. It describes the
