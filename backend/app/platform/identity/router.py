@@ -285,7 +285,7 @@ def put_preferences(
         row.display = body.display.model_dump()
     if body.sound is not None:
         row.sound = body.sound.model_dump()
-    row.updated_at = func.now()  # type: ignore[assignment]
+    row.updated_at = func.now()
     db.commit()
     db.refresh(row)
     return _prefs_out(row)
