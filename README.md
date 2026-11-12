@@ -110,6 +110,7 @@ validated at startup. With `APP_ENV=production` the API refuses to start if:
 `docs/director-stage-plan.md`.
 
 Stages 3–15: `docs/stages-3-15-report.md` (results and open questions).
+Director's answers: `docs/DIRECTOR_DECISIONS.md` and `docs/OUTSTANDING_INFORMATION.md`.
 Operations: `docs/operations/` (production checklist, UAT, disaster recovery,
 deployment guide, administrator guide). Brand: `docs/brand/LOGO.md`.
 Policies: `docs/policies/COMMUNICATIONS_POLICY.md`.

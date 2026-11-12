@@ -52,5 +52,10 @@ deployed.
 
 ## Next
 
-The Director reviews PR #2 and PR #3, then answers the open questions in the
-final report. After that, Stage 14 provisioning can start.
+The Director answered the open questions on 2026-11-12. They are recorded in
+`docs/DIRECTOR_DECISIONS.md` (confirmed, proposed, pending and
+professional-review items) and `docs/OUTSTANDING_INFORMATION.md`.
+
+Phase 2 is planned in `ROADMAP.md`. **Stage R (research, no purchases) and
+Stage 16 (company identity, quotations and approval rules) await the
+Director's approval to start.** PRs #1–#3 await review and merge.

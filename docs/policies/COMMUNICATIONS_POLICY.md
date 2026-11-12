@@ -1,7 +1,6 @@
 # AVEN GLOBAL — Staff communications and retention policy
 
-Status: **draft for Director approval**. Retention periods marked _proposed_ need a
-decision and, where employment law applies, review by a qualified Malawi adviser.
+Status: **retention periods proposed by the Director; legal confirmation pending.**
 
 ## What the system provides
 
@@ -34,17 +33,19 @@ decision and, where employment law applies, review by a qualified Malawi adviser
 Messages, task updates and reports are append-only. A correction is a new message
 or update. This keeps an honest record for both the company and the employee.
 
-## Retention (_proposed_, needs Director decision)
+## Retention (proposed by the Director 2026-11-12; subject to Malawi legal, tax and privacy confirmation)
 
-| Record | Proposed retention |
+| Record | Retention |
 |---|---|
-| Messages and announcements | 3 years, then archived |
-| Tasks and task updates | 5 years |
-| Work plans and reports | 3 years |
-| Audit events | 7 years |
+| Financial records, invoices, receipts and supporting documents | 7 years minimum, longer if the law requires |
+| Audit logs | 7 years minimum |
+| Official business reports that support financial or legal records | 7 years |
+| Ordinary internal messages | 2 years by default |
+| Employee and HR records | As employment and privacy law requires |
 
-No automatic deletion is implemented. Any deletion job will be built only after
-these periods are approved, and will never remove records under a legal hold.
+Retention will be configurable. No automatic deletion is implemented yet.
+Archival and authorised deletion will be built only after legal confirmation,
+and will never touch records under a legal hold or investigation.
 
 ## Employee notice
 
