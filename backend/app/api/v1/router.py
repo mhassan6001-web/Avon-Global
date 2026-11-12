@@ -6,7 +6,9 @@ from app.api.v1.endpoints import health
 from app.modules.crm.router import router as crm_router
 from app.modules.director.router import router as director_router
 from app.modules.organisation.router import router as organisation_router
+from app.modules.tenders.router import router as tenders_router
 from app.platform.admin.router import router as admin_router
+from app.platform.approvals.router import router as approvals_router
 from app.platform.files.router import router as files_router
 from app.platform.identity.router import router as auth_router
 
@@ -19,6 +21,8 @@ ROUTERS: tuple[APIRouter, ...] = (
     files_router,
     director_router,
     crm_router,
+    tenders_router,
+    approvals_router,
 )
 
 api_router = APIRouter()

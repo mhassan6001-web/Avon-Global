@@ -53,7 +53,9 @@ test("Business Development records a customer, contact, opportunity and follow-u
   await page.getByRole("button", { name: "Cancel" }).click();
   await stage.selectOption("proposal");
   await expect(
-    page.getByRole("region", { name: "Proposal stage" }).getByText("E2E Office chairs"),
+    page
+      .getByRole("region", { name: "Proposal stage" })
+      .getByText("E2E Office chairs", { exact: true }),
   ).toBeVisible();
 
   // Command Centre now reflects real CRM records (no longer "No data yet").

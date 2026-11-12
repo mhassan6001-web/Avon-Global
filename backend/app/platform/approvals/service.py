@@ -8,6 +8,7 @@ The database also enforces ``decided_by <> requested_by``.
 from __future__ import annotations
 
 import uuid
+from collections.abc import Callable
 from typing import Any
 
 from sqlalchemy.orm import Session
@@ -18,6 +19,16 @@ from app.platform.audit import service as audit
 from app.platform.authz.catalogue import PERMISSION_CODES
 from app.platform.authz.deps import Principal
 from app.platform.identity import service as identity
+
+# Business modules register a handler per subject type to apply a decision
+# (e.g. a tender becomes "approved for submission"). Handlers run inside the
+# same transaction as the decision, so both commit or neither does.
+DecisionHandler = Callable[[Session, ApprovalRequest], None]
+_HANDLERS: dict[str, DecisionHandler] = {}
+
+
+def register_handler(subject_type: str, handler: DecisionHandler) -> None:
+    _HANDLERS[subject_type] = handler
 
 
 class SelfApprovalError(PermissionDeniedError):
@@ -93,4 +104,7 @@ def decide(
         details={"approval_id": str(request.id)},
     )
     db.flush()
+    handler = _HANDLERS.get(request.subject_type)
+    if handler is not None:
+        handler(db, request)
     return request

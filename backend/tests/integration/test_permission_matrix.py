@@ -73,6 +73,22 @@ MATRIX: list[tuple[str, str, dict | None, set[str]]] = [
         {"customer_id": str(uuid.uuid4()), "title": "x1", "division": "technologies"},
         CRM,
     ),
+    # Stage 5: tenders (Business Development) and the approval queue (everyone signed in)
+    ("GET", "/tenders", None, CRM),
+    ("GET", "/tenders/summary", None, CRM),
+    ("GET", f"/tenders/{uuid.uuid4()}", None, CRM),
+    (
+        "POST",
+        "/tenders",
+        {
+            "title": "Matrix",
+            "issuer_name": "TEST",
+            "kind": "rfq",
+            "submission_deadline": "2031-01-01T10:00:00+02:00",
+        },
+        CRM,
+    ),
+    ("GET", "/approvals", None, EVERYONE),
 ]
 
 

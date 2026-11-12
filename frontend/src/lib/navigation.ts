@@ -8,6 +8,7 @@
 
 import type { IconType } from "react-icons";
 import {
+  LuBadgeCheck,
   LuBot,
   LuBoxes,
   LuBriefcase,
@@ -46,6 +47,7 @@ export interface BusinessModule extends NavItem {
 
 export const WORKSPACE_NAV: NavItem[] = [
   { label: "Command Centre", href: "/", icon: LuLayoutDashboard, status: "available" },
+  { label: "Approvals", href: "/approvals", icon: LuBadgeCheck, status: "available" },
   { label: "System Status", href: "/system", icon: LuServer, status: "available" },
 ];
 
@@ -114,7 +116,7 @@ export const BUSINESS_MODULES: BusinessModule[] = [
     "/crm",
     "crm.records.view",
   ),
-  planned(
+  available(
     "tenders",
     "Tenders",
     LuGavel,
@@ -124,6 +126,8 @@ export const BUSINESS_MODULES: BusinessModule[] = [
       "Eligibility and submission-document checklists",
       "Bid approvals and award tracking",
     ],
+    "/tenders",
+    "tenders.records.view",
   ),
   planned(
     "procurement",
