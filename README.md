@@ -9,6 +9,8 @@ and executive AI (JARVIS). It will be used on Windows, Mac, iPhone and Android.
 - Stage 0 (architecture) documents are complete and awaiting review.
 - Stage 1 (core infrastructure and shell) is approved and **verified green
   in GitHub CI**.
+- Stage 2 (identity and security) is built and verified in CI: 123 backend
+  tests and 6 browser tests. It is **awaiting Director approval**.
 - No business module is built yet. See `PROJECT_STATUS.md`.
 
 ## Architecture
@@ -39,6 +41,21 @@ make up          # copies .env.example → .env, builds and starts everything
 | Liveness  | <http://localhost:8000/api/v1/health/live>   |
 | Readiness | <http://localhost:8000/api/v1/health/ready>  |
 
+After `make up`, create development-only test accounts (one per role,
+printed once):
+
+```bash
+make seed-dev-users
+```
+
+For a real deployment, create the single Director account once:
+
+```bash
+make create-director EMAIL=... NAME="..."
+```
+
+The password is prompted, and two-factor setup is required at first sign-in.
+
 The development backend applies migrations on start (`scripts/start-dev.sh`).
 In production, migrations run as a separate release step, never on every start.
 
@@ -49,9 +66,16 @@ make lint            # ruff, ruff format, mypy, eslint, tsc, prettier
 make test            # backend unit + integration (real Postgres/Redis), frontend tests
 ```
 
-CI (`.github/workflows/ci.yml`) runs the same checks plus bandit, pip-audit, a
-migration round-trip, an API startup test and `next build`. CI fails if any
-integration test is skipped.
+CI (`.github/workflows/ci.yml`) runs three jobs:
+
+- **backend:** ruff, mypy, bandit, pip-audit, pytest (unit and integration
+  on real PostgreSQL and Redis), a migration round-trip, and API startup
+- **frontend:** Prettier, ESLint, tsc, unit tests, and `next build`
+- **e2e:** Playwright in Chromium against the real stack, with seeded
+  development-only accounts
+
+Results appear as annotations on each commit. CI fails if any integration
+test is skipped.
 
 ## Health endpoints
 
