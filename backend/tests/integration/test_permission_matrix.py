@@ -29,6 +29,7 @@ CRM = {"director", "business_development"}
 PRC = {"director", "procurement"}
 FIN = {"director", "finance"}
 LGX = {"director", "logistics"}
+HRA = {"director", "hr_admin"}
 
 PDF = b"%PDF-1.4\n% AVEN test document\n%%EOF\n"
 
@@ -128,6 +129,11 @@ MATRIX: list[tuple[str, str, dict | None, set[str]]] = [
     ("GET", "/logistics/shipments", None, LGX),
     ("GET", "/logistics/delivery-notes", None, LGX),
     ("GET", "/logistics/customers", None, LGX),
+    # Stage 9: HR and payroll
+    ("GET", "/hr/employees", None, HRA),
+    ("GET", "/hr/leave", None, HRA),
+    ("GET", "/hr/payroll-runs", None, HRA),
+    ("GET", "/hr/pay-components", None, HRA),
 ]
 
 

@@ -6,6 +6,7 @@ from app.api.v1.endpoints import health
 from app.modules.crm.router import router as crm_router
 from app.modules.director.router import router as director_router
 from app.modules.finance.router import router as finance_router
+from app.modules.hr.router import router as hr_router
 from app.modules.inventory.router import router as inventory_router
 from app.modules.logistics.router import router as logistics_router
 from app.modules.organisation.router import router as organisation_router
@@ -30,6 +31,7 @@ ROUTERS: tuple[APIRouter, ...] = (
     finance_router,
     inventory_router,
     logistics_router,
+    hr_router,
     approvals_router,
 )
 

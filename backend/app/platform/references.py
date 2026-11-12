@@ -22,6 +22,7 @@ SEQUENCES: dict[str, str] = {
     "GRN": "inv_grn_ref_seq",
     "SHP": "lgx_shipment_ref_seq",
     "DN": "lgx_delivery_ref_seq",
+    "EMP": "hr_employee_ref_seq",
 }
 
 
