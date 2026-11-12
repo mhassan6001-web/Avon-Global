@@ -5,14 +5,17 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from decimal import Decimal
 from typing import Any
 
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     DateTime,
     ForeignKey,
     Index,
     Integer,
+    Numeric,
     String,
     Text,
     Uuid,
@@ -115,4 +118,38 @@ class AIAction(Base):
     error: Mapped[str | None] = mapped_column(Text)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = _now()
+
+
+class AIVoiceSettings(Base):
+    """Per-user voice choices. Wake word is off until consent is recorded."""
+
+    __tablename__ = "ai_voice_settings"
+    __table_args__ = (CheckConstraint("speed BETWEEN 0.80 AND 1.25", name="speed_range"),)
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("auth_users.id", ondelete="CASCADE"), primary_key=True
+    )
+    voice_id: Mapped[str | None] = mapped_column(String(80))
+    speed: Mapped[Decimal] = mapped_column(Numeric(3, 2), nullable=False, server_default="1.00")
+    speak_replies: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("false")
+    )
+    wake_word_enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("false")
+    )
+    updated_at: Mapped[datetime] = _now()
+
+
+class AIVoiceConsent(Base):
+    """Append-only record of wake-word consent decisions (who, device, when)."""
+
+    __tablename__ = "ai_voice_consents"
+
+    id: Mapped[uuid.UUID] = _pk()
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("auth_users.id"), nullable=False, index=True
+    )
+    device: Mapped[str] = mapped_column(String(120), nullable=False)
+    granted: Mapped[bool] = mapped_column(Boolean, nullable=False)
     created_at: Mapped[datetime] = _now()

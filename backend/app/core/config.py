@@ -114,6 +114,17 @@ class Settings(BaseModel):
     ai_max_output_tokens: Annotated[int, Field(ge=256, le=8192)] = 2048
     ai_timeout_seconds: Annotated[float, Field(gt=0, le=300)] = 60.0
 
+    # --- JARVIS voice (Stage 12) -----------------------------------------
+    # Providers are chosen by the Director after voice auditions; until then
+    # voice falls back to text. "fake" is for tests only.
+    stt_provider: Literal["disabled", "fake"] = "disabled"
+    tts_provider: Literal["disabled", "fake"] = "disabled"
+    # Picovoice Porcupine AccessKey (paid licence). Porcupine Web runs in the
+    # browser, so the key is released only to consenting JARVIS users.
+    picovoice_access_key: SecretStr = SecretStr("")
+    wake_word_model_url: str | None = None  # trained .ppn served from our origin
+    voice_max_clip_kb: Annotated[int, Field(ge=64, le=10_240)] = 2048
+
     # --- validators -------------------------------------------------------
 
     @field_validator("cors_origins", "field_encryption_keys", mode="before")
@@ -179,6 +190,8 @@ class Settings(BaseModel):
             problems.append("PUBLIC_BASE_URL must be https in production")
         if self.ai_provider == "fake":
             problems.append("AI_PROVIDER=fake is for tests only")
+        if "fake" in (self.stt_provider, self.tts_provider):
+            problems.append("STT_PROVIDER/TTS_PROVIDER=fake are for tests only")
         if self.ai_provider == "anthropic" and not self.anthropic_base_url.startswith("https://"):
             problems.append("ANTHROPIC_BASE_URL must be https in production")
         if problems:

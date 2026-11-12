@@ -39,6 +39,10 @@ def settings(tmp_path_factory: pytest.TempPathFactory) -> Settings:
     os.environ["ARGON2_MEMORY_KIB"] = "8192"
     os.environ["MAX_UPLOAD_MB"] = "1"
     os.environ["AI_PROVIDER"] = "fake"  # deterministic JARVIS provider, never a real model
+    os.environ["STT_PROVIDER"] = "fake"
+    os.environ["TTS_PROVIDER"] = "fake"
+    os.environ["PICOVOICE_ACCESS_KEY"] = "test-access-key-not-real"
+    os.environ["WAKE_WORD_MODEL_URL"] = "/wake-word/test.ppn"
     os.environ["STORAGE_DIR"] = str(tmp_path_factory.mktemp("files"))
     os.environ["DATABASE_URL"] = TEST_DATABASE_URL  # type: ignore[assignment]
     os.environ.setdefault("REDIS_URL", os.environ.get("TEST_REDIS_URL", "redis://localhost:6379/0"))

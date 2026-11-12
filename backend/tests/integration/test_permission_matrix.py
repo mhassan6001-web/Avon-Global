@@ -142,6 +142,7 @@ MATRIX: list[tuple[str, str, dict | None, set[str]]] = [
     ("GET", "/jarvis/status", None, DIRECTOR),
     ("GET", "/jarvis/briefing", None, DIRECTOR),
     ("GET", "/jarvis/conversations", None, DIRECTOR),
+    ("GET", "/jarvis/voice/status", None, DIRECTOR),
     ("GET", "/hr/me", None, EVERYONE),
 ]
 
