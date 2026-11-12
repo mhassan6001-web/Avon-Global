@@ -15,14 +15,14 @@ test("HR adds an employee and a configured pay component; payroll stays restrict
   await d.getByLabel("Job title").fill("Driver");
   await d.getByLabel("Start date").fill("2026-01-05");
   await d.getByRole("button", { name: "Create employee" }).click();
-  await expect(page.getByText("E2E TEST Employee")).toBeVisible();
+  await expect(page.getByText("E2E TEST Employee", { exact: true })).toBeVisible();
   await expect(page.getByText(/^EMP-\d{5}$/).first()).toBeVisible();
 
   await page.getByRole("radio", { name: "Payroll" }).click();
   await page.getByRole("button", { name: "Add", exact: true }).click();
   const c = page.getByRole("dialog", { name: "Add pay component" });
-  await c.getByLabel("Code").fill("E2E-TAX");
-  await c.getByLabel("Name").fill("E2E test tax");
+  await c.getByLabel("Code", { exact: true }).fill("E2E-TAX");
+  await c.getByLabel("Name", { exact: true }).fill("E2E test tax");
   await c.getByLabel("Method").selectOption("bands");
   await c.getByLabel(/Bands, one per line/).fill("0,100000,0\n100000,,25");
   await c.getByLabel("Source of these figures").fill("E2E test values only");

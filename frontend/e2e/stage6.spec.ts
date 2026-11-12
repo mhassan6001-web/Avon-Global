@@ -39,14 +39,14 @@ test("procurement: verified supplier, quotation comparison, approval request", a
   await page.getByRole("button", { name: "New purchase request" }).click();
   const pr = page.getByRole("dialog", { name: "New purchase request" });
   await pr.getByLabel("What is needed").fill(`E2E Printer paper ${stamp}`);
-  await pr.getByLabel("Item 1").fill("A4 ream");
+  await pr.getByLabel("Item 1", { exact: true }).fill("A4 ream");
   await pr.getByLabel("Quantity 1").fill("10");
   await pr.getByRole("button", { name: "Create request" }).click();
   await expect(page.getByRole("heading", { name: `E2E Printer paper ${stamp}` })).toBeVisible();
 
   await page.getByRole("button", { name: "Add quotation" }).click();
   const qd = page.getByRole("dialog", { name: "Add supplier quotation" });
-  await qd.getByLabel("Supplier").selectOption({ label: supplier });
+  await qd.getByLabel("Supplier", { exact: true }).selectOption({ label: supplier });
   await qd.getByLabel("Unit price: A4 ream").fill("6500");
   await qd.getByRole("button", { name: "Save quotation" }).click();
   await expect(page.getByText("MWK 65,000.00")).toBeVisible();

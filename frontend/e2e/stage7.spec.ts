@@ -34,12 +34,12 @@ test("finance: set up books, issue an invoice, see a balanced trial balance", as
   await page.getByRole("link", { name: "Sales & receipts" }).click();
   await page.getByRole("button", { name: "New invoice" }).click();
   const dialog = page.getByRole("dialog", { name: "New invoice" });
-  await dialog.getByLabel("Customer").selectOption({ index: 1 });
+  await dialog.getByLabel("Customer", { exact: true }).selectOption({ index: 1 });
   await dialog.getByLabel("Description 1").fill("E2E consulting");
   await dialog.getByLabel("Unit price 1").fill("1500.50");
   await dialog.getByLabel("Revenue account 1").selectOption({ label: "E4000 E2E TEST Sales" });
   await dialog.getByRole("button", { name: "Save draft" }).click();
-  await expect(page.getByRole("cell", { name: /^Draft/ })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "Draft", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Issue", exact: true }).click();
   await expect(page.getByText(`INV-${year}-00001`)).toBeVisible();
   await expect(page.getByText("MWK 1,500.50").first()).toBeVisible();
