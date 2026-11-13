@@ -93,3 +93,11 @@ are **not legally approved**, and the app says so on the finance screens.
   repository, in documents or in chat records by the project**. It belongs
   only in the server's secret store (or a local `.env` file that git ignores).
 - **Remaining stages:** approved to proceed. TPIN and VAT number to follow.
+
+## Confirmed by the Director on 2026-11-13
+
+- **Hosting:** run the system from the Director's own computer for now.
+  **Azure is dropped.** Any online hosting must be free. This replaces the
+  earlier Azure proposal (item 15) and Stage 23 as written.
+- Guide: `docs/operations/RUN_ON_YOUR_COMPUTER.md`. The limits are stated
+  there: one computer, no automatic backups, not yet reachable by staff.

@@ -35,7 +35,7 @@ with questions collected at the end (`docs/stages-3-15-report.md`).
 | 20 | Microsoft 365 integration | Email outbox, Outlook calendar, reminders and document storage through a replaceable interface; connected only with approval | Queued |
 | 21 | Retention and archival | Configurable policies, legal hold, authorised deletion procedure | Queued (after legal confirmation) |
 | 22 | Contracts and tender packs | Contracts and service agreements; EOI, RFQ and RFP packs with company documents | Queued |
-| 23 | Azure provisioning and launch | Only after cost approval, the accountant's review and user acceptance tests | Queued |
+| 23 | Hosting and launch | **Changed 2026-11-13:** run on the Director's computer for now (`docs/operations/RUN_ON_YOUR_COMPUTER.md`); Azure dropped; online hosting only if free. Staff and phone access, HTTPS and routine backups still to be set up before real records. | Local start scripts built |
 
 Decisions and pending information: `docs/DIRECTOR_DECISIONS.md` and
 `docs/OUTSTANDING_INFORMATION.md`.
