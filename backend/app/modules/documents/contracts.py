@@ -109,7 +109,9 @@ def _need(p: Principal, permission: str) -> None:
 
 
 def _party(db: Session, party_type: str, party_id: uuid.UUID) -> Customer | Supplier:
-    row = db.get(Customer if party_type == "customer" else Supplier, party_id)
+    row: Customer | Supplier | None = (
+        db.get(Customer, party_id) if party_type == "customer" else db.get(Supplier, party_id)
+    )
     if row is None:
         raise ContractRuleError("Choose an existing customer or supplier.")
     return row
