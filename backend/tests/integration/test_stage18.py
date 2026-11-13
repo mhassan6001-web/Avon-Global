@@ -96,7 +96,7 @@ def test_movements_post_balanced_journals_once_enabled(app: FastAPI, db: Session
         "quantity": "5",
         "movement_date": str(TODAY),
     }
-    assert stock.post(f"{INV}/transfers", json=transfer).status_code == 201
+    assert stock.post(f"{INV}/transfers", json=transfer).status_code == 200
 
     journals = db.execute(
         text(

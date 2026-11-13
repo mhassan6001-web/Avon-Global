@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { LuFileDown, LuFileSpreadsheet, LuFileText } from "react-icons/lu";
 
@@ -126,9 +127,16 @@ export default function DocumentsPage() {
               </a>
             </p>
             <p className={page.note}>
-              Invoices, receipts, purchase orders and delivery notes are downloaded from their own
-              lists (PDF or Word).
+              Quotations, invoices, receipts, purchase orders and delivery notes are downloaded from
+              their own lists (PDF or Word). Tender packs are downloaded from each tender.
             </p>
+            {(can("crm.records.view") || can("procurement.records.view")) && (
+              <p>
+                <Link className={page.inlineLink} href="/documents/contracts">
+                  Contracts and service agreements
+                </Link>
+              </p>
+            )}
           </Panel>
         </div>
         <div className={page.span6}>

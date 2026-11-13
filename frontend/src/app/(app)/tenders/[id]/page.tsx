@@ -19,7 +19,7 @@ import {
   Spinner,
   TextField,
 } from "@/components/ui";
-import { send } from "@/lib/api/client";
+import { API_PREFIX, send } from "@/lib/api/client";
 import { errorMessage, useResource } from "@/lib/api/useResource";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { DIVISION_LABEL, formatMoney } from "@/lib/crm/types";
@@ -89,7 +89,14 @@ export default function TenderPage() {
   return (
     <>
       <PageHeader
-        eyebrow={`${t.reference} · ${KIND_LABEL[t.kind]}`}
+        eyebrow={
+          <>
+            {`${t.reference} · ${KIND_LABEL[t.kind]} · `}
+            <a href={`${API_PREFIX}/documents/tender-packs/${t.id}`} download>
+              Download tender pack (ZIP)
+            </a>
+          </>
+        }
         title={t.title}
         description={`${t.issuer_name}${t.issuer_reference ? ` · ${t.issuer_reference}` : ""}`}
         actions={
