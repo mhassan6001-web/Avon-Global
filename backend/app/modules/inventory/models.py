@@ -90,7 +90,7 @@ class StockMovement(Base):
     __table_args__ = (
         CheckConstraint(
             "kind IN ('opening', 'receipt', 'dispatch', 'adjustment', 'transfer_in', "
-            "'transfer_out')",
+            "'transfer_out', 'return_in', 'damage')",
             name="kind_valid",
         ),
         CheckConstraint("quantity <> 0", name="quantity_non_zero"),

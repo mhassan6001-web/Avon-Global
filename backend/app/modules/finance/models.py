@@ -25,6 +25,7 @@ from sqlalchemy import (
     Index,
     Integer,
     Numeric,
+    SmallInteger,
     String,
     Text,
     UniqueConstraint,
@@ -181,7 +182,7 @@ class JournalEntry(TimestampMixin, Base):
         ),
         CheckConstraint(
             "source_type IN ('manual', 'invoice', 'receipt', 'credit_note', 'bill', 'payment', "
-            "'reversal')",
+            "'reversal', 'stock')",
             name="source_valid",
         ),
         CheckConstraint(
@@ -491,3 +492,43 @@ class BankStatementLine(TimestampMixin, Base):
     matched_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("auth_users.id"))
     matched_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("auth_users.id"), nullable=False)
+
+
+class StockPosting(Base):
+    """Perpetual inventory accounting settings (one row).
+
+    While ``enabled`` is off, stock movements update quantities and cost only.
+    When on, every movement also posts a balanced journal in the same
+    transaction. It can be switched on only after the accounts are mapped and
+    the reviewing accountant is recorded.
+    """
+
+    __tablename__ = "fin_stock_posting"
+    __table_args__ = (
+        CheckConstraint("id = 1", name="single_row"),
+        CheckConstraint("valuation_method IN ('weighted_average')", name="method_valid"),
+        CheckConstraint(
+            "NOT enabled OR (inventory_account_id IS NOT NULL AND grni_account_id IS NOT NULL "
+            "AND cogs_account_id IS NOT NULL AND adjustment_account_id IS NOT NULL "
+            "AND opening_account_id IS NOT NULL AND reviewed_by_name IS NOT NULL "
+            "AND reviewed_on IS NOT NULL)",
+            name="enabled_requires_setup",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(SmallInteger, primary_key=True, autoincrement=False)
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
+    valuation_method: Mapped[str] = mapped_column(
+        String(20), nullable=False, server_default="weighted_average"
+    )
+    inventory_account_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("fin_accounts.id"))
+    grni_account_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("fin_accounts.id"))
+    cogs_account_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("fin_accounts.id"))
+    adjustment_account_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("fin_accounts.id"))
+    opening_account_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("fin_accounts.id"))
+    reviewed_by_name: Mapped[str | None] = mapped_column(String(200))
+    reviewed_on: Mapped[date | None] = mapped_column(Date)
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("auth_users.id"))
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=text("now()")
+    )

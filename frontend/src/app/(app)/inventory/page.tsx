@@ -380,6 +380,8 @@ export default function InventoryPage() {
               options={[
                 { value: "adjustment", label: "Count adjustment" },
                 { value: "opening", label: "Opening stock" },
+                { value: "return_in", label: "Customer return (+)" },
+                { value: "damage", label: "Damaged stock (−)" },
               ]}
             />
             <TextField

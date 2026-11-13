@@ -45,6 +45,7 @@ from app.modules.finance.models import (
     Receipt,
     ReceiptAllocation,
     Settings,
+    StockPosting,
     TaxCode,
 )
 from app.modules.hr.models import (
@@ -172,6 +173,7 @@ __all__ = [
     "ShipmentEvent",
     "StockLevel",
     "StockMovement",
+    "StockPosting",
     "StoredFile",
     "Supplier",
     "SupplierBankAccount",

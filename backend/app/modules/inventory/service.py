@@ -11,7 +11,7 @@ from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
 from app.core.errors import AppError, ConflictError, NotFoundError
-from app.modules.finance import posting
+from app.modules.finance import posting, stock_posting
 from app.modules.procurement.models import PurchaseOrder, PurchaseOrderLine
 from app.platform.audit import service as audit
 from app.platform.references import next_reference
@@ -113,6 +113,7 @@ def move_in(
     )
     db.add(movement)
     db.flush()
+    stock_posting.post_movement(db, movement, actor)  # perpetual inventory (Stage 18)
     return movement
 
 
@@ -154,6 +155,7 @@ def move_out(
     )
     db.add(movement)
     db.flush()
+    stock_posting.post_movement(db, movement, actor)  # perpetual inventory (Stage 18)
     return movement
 
 
@@ -234,6 +236,10 @@ def adjust(db: Session, body: schemas.AdjustmentIn, actor: uuid.UUID) -> StockMo
     warehouse = get_warehouse(db, body.warehouse_id)
     if body.quantity == 0:
         raise InventoryRuleError("An adjustment cannot be zero.")
+    if body.kind == "damage" and body.quantity > 0:
+        raise InventoryRuleError("Enter damaged stock as a negative quantity.")
+    if body.kind == "return_in" and body.quantity < 0:
+        raise InventoryRuleError("A customer return must be a positive quantity.")
     if body.quantity > 0:
         cost = body.unit_cost
         if cost is None:
@@ -260,7 +266,7 @@ def adjust(db: Session, body: schemas.AdjustmentIn, actor: uuid.UUID) -> StockMo
             product=product,
             warehouse=warehouse,
             quantity=-body.quantity,
-            kind="adjustment",
+            kind="damage" if body.kind == "damage" else "adjustment",
             on=body.movement_date,
             actor=actor,
             reason=body.reason,

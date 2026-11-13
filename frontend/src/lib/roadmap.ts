@@ -29,7 +29,8 @@ export const STAGES: Stage[] = [
   { number: 14, title: "Production readiness runbooks", state: "verified" },
   { number: 15, title: "Mobile & installable app", state: "verified" },
   { number: 16, title: "Company identity, quotations & approval rules", state: "verified" },
-  { number: 17, title: "Statements & supplier documents", state: "in_progress" },
+  { number: 17, title: "Statements & supplier documents", state: "verified" },
+  { number: 18, title: "Perpetual inventory accounting", state: "in_progress" },
 ];
 
 export const TOTAL_STAGES = 15;

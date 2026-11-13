@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { StockPostingPanel } from "@/components/finance/StockPostingPanel";
 import styles from "@/components/crm/crm.module.css";
 import { FinanceNav } from "@/components/finance/FinanceNav";
 import {
@@ -465,6 +466,9 @@ export default function FinanceSetupPage() {
               </form>
             )}
           </Panel>
+        </div>
+        <div>
+          <StockPostingPanel accounts={all} />
         </div>
       </div>
     </>
