@@ -41,6 +41,8 @@ REPORTS = {
 KIND_PERMISSION = {k: perm for k, (_, perm) in builders.BUILDERS.items()} | REPORTS
 KIND_PERMISSION["letterhead"] = "org.profile.view"
 KIND_PERMISSION["statement"] = "finance.records.view"
+KIND_PERMISSION["contract"] = "crm.quotation.approve"  # register view: Director
+KIND_PERMISSION["tender_pack"] = "tenders.records.view"
 
 
 class RegisterRow(BaseModel):
@@ -61,19 +63,21 @@ def _need(p: Principal, permission: str) -> None:
         raise PermissionDeniedError()
 
 
+def next_version(db: DbSession, kind: str, subject: str, fmt: str) -> int:
+    current: int = db.execute(
+        select(func.coalesce(func.max(GeneratedDocument.version), 0)).where(
+            GeneratedDocument.kind == kind,
+            GeneratedDocument.subject == subject,
+            GeneratedDocument.format == fmt,
+        )
+    ).scalar_one()
+    return current + 1
+
+
 def _deliver(
     db: DbSession, p: Principal, kind: str, subject: str, number: str, fmt: str, data: bytes
 ) -> Response:
-    version = (
-        db.execute(
-            select(func.coalesce(func.max(GeneratedDocument.version), 0)).where(
-                GeneratedDocument.kind == kind,
-                GeneratedDocument.subject == subject,
-                GeneratedDocument.format == fmt,
-            )
-        ).scalar_one()
-        + 1
-    )
+    version = next_version(db, kind, subject, fmt)
     digest = hashlib.sha256(data).hexdigest()
     row = GeneratedDocument(
         kind=kind,

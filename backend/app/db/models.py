@@ -27,7 +27,7 @@ from app.modules.crm.models import (
     Quotation,
     QuotationLine,
 )
-from app.modules.documents.models import GeneratedDocument
+from app.modules.documents.models import BusinessContract, GeneratedDocument
 from app.modules.finance.models import (
     Account,
     BankStatementLine,
@@ -117,6 +117,7 @@ __all__ = [
     "Base",
     "Bill",
     "BillLine",
+    "BusinessContract",
     "Commission",
     "Compensation",
     "Contact",
