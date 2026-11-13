@@ -27,7 +27,7 @@ from app.modules.crm.models import (
     Quotation,
     QuotationLine,
 )
-from app.modules.documents.models import GeneratedDocument
+from app.modules.documents.models import BusinessContract, GeneratedDocument
 from app.modules.finance.models import (
     Account,
     BankStatementLine,
@@ -45,6 +45,7 @@ from app.modules.finance.models import (
     Receipt,
     ReceiptAllocation,
     Settings,
+    StockPosting,
     TaxCode,
 )
 from app.modules.hr.models import (
@@ -116,6 +117,7 @@ __all__ = [
     "Base",
     "Bill",
     "BillLine",
+    "BusinessContract",
     "Commission",
     "Compensation",
     "Contact",
@@ -172,6 +174,7 @@ __all__ = [
     "ShipmentEvent",
     "StockLevel",
     "StockMovement",
+    "StockPosting",
     "StoredFile",
     "Supplier",
     "SupplierBankAccount",

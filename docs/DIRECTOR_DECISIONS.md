@@ -73,3 +73,31 @@ are **not legally approved**, and the app says so on the finance screens.
   Staff quotations go to the Director above the configured limit.
 - If the Director later wants to approve their own restricted requests, that
   is a change to the master rule and needs an explicit written decision.
+
+## Confirmed by the Director on 2026-11-12 (third message)
+
+- **Pull requests:** the Director asked for PRs #1, #2 and #3 to be merged on
+  his behalf. Merged into `main` on 2026-11-12.
+- **Business telephone (for now):** +265 999 667 007. To be entered in
+  Admin → Organisation; it prints once ticked "Approved to print".
+- **Voice audition:** trial accounts approved (ElevenLabs, Azure Speech,
+  Cartesia). No payment.
+- **JARVIS name:** internal use only.
+- **Trademark:** formal Malawi search for AVEN GLOBAL approved in principle;
+  the fee and practitioner still need the Director's go-ahead.
+- **Monitoring:** Sentry plus Better Stack approved in principle. Nothing
+  purchased.
+- **Hosting:** the Director asked for a free option first. See
+  `docs/research/HOSTING_FREE_OPTIONS.md`.
+- **Anthropic API key:** supplied by the Director. It is **not stored in this
+  repository, in documents or in chat records by the project**. It belongs
+  only in the server's secret store (or a local `.env` file that git ignores).
+- **Remaining stages:** approved to proceed. TPIN and VAT number to follow.
+
+## Confirmed by the Director on 2026-11-13
+
+- **Hosting:** run the system from the Director's own computer for now.
+  **Azure is dropped.** Any online hosting must be free. This replaces the
+  earlier Azure proposal (item 15) and Stage 23 as written.
+- Guide: `docs/operations/RUN_ON_YOUR_COMPUTER.md`. The limits are stated
+  there: one computer, no automatic backups, not yet reachable by staff.

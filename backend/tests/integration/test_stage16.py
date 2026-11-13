@@ -245,3 +245,103 @@ def test_jarvis_uses_the_advanced_model_only_when_asked(app: FastAPI, db: Sessio
     models = [m for (m,) in db.execute(text("SELECT model FROM ai_usage ORDER BY created_at"))]
     assert models == ["fake-jarvis", "claude-opus-5-5"]
     assert director.post(url, json={"text": "x", "depth": "max"}).status_code == 422
+
+
+def test_customer_statement_and_rfq_documents(app: FastAPI, db: Session) -> None:
+    """Stage 17: statements from posted records; request-for-quotation documents."""
+    import io
+    import zipfile
+
+    from .test_finance import _invoice
+    from .test_inventory_logistics import _approved_order
+
+    b = _setup(app, db)
+    inv = _invoice(
+        b,
+        [
+            {
+                "description": "Desks",
+                "quantity": "10",
+                "unit_price": "1000",
+                "account_id": b.acc["4000"],
+            }
+        ],
+    )
+    draft_only = _invoice(
+        b,
+        [
+            {
+                "description": "Never issued",
+                "quantity": "1",
+                "unit_price": "77",
+                "account_id": b.acc["4000"],
+            }
+        ],
+    )
+    issued = b.fin.post(f"{API}/finance/invoices/{inv['id']}/issue", json={}).json()
+    receipt = b.fin.post(
+        f"{API}/finance/receipts",
+        json={
+            "customer_id": b.customer,
+            "receipt_date": str(TODAY),
+            "currency": "MWK",
+            "amount": "4000",
+            "bank_account_id": b.acc["1000"],
+            "method": "bank_transfer",
+            "allocations": [{"invoice_id": inv["id"], "amount": "4000"}],
+        },
+    )
+    assert receipt.status_code == 201, receipt.text
+
+    st = b.fin.get(f"{API}/finance/reports/statement", params={"customer_id": b.customer}).json()
+    assert [r["kind"] for r in st["rows"]] == ["invoice", "receipt"]
+    assert st["rows"][0]["number"] == issued["number"]
+    assert st["rows"][-1]["balance"] == "6000.00"
+    assert st["totals"] == [
+        {
+            "currency": "MWK",
+            "opening": "0",
+            "invoiced": "10000.00",
+            "received": "4000.00",
+            "credited": "0",
+            "closing": "6000.00",
+        }
+    ]
+    assert draft_only["id"]  # the draft invoice never appears on a statement
+    # A later period carries the balance forward as the opening balance.
+    later = b.fin.get(
+        f"{API}/finance/reports/statement",
+        params={
+            "customer_id": b.customer,
+            "date_from": str(TODAY + timedelta(days=1)),
+            "date_to": str(TODAY + timedelta(days=30)),
+        },
+    ).json()
+    assert later["rows"] == [] and later["totals"][0]["opening"] == "6000.00"
+
+    pdf = b.fin.get(f"{API}/documents/statements/{b.customer}")
+    assert pdf.status_code == 200, pdf.text
+    page = _pdf_text(pdf.content)
+    assert b"STATEMENT OF ACCOUNT" in page and b"6,000.00" in page and b"Never issued" not in page
+    xlsx = b.fin.get(f"{API}/documents/statements/{b.customer}", params={"format": "xlsx"})
+    with zipfile.ZipFile(io.BytesIO(xlsx.content)) as z:
+        assert issued["number"] in z.read("xl/worksheets/sheet1.xml").decode()
+    staff = sign_in(app, make_user(db, "logistics"))
+    assert staff.get(f"{API}/documents/statements/{b.customer}").status_code == 403
+    assert (
+        staff.get(
+            f"{API}/finance/reports/statement", params={"customer_id": b.customer}
+        ).status_code
+        == 403
+    )
+
+    order = _approved_order(app, db)
+    prc = sign_in(app, make_user(db, "procurement"))
+    request_id = prc.get(f"{API}/procurement/requests").json()["items"][0]["id"]
+    rfq = prc.get(f"{API}/documents/records/rfq/{request_id}")
+    assert rfq.status_code == 200, rfq.text
+    text_ = _pdf_text(rfq.content)
+    assert b"REQUEST FOR QUOTATION" in text_ and b"Office chair" in text_
+    assert b"not an order" in text_ and b"Your unit price" in text_
+    assert order["reference"]
+    assert staff.get(f"{API}/documents/records/rfq/{request_id}").status_code == 403

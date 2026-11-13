@@ -17,7 +17,7 @@ from app.modules.procurement.models import Supplier
 from app.platform.audit import service as audit
 from app.platform.authz.deps import DbSession, Principal, require, require_step_up
 
-from . import posting, reports, schemas
+from . import posting, reports, schemas, stock_posting
 from . import service as fin
 from .models import (
     Account,
@@ -492,6 +492,51 @@ def ageing(
     as_of: date | None = None,
 ) -> schemas.Ageing:
     return reports.ageing(db, kind, as_of or _today())
+
+
+@router.get("/stock-posting", response_model=stock_posting.StockPostingOut)
+def get_stock_posting(db: DbSession, _: Principal = Ledger) -> stock_posting.StockPostingOut:
+    return stock_posting.config_out(db)
+
+
+@router.put(
+    "/stock-posting",
+    response_model=stock_posting.StockPostingOut,
+    dependencies=[Depends(require_step_up)],
+)
+def put_stock_posting(
+    body: stock_posting.StockPostingIn,
+    db: DbSession,
+    principal: Principal = Depends(require("finance.transaction.approve")),
+) -> stock_posting.StockPostingOut:
+    """Director only, with step-up: map accounts and switch perpetual inventory posting."""
+    out = stock_posting.save_config(db, body, principal.user.id)
+    db.commit()
+    return out
+
+
+@router.get("/reports/stock-reconciliation", response_model=stock_posting.StockReconciliation)
+def stock_reconciliation(
+    db: DbSession, _: Principal = Ledger, as_of: date | None = None
+) -> stock_posting.StockReconciliation:
+    """Stock ledger value against the inventory account (run at each month end)."""
+    return stock_posting.reconciliation(db, as_of or _today())
+
+
+@router.get("/reports/statement", response_model=schemas.Statement)
+def customer_statement(
+    db: DbSession,
+    customer_id: uuid.UUID,
+    _: Principal = View,
+    date_from: date | None = None,
+    date_to: date | None = None,
+) -> schemas.Statement:
+    """Customer account statement. Defaults to the current calendar year to date."""
+    end = date_to or _today()
+    start = date_from or date(end.year, 1, 1)
+    if start > end:
+        raise posting.FinanceRuleError("The start date is after the end date.")
+    return reports.statement(db, customer_id, start, end)
 
 
 @router.get("/reports/cashbook", response_model=schemas.Cashbook)

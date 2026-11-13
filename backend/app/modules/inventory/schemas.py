@@ -86,7 +86,7 @@ class AdjustmentIn(_In):
     quantity: Decimal = Field(max_digits=18, decimal_places=3)  # + found, - lost/damaged
     unit_cost: Decimal | None = Field(default=None, ge=0, max_digits=18, decimal_places=4)
     movement_date: date
-    kind: Literal["adjustment", "opening"] = "adjustment"
+    kind: Literal["adjustment", "opening", "return_in", "damage"] = "adjustment"
     reason: str = Field(min_length=3, max_length=2000)
 
 

@@ -19,7 +19,7 @@ import {
   Spinner,
   TextField,
 } from "@/components/ui";
-import { send } from "@/lib/api/client";
+import { API_PREFIX, send } from "@/lib/api/client";
 import { errorMessage, useResource } from "@/lib/api/useResource";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { DIVISION_LABEL, formatMoney } from "@/lib/crm/types";
@@ -104,6 +104,14 @@ export default function TenderPage() {
         <Link href="/tenders" className={page.inlineLink}>
           All tenders
         </Link>
+        {" · "}
+        <a
+          className={page.inlineLink}
+          href={`${API_PREFIX}/documents/tender-packs/${t.id}`}
+          download
+        >
+          Download tender pack (ZIP)
+        </a>
       </p>
       <FormError message={actionError} />
       <div className={page.grid}>

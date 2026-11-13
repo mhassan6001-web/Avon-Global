@@ -17,7 +17,13 @@ from app.modules.finance.models import Invoice, InvoiceLine, Receipt, TaxCode
 from app.modules.inventory.models import Product, Warehouse
 from app.modules.logistics.models import DeliveryNote, DeliveryNoteLine
 from app.modules.organisation.models import OrganisationProfile
-from app.modules.procurement.models import PurchaseOrder, PurchaseOrderLine, Supplier
+from app.modules.procurement.models import (
+    PurchaseOrder,
+    PurchaseOrderLine,
+    PurchaseRequest,
+    PurchaseRequestLine,
+    Supplier,
+)
 from app.platform.identity.models import User
 
 from .model import Column, Document, Sheet
@@ -400,7 +406,118 @@ def quotation(db: Session, record_id: uuid.UUID, by: str, now: datetime) -> Docu
     )
 
 
+def rfq(db: Session, record_id: uuid.UUID, by: str, now: datetime) -> Document:
+    """Request for quotation to send to suppliers: the items needed, no prices."""
+    pr = db.get(PurchaseRequest, record_id)
+    if pr is None:
+        raise NotFoundError("Purchase request not found.")
+    lines = list(
+        db.execute(
+            select(PurchaseRequestLine)
+            .where(PurchaseRequestLine.request_id == pr.id)
+            .order_by(PurchaseRequestLine.line_no)
+        ).scalars()
+    )
+    return Document(
+        kind="Request for quotation",
+        number=f"RFQ-{pr.reference}",
+        issuer=issuer_lines(db),
+        recipient_title="To",
+        recipient=["Supplier", "(name and address to be completed)"],
+        meta=[
+            ("Our reference", pr.reference),
+            ("Subject", pr.title),
+            ("Required by", day(pr.needed_by)),
+            ("Quote in", pr.currency),
+            ("Prepared by", _name(db, pr.requested_by) or "—"),
+        ],
+        columns=[
+            Column("No.", 0.6),
+            Column("Item", 5.5),
+            Column("Quantity", 1.4, "right"),
+            Column("Unit", 1.2),
+            Column("Your unit price", 2, "right"),
+        ],
+        rows=[[str(ln.line_no), ln.description, qty(ln.quantity), ln.unit, ""] for ln in lines],
+        notes=[
+            "Please quote your unit price for each item, your delivery time and how long "
+            "your quotation stays valid.",
+            "This is a request for prices only. It is not an order.",
+        ],
+        footer=footer(by, now),
+        banners=[],
+    )
+
+
+def statement(
+    db: Session, customer_id: uuid.UUID, date_from: date, date_to: date, by: str, now: datetime
+) -> tuple[Document, Sheet]:
+    """Customer account statement as a document and as a worksheet."""
+    from app.modules.finance import reports
+
+    st = reports.statement(db, customer_id, date_from, date_to)
+    customer = db.get(Customer, customer_id)
+    label = {"invoice": "Invoice", "receipt": "Receipt", "credit_note": "Credit note"}
+    rows = [
+        [day(r.entry_date), f"{label[r.kind]} {r.number}", r.description, r.currency,
+         money(r.debit) if r.debit else "", money(r.credit) if r.credit else "", money(r.balance)]
+        for r in st.rows
+    ]  # fmt: skip
+    totals: list[tuple[str, str]] = []
+    for t in st.totals:
+        totals.append((f"Opening balance {t.currency}", money(t.opening)))
+        totals.append((f"Balance due {t.currency}", f"{t.currency} {money(t.closing)}"))
+    number = f"STMT-{customer.reference if customer else ''}-{date_to:%Y%m%d}"
+    doc = Document(
+        kind="Statement of account",
+        number=number,
+        issuer=issuer_lines(db),
+        recipient_title="Account of",
+        recipient=[
+            x
+            for x in (st.customer_name, customer and customer.city, customer and customer.email)
+            if x
+        ],
+        meta=[("Period", f"{day(date_from)} to {day(date_to)}"), ("Statement date", day(now))],
+        columns=[
+            Column("Date", 1.5),
+            Column("Document", 2.6),
+            Column("Details", 3),
+            Column("Cur", 0.8),
+            Column("Charges", 1.7, "right"),
+            Column("Payments", 1.7, "right"),
+            Column("Balance", 1.8, "right"),
+        ],
+        rows=rows or [["", "No transactions in this period", "", "", "", "", ""]],
+        totals=totals,
+        notes=["Balances are shown separately for each currency and are not converted."],
+        footer=footer(by, now),
+        banners=_demo(bool(customer and customer.is_demo)),
+    )
+    sheet = Sheet(
+        title="Statement of account",
+        subtitle=_subtitle(db, f"{st.customer_name}: {day(date_from)} to {day(date_to)}", by, now),
+        headers=["Date", "Type", "Number", "Details", "Currency", "Charges", "Payments", "Balance"],
+        rows=[
+            [
+                r.entry_date.isoformat(),
+                label[r.kind],
+                r.number,
+                r.description,
+                r.currency,
+                float(r.debit),
+                float(r.credit),
+                float(r.balance),
+            ]
+            for r in st.rows
+        ],
+        numeric={5, 6, 7},
+    )
+    return doc, sheet
+
+
 BUILDERS = {
+    "rfq": (rfq, "procurement.records.view"),
     "quotation": (quotation, "crm.records.view"),
     "invoice": (invoice, "finance.records.view"),
     "receipt": (receipt, "finance.records.view"),

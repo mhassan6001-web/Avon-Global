@@ -519,3 +519,32 @@ class FinanceOverview(BaseModel):
     creditors_outstanding: Decimal
     months: list[MonthFigure]
     revenue_by_division: dict[str, Decimal]
+
+
+class StatementRow(BaseModel):
+    entry_date: date
+    kind: Literal["invoice", "receipt", "credit_note"]
+    number: str
+    description: str
+    currency: str
+    debit: Decimal
+    credit: Decimal
+    balance: Decimal
+
+
+class StatementCurrency(BaseModel):
+    currency: str
+    opening: Decimal
+    invoiced: Decimal
+    received: Decimal
+    credited: Decimal
+    closing: Decimal
+
+
+class Statement(BaseModel):
+    customer_id: uuid.UUID
+    customer_name: str
+    date_from: date
+    date_to: date
+    rows: list[StatementRow]
+    totals: list[StatementCurrency]

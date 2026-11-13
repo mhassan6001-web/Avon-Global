@@ -24,6 +24,7 @@ from .models import (
     Account,
     BankStatementLine,
     Bill,
+    CreditNote,
     Invoice,
     InvoiceLine,
     JournalEntry,
@@ -338,3 +339,81 @@ def overview(db: Session, today: date) -> schemas.FinanceOverview:
         ],
         revenue_by_division=dict(by_division),
     )
+
+
+def statement(
+    db: Session, customer_id: uuid.UUID, date_from: date, date_to: date
+) -> schemas.Statement:
+    """Customer account statement from posted documents only: invoices issued,
+    receipts and posted credit notes, with a running balance per currency."""
+    customer = db.get(Customer, customer_id)
+    if customer is None:
+        raise NotFoundError("Customer not found.")
+    events: list[tuple[date, int, str, str, str, str, Decimal, Decimal]] = []
+    invoices = db.execute(
+        select(Invoice).where(
+            Invoice.customer_id == customer_id,
+            Invoice.status != "draft",
+            Invoice.issue_date <= date_to,
+        )
+    ).scalars()
+    for inv in invoices:
+        events.append(
+            (inv.issue_date, 0, "invoice", inv.number or "", f"Invoice due {inv.due_date:%d %b %Y}",
+             inv.currency, inv.total, Decimal(0))
+        )  # fmt: skip
+    receipts = db.execute(
+        select(Receipt).where(Receipt.customer_id == customer_id, Receipt.receipt_date <= date_to)
+    ).scalars()
+    for rc in receipts:
+        events.append(
+            (rc.receipt_date, 2, "receipt", rc.number, "Payment received",
+             rc.currency, Decimal(0), rc.amount)
+        )  # fmt: skip
+    notes = db.execute(
+        select(CreditNote, Invoice.number, Invoice.currency)
+        .join(Invoice, Invoice.id == CreditNote.invoice_id)
+        .where(
+            Invoice.customer_id == customer_id,
+            CreditNote.status == "posted",
+            CreditNote.credit_date <= date_to,
+        )
+    ).tuples()
+    for cn, inv_number, currency in notes:
+        events.append(
+            (cn.credit_date, 1, "credit_note", cn.number or "", f"Credit against {inv_number}",
+             currency, Decimal(0), cn.amount)
+        )  # fmt: skip
+    events.sort(key=lambda e: (e[5], e[0], e[1], e[3]))
+
+    balance: dict[str, Decimal] = defaultdict(Decimal)
+    opening: dict[str, Decimal] = defaultdict(Decimal)
+    sums: dict[str, dict[str, Decimal]] = defaultdict(lambda: defaultdict(Decimal))
+    rows: list[schemas.StatementRow] = []
+    for on, _, kind, number, description, currency, debit, credit in events:
+        balance[currency] += debit - credit
+        if on < date_from:
+            opening[currency] = balance[currency]
+            continue
+        sums[currency][kind] += debit or credit
+        rows.append(
+            schemas.StatementRow(
+                entry_date=on, kind=kind, number=number, description=description,
+                currency=currency, debit=debit, credit=credit, balance=balance[currency],
+            )
+        )  # fmt: skip
+    totals = [
+        schemas.StatementCurrency(
+            currency=c,
+            opening=opening[c],
+            invoiced=sums[c]["invoice"],
+            received=sums[c]["receipt"],
+            credited=sums[c]["credit_note"],
+            closing=balance[c],
+        )
+        for c in sorted(balance)
+    ]
+    return schemas.Statement(
+        customer_id=customer.id, customer_name=customer.name,
+        date_from=date_from, date_to=date_to, rows=rows, totals=totals,
+    )  # fmt: skip

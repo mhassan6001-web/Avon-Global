@@ -4,7 +4,9 @@ import { API_PREFIX } from "@/lib/api/client";
 
 import styles from "./documents.module.css";
 
-export type RecordKind = "quotation" | "invoice" | "receipt" | "purchase_order" | "delivery_note";
+type SalesKind = "quotation" | "invoice" | "receipt";
+type SupplyKind = "rfq" | "purchase_order" | "delivery_note";
+export type RecordKind = SalesKind | SupplyKind;
 
 /**
  * Download links for a record's branded document (PDF / Word). The server

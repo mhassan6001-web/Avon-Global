@@ -1,5 +1,53 @@
 # Changelog
 
+## [0.6.0] — 2026-11-13 — Stages 18 and 22, and running on the Director's computer
+
+### Added
+
+- **Perpetual inventory accounting (Stage 18).** Each stock movement can post
+  a balanced journal in the same database transaction, valued at the
+  movement's own weighted-average cost: opening stock, goods received,
+  deliveries, returns, damage and adjustments. Transfers between warehouses
+  post nothing. A reconciliation report compares the stock valuation with the
+  inventory account.
+  - **Posting is off by default.** It can be switched on only after the
+    ledger accounts are mapped and the reviewing accountant's name and review
+    date are recorded (Finance → Settings; needs the finance approval
+    permission and a second sign-in step).
+- **Contracts and service agreements (Stage 22).** Numbered `CON-YYYY-NNNNN`,
+  for a customer or a supplier, as PDF or Word on the letterhead. The system
+  supplies layout and headings only. **It supplies no legal wording**: every
+  clause is typed by the user. Signature lines print blank. A final contract
+  cannot be edited.
+- **Tender packs (Stage 22).** One ZIP per tender: a cover document, the
+  requirements checklist and the files attached to the requirements.
+  Generating a pack does not submit a tender.
+- **Windows start scripts** (`scripts/windows/`) and
+  `docs/operations/RUN_ON_YOUR_COMPUTER.md`.
+
+### Changed
+
+- Hosting: the Director chose to run the system on his own computer for now.
+  Azure is dropped. Nothing is deployed online.
+
+## [0.5.0] — 2026-11-12 — Stage 17: statements and supplier documents
+
+### Added
+
+- **Customer statement of account** (PDF, Word, Excel), built from posted
+  records only: issued invoices, receipts and posted credit notes, with an
+  opening balance and a running balance per currency. Draft invoices never
+  appear.
+- **Request for quotation** document generated from a purchase request, with
+  the items and no prices, to send to suppliers.
+- Statements panel on the Documents page (Finance and Director); RFQ links on
+  purchase requests.
+
+### Changed
+
+- Pull requests #1, #2 and #3 were merged into `main` on 2026-11-12 at the
+  Director's request. Phase 2 work continues on branch `phase-2`.
+
 ## [0.4.0] — 2026-11-12 — Stage 16 and Stage R (approved by the Director; built and verified in CI)
 
 ### Added
