@@ -89,14 +89,7 @@ export default function TenderPage() {
   return (
     <>
       <PageHeader
-        eyebrow={
-          <>
-            {`${t.reference} · ${KIND_LABEL[t.kind]} · `}
-            <a href={`${API_PREFIX}/documents/tender-packs/${t.id}`} download>
-              Download tender pack (ZIP)
-            </a>
-          </>
-        }
+        eyebrow={`${t.reference} · ${KIND_LABEL[t.kind]}`}
         title={t.title}
         description={`${t.issuer_name}${t.issuer_reference ? ` · ${t.issuer_reference}` : ""}`}
         actions={
@@ -111,6 +104,14 @@ export default function TenderPage() {
         <Link href="/tenders" className={page.inlineLink}>
           All tenders
         </Link>
+        {" · "}
+        <a
+          className={page.inlineLink}
+          href={`${API_PREFIX}/documents/tender-packs/${t.id}`}
+          download
+        >
+          Download tender pack (ZIP)
+        </a>
       </p>
       <FormError message={actionError} />
       <div className={page.grid}>
